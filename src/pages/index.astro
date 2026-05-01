@@ -1,0 +1,156 @@
+---
+const projects = [
+  {
+    name: 'MapInBlue',
+    tagline: 'Cartographie collaborative en bleu — explorez et coloriez le monde.',
+    status: 'En développement',
+    href: '#',
+    accent: '#3b82f6',
+  },
+  {
+    name: 'SpeechTimer',
+    tagline: 'Chronomètre de prise de parole pour réunions, débats et formations.',
+    status: 'À venir',
+    href: '#',
+    accent: '#f59e0b',
+  },
+  {
+    name: 'CV Power BI',
+    tagline: 'Mon parcours en data viz, navigable comme un dashboard interactif.',
+    status: 'À venir',
+    href: '#',
+    accent: '#10b981',
+  },
+];
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="SquirrelLab — studio indépendant. Apps mobiles, data viz, expérimentations tech." />
+    <title>SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="totem">🐿️</div>
+        <h1>SquirrelLab</h1>
+        <p class="tagline">Studio indépendant. Apps mobiles, data viz, expérimentations tech.</p>
+      </header>
+
+      <section class="projects">
+        {projects.map((p) => (
+          <article class="card" style={`--accent: ${p.accent}`}>
+            <div class="status">{p.status}</div>
+            <h2>{p.name}</h2>
+            <p>{p.tagline}</p>
+          </article>
+        ))}
+      </section>
+
+      <footer>
+        <p>
+          Contact :
+          <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>
+        </p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --bg-card: #131a33;
+        --fg: #e6ebf5;
+        --muted: #8b94b3;
+        --border: #1f274a;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #14204a 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 4rem 1.5rem 2rem;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+      .totem {
+        font-size: 4rem;
+        line-height: 1;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.02em;
+      }
+      .tagline {
+        color: var(--muted);
+        font-size: 1.1rem;
+        margin: 0;
+      }
+      .projects {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 4rem;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 150ms ease, border-color 150ms ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+      }
+      .status {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+      }
+      .card h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.25rem;
+      }
+      .card p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+      }
+      footer a {
+        color: var(--fg);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--muted);
+      }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
