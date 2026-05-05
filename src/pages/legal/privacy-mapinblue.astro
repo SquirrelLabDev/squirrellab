@@ -1,0 +1,271 @@
+---
+const lastUpdated = '2026-05-05';
+const appVersion = '1.14.1+34';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Politique de confidentialité de l'application MapInBlue, éditée par SquirrelLab." />
+    <meta name="robots" content="index, follow" />
+    <title>Politique de confidentialité — MapInBlue</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/projets/mapinblue">← MapInBlue</a>
+        <span> · </span>
+        <a href="/">SquirrelLab</a>
+      </nav>
+
+      <header>
+        <h1>Politique de confidentialité — MapInBlue</h1>
+        <p class="meta">Dernière mise à jour : {lastUpdated} — Version applicative concernée : {appVersion}</p>
+      </header>
+
+      <section class="tldr">
+        <h2>En résumé</h2>
+        <p>
+          MapInBlue <strong>ne collecte aucune donnée personnelle</strong> sur ses propres serveurs : il n'y a ni compte utilisateur, ni base de données distante, ni service d'analyse, ni publicité, ni service de remontée d'erreurs. Toutes vos données (traces GPS, exploration, paramètres) restent sur votre appareil et sont supprimées lorsque vous désinstallez l'application.
+        </p>
+        <p>
+          Trois flux externes existent et sont décrits ci-dessous : (1) les requêtes vers OpenStreetMap pour afficher le fond de carte, (2) les rapports techniques collectés automatiquement par Google Play, (3) les actions que vous initiez vous-même via le système Android (partage CSV, ouverture d'un lien).
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Éditeur de l'application</h2>
+        <p>
+          L'application <strong>MapInBlue</strong> est éditée par <strong>SquirrelLab</strong>, studio indépendant représenté par Matthieu Rancinan.
+        </p>
+        <p>
+          Contact : <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a><br />
+          Site web : <a href="https://squirrellab.fr">https://squirrellab.fr</a>
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Données traitées localement par l'application</h2>
+        <p>
+          MapInBlue lit et stocke les informations suivantes <strong>exclusivement sur votre appareil</strong>, dans le répertoire privé de l'application (sandbox Android). Ces données ne sont jamais transmises à SquirrelLab ni à un quelconque serveur tiers.
+        </p>
+        <ul>
+          <li>
+            <strong>Position GPS</strong> : lue via le système Android lorsque vous activez l'enregistrement d'une trace. Utilisée pour tracer votre parcours et marquer les territoires explorés.
+          </li>
+          <li>
+            <strong>Traces enregistrées</strong> : sauvegardées dans des fichiers JSON locaux (`tracks.json`, `in_progress.json`).
+          </li>
+          <li>
+            <strong>Indicateurs d'usage</strong> : un marqueur `.onboarded_record` indique si vous avez terminé le tutoriel d'introduction.
+          </li>
+        </ul>
+        <p>
+          Ces fichiers sont stockés dans le répertoire renvoyé par <code>getApplicationDocumentsDirectory()</code> du système Android. Ils sont supprimés automatiquement par Android lorsque vous désinstallez MapInBlue ou videz les données de l'application.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Service tiers utilisé : OpenStreetMap (fond de carte)</h2>
+        <p>
+          Pour afficher la carte, MapInBlue télécharge des « tuiles » d'image depuis le serveur public d'<strong>OpenStreetMap</strong> (OSMF, association à but non lucratif basée au Royaume-Uni). Ce flux est nécessaire au fonctionnement de l'application — sans lui, aucune carte n'est visible.
+        </p>
+        <p>Les informations transmises à OpenStreetMap à chaque requête sont :</p>
+        <ul>
+          <li>l'<strong>adresse IP</strong> de votre appareil (par construction du protocole HTTP) ;</li>
+          <li>les <strong>coordonnées des tuiles</strong> consultées (zoom, x, y), qui reflètent indirectement les zones que vous regardez sur la carte ;</li>
+          <li>un <strong>identifiant applicatif</strong> dans l'en-tête User-Agent : <code>com.insiderscoop.app_map_in_blue</code>.</li>
+        </ul>
+        <p>
+          <strong>Votre position GPS n'est jamais envoyée à OpenStreetMap.</strong> Seules les coordonnées des tuiles affichées le sont, ce qui constitue une indication indirecte des zones consultées mais pas une géolocalisation en temps réel.
+        </p>
+        <p>
+          Les serveurs OSMF sont principalement situés en Europe et leur diffusion s'appuie sur le CDN Fastly (points de présence mondiaux). Le traitement de ces données est régi par la politique de confidentialité d'OpenStreetMap : <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" rel="noopener">https://wiki.osmfoundation.org/wiki/Privacy_Policy</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Données collectées automatiquement par Google Play</h2>
+        <p>
+          MapInBlue étant distribuée via le Google Play Store, Google collecte automatiquement, indépendamment de l'éditeur :
+        </p>
+        <ul>
+          <li>les <strong>rapports de crash et d'ANR</strong> (Application Not Responding) lorsque l'application rencontre une erreur, sauf si vous désactivez cette transmission dans les paramètres Android ;</li>
+          <li>des <strong>métriques d'installation</strong>, de désinstallation, de version d'Android, et de modèle d'appareil utilisé pour exécuter l'application.</li>
+        </ul>
+        <p>
+          Ces données sont traitées par <strong>Google</strong> selon ses propres conditions et permettent à l'éditeur de consulter des statistiques agrégées et anonymes via la Google Play Console. Pour plus d'informations : <a href="https://policies.google.com/privacy" rel="noopener">https://policies.google.com/privacy</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Actions initiées par l'utilisateur</h2>
+        <p>
+          Certaines fonctions de l'application déclenchent des actions du système Android qui sortent du périmètre de MapInBlue :
+        </p>
+        <ul>
+          <li>
+            <strong>Export CSV de vos traces</strong> : utilise le partage natif d'Android (Sharesheet). Vous choisissez la destination (Gmail, Drive, messagerie, fichier local, etc.). Ce qui se passe ensuite dépend du service que vous avez choisi et MapInBlue ne le contrôle pas.
+          </li>
+          <li>
+            <strong>Liens externes</strong> (par exemple le lien <code>mailto:contact@squirrellab.fr</code> dans les paramètres) : ouvert dans votre navigateur ou client mail par défaut, sans qu'aucune donnée ne soit envoyée par MapInBlue elle-même.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>6. Permissions Android demandées</h2>
+        <ul>
+          <li><code>ACCESS_FINE_LOCATION</code>, <code>ACCESS_COARSE_LOCATION</code>, <code>ACCESS_BACKGROUND_LOCATION</code> : lecture du GPS de l'appareil, y compris en arrière-plan pendant l'enregistrement d'une trace.</li>
+          <li><code>FOREGROUND_SERVICE</code>, <code>FOREGROUND_SERVICE_LOCATION</code> : maintien du suivi GPS lorsque l'application n'est pas au premier plan.</li>
+          <li><code>POST_NOTIFICATIONS</code> : affichage d'une notification persistante pendant l'enregistrement (signal au système et à vous-même que le suivi est actif).</li>
+          <li><code>INTERNET</code> : utilisée uniquement pour télécharger les tuiles OpenStreetMap (section 3).</li>
+          <li><code>WAKE_LOCK</code> : empêcher la mise en veille de l'appareil pendant l'enregistrement.</li>
+        </ul>
+        <p>
+          Ces permissions peuvent être révoquées à tout moment depuis les paramètres Android de votre appareil. Sans la permission de localisation, les fonctions d'enregistrement de trace ne sont pas opérationnelles ; le reste de l'application reste utilisable.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. Ce que MapInBlue n'utilise pas</h2>
+        <p>Pour lever toute ambiguïté, MapInBlue n'utilise <strong>aucun</strong> des services suivants :</p>
+        <ul>
+          <li>aucun système d'authentification (Google Sign-In, Apple Sign-In, Firebase Auth, etc.) ;</li>
+          <li>aucune base de données distante ;</li>
+          <li>aucun service d'analyse de comportement (Firebase Analytics, Mixpanel, Amplitude, GA, etc.) ;</li>
+          <li>aucun service de remontée d'erreurs tiers (Crashlytics, Sentry, Bugsnag, etc.) ;</li>
+          <li>aucun service de notification push (FCM, OneSignal, APNs, etc.) ;</li>
+          <li>aucune publicité, aucun pixel publicitaire, aucun identifiant publicitaire (AAID) ;</li>
+          <li>aucun SDK de profilage ou de suivi inter-applications.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>8. Vos droits (RGPD)</h2>
+        <p>
+          MapInBlue ne stockant <strong>aucune donnée personnelle sur ses serveurs</strong>, l'exercice de la majorité des droits RGPD est immédiat et ne nécessite aucune démarche auprès de l'éditeur :
+        </p>
+        <ul>
+          <li><strong>Droit d'accès</strong> : vos données sont visibles dans l'application, et exportables en CSV via la fonction de partage.</li>
+          <li><strong>Droit de rectification et d'effacement</strong> : vous pouvez supprimer vos traces individuellement dans l'application, ou tout effacer en désinstallant MapInBlue (ou via Paramètres Android → Applications → MapInBlue → Effacer les données).</li>
+          <li><strong>Droit à la portabilité</strong> : exercé via l'export CSV.</li>
+        </ul>
+        <p>
+          Pour les données traitées par <strong>OpenStreetMap</strong> et <strong>Google Play</strong>, l'exercice de vos droits relève de leurs politiques respectives (sections 3 et 4).
+        </p>
+        <p>
+          Pour toute question, contactez <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>. Vous disposez également du droit d'introduire une réclamation auprès de la <abbr title="Commission Nationale de l'Informatique et des Libertés">CNIL</abbr> (<a href="https://www.cnil.fr" rel="noopener">www.cnil.fr</a>).
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Sécurité</h2>
+        <p>
+          Les seules communications réseau de MapInBlue (vers OpenStreetMap) sont chiffrées en HTTPS/TLS. Les données stockées localement reposent sur l'isolation par défaut du système Android (sandbox applicative).
+        </p>
+      </section>
+
+      <section>
+        <h2>10. Enfants</h2>
+        <p>
+          MapInBlue n'est pas destinée spécifiquement aux enfants de moins de 13 ans. Aucune donnée n'étant transmise à l'éditeur, aucune collecte involontaire concernant des mineurs ne peut avoir lieu côté SquirrelLab.
+        </p>
+      </section>
+
+      <section>
+        <h2>11. Modifications de cette politique</h2>
+        <p>
+          Cette politique peut être mise à jour pour refléter les évolutions de l'application (ajout de nouvelles fonctionnalités, intégration de services tiers, etc.) ou de la réglementation. La date de dernière mise à jour figure en haut de cette page. Les modifications substantielles seront signalées dans l'application et par mise à jour de la fiche Play Store.
+        </p>
+      </section>
+
+      <footer>
+        <p><a href="/projets/mapinblue">← MapInBlue</a> · <a href="/">SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+      .topnav {
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 2.5rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 2.5rem 0 0.75rem;
+        color: var(--fg);
+      }
+      p { margin: 0.75rem 0; }
+      ul { padding-left: 1.4rem; }
+      li { margin: 0.4rem 0; }
+      a { color: var(--accent); }
+      strong { color: var(--fg); }
+      code {
+        background: var(--bg-card);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: #cdd6f4;
+      }
+      .tldr {
+        background: var(--bg-card);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+      .tldr h2 { margin-top: 0; }
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

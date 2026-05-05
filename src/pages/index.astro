@@ -2,24 +2,24 @@
 const projects = [
   {
     name: 'MapInBlue',
-    tagline: 'Cartographie collaborative en bleu — explorez et coloriez le monde.',
+    tagline: 'Tracez vos parcours, coloriez votre carte personnelle. 100 % local, sans compte.',
     status: 'En développement',
-    href: '#',
-    accent: '#3b82f6',
+    href: '/projets/mapinblue',
+    accent: '#5b8def',
   },
   {
     name: 'SpeechTimer',
     tagline: 'Chronomètre de prise de parole pour réunions, débats et formations.',
     status: 'À venir',
     href: '#',
-    accent: '#f59e0b',
+    accent: '#f5b840',
   },
   {
     name: 'CV Power BI',
     tagline: 'Mon parcours en data viz, navigable comme un dashboard interactif.',
     status: 'À venir',
     href: '#',
-    accent: '#10b981',
+    accent: '#8b9d7e',
   },
 ];
 ---
@@ -27,7 +27,8 @@ const projects = [
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content="SquirrelLab — studio indépendant. Apps mobiles, data viz, expérimentations tech." />
@@ -36,7 +37,7 @@ const projects = [
   <body>
     <main>
       <header class="hero">
-        <div class="totem">🐿️</div>
+        <img class="totem" src="/logo.png" alt="SquirrelLab" width="160" height="160" />
         <h1>SquirrelLab</h1>
         <p class="tagline">Studio indépendant. Apps mobiles, data viz, expérimentations tech.</p>
       </header>
@@ -63,16 +64,17 @@ const projects = [
     <style is:global>
       :root {
         color-scheme: dark;
-        --bg: #0b1020;
-        --bg-card: #131a33;
-        --fg: #e6ebf5;
-        --muted: #8b94b3;
-        --border: #1f274a;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent-brand: #e07840;
       }
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; }
       body {
-        background: radial-gradient(circle at 20% 0%, #14204a 0%, var(--bg) 60%);
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
         color: var(--fg);
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         min-height: 100vh;
@@ -87,9 +89,10 @@ const projects = [
         margin-bottom: 4rem;
       }
       .totem {
-        font-size: 4rem;
-        line-height: 1;
-        margin-bottom: 1rem;
+        display: block;
+        margin: 0 auto 1rem;
+        width: 160px;
+        height: auto;
       }
       h1 {
         font-size: clamp(2.5rem, 6vw, 4rem);

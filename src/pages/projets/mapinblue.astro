@@ -1,0 +1,164 @@
+---
+const features = [
+  {
+    title: 'Suivi GPS de vos parcours',
+    desc: 'Enregistrez vos sorties en arrière-plan, visualisez vos traces sur la carte.',
+  },
+  {
+    title: 'Coloriage de territoires',
+    desc: 'Marquez les zones que vous avez parcourues et révélez peu à peu votre carte personnelle.',
+  },
+  {
+    title: '100 % local, 100 % privé',
+    desc: 'Aucun compte, aucun serveur, aucune publicité. Vos données restent sur votre téléphone.',
+  },
+];
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="MapInBlue — application Android de cartographie collaborative. Explorez le monde, coloriez vos territoires." />
+    <title>MapInBlue — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/">← SquirrelLab</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge">En développement</div>
+        <h1>MapInBlue</h1>
+        <p class="tagline">Cartographie collaborative en bleu — explorez et coloriez le monde.</p>
+      </header>
+
+      <section class="about">
+        <p>
+          MapInBlue est une application Android pensée pour les explorateurs du quotidien.
+          Enregistrez vos sorties à pied, à vélo ou en voiture, et regardez votre carte personnelle
+          se colorier au fil de vos parcours. Le tout sans compte, sans serveur, sans pub : vos
+          données restent sur votre téléphone.
+        </p>
+      </section>
+
+      <section class="features">
+        {features.map((f) => (
+          <article class="feature">
+            <h2>{f.title}</h2>
+            <p>{f.desc}</p>
+          </article>
+        ))}
+      </section>
+
+      <section class="status">
+        <h2>État du projet</h2>
+        <ul>
+          <li>Développement actif — première version Play Store en préparation.</li>
+          <li>Plateforme : Android (Flutter), fond de carte OpenStreetMap.</li>
+          <li>Une option payante est prévue pour soutenir le développement.</li>
+          <li>Une dimension collaborative (partage, comptes, défis) est envisagée pour les versions futures.</li>
+        </ul>
+      </section>
+
+      <section class="links">
+        <h2>Liens</h2>
+        <ul>
+          <li>Google Play Store : <em>à venir</em></li>
+          <li>Politique de confidentialité : <a href="/legal/privacy-mapinblue">/legal/privacy-mapinblue</a></li>
+          <li>Contact : <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a></li>
+        </ul>
+      </section>
+
+      <footer>
+        <p><a href="/">← Retour à SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
+      .topnav {
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+      }
+      .topnav a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2.5rem; }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.02em;
+      }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .about p { line-height: 1.6; color: var(--fg); }
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .feature h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      section h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+      ul { line-height: 1.8; padding-left: 1.2rem; }
+      a { color: var(--accent); }
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
