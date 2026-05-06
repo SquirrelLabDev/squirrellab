@@ -10,15 +10,15 @@ const projects = [
   {
     name: 'SpeechTimer',
     tagline: 'Chronomètre de prise de parole pour réunions, débats et formations.',
-    status: 'À venir',
-    href: '#',
+    status: 'En ligne',
+    href: '/projets/speechtimer',
     accent: '#f5b840',
   },
   {
-    name: 'CV Power BI',
-    tagline: 'Mon parcours en data viz, navigable comme un dashboard interactif.',
-    status: 'À venir',
-    href: '#',
+    name: 'Data viz',
+    tagline: 'Dashboards Power BI : CV interactif, escape game data.',
+    status: 'En ligne',
+    href: '/data',
     accent: '#8b9d7e',
   },
 ];
@@ -43,13 +43,29 @@ const projects = [
       </header>
 
       <section class="projects">
-        {projects.map((p) => (
-          <article class="card" style={`--accent: ${p.accent}`}>
-            <div class="status">{p.status}</div>
-            <h2>{p.name}</h2>
-            <p>{p.tagline}</p>
-          </article>
-        ))}
+        {projects.map((p) => {
+          const isLive = p.href !== '#';
+          return isLive ? (
+            <a
+              class="card card--link"
+              href={p.href}
+              style={`--accent: ${p.accent}`}
+              target={p.external ? '_blank' : undefined}
+              rel={p.external ? 'noopener' : undefined}
+            >
+              <div class="status">{p.status}</div>
+              <h2>{p.name}</h2>
+              <p>{p.tagline}</p>
+              <span class="cta">{p.external ? 'Ouvrir ↗' : 'En savoir plus →'}</span>
+            </a>
+          ) : (
+            <article class="card card--soon" style={`--accent: ${p.accent}`}>
+              <div class="status">{p.status}</div>
+              <h2>{p.name}</h2>
+              <p>{p.tagline}</p>
+            </article>
+          );
+        })}
       </section>
 
       <footer>
@@ -117,10 +133,22 @@ const projects = [
         border-radius: 12px;
         padding: 1.5rem;
         transition: transform 150ms ease, border-color 150ms ease;
+        display: block;
+        color: inherit;
+        text-decoration: none;
       }
-      .card:hover {
+      .card--link { cursor: pointer; }
+      .card--link:hover {
         transform: translateY(-2px);
         border-color: var(--accent);
+      }
+      .card--soon { opacity: 0.75; }
+      .cta {
+        display: inline-block;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 500;
       }
       .status {
         display: inline-block;
