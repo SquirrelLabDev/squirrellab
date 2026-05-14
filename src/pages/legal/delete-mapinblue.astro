@@ -1,0 +1,166 @@
+---
+const lastUpdated = '2026-05-14';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Comment supprimer vos données dans l'application MapInBlue, éditée par SquirrelLab." />
+    <meta name="robots" content="index, follow" />
+    <title>Suppression des données — MapInBlue</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/projets/mapinblue">← MapInBlue</a>
+        <span> · </span>
+        <a href="/">SquirrelLab</a>
+      </nav>
+
+      <header>
+        <h1>Suppression des données — MapInBlue</h1>
+        <p class="meta">Dernière mise à jour : {lastUpdated}</p>
+      </header>
+
+      <section class="tldr">
+        <h2>En résumé</h2>
+        <p>
+          Toutes vos données MapInBlue (traces GPS, paramètres) sont stockées <strong>uniquement sur votre appareil</strong>. Aucune donnée n'est envoyée à SquirrelLab. Vous pouvez les supprimer à tout moment, directement depuis l'application ou via les paramètres Android.
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Supprimer vos traces depuis l'application</h2>
+        <p>Pour effacer l'ensemble de vos traces GPS enregistrées :</p>
+        <ol>
+          <li>Ouvrez <strong>MapInBlue</strong></li>
+          <li>Appuyez sur l'icône <strong>Paramètres</strong> (en haut à droite)</li>
+          <li>Section <strong>Données</strong> → <strong>Effacer toutes les traces</strong></li>
+          <li>Confirmez la suppression</li>
+        </ol>
+        <p>Cette action supprime définitivement toutes vos traces de l'appareil.</p>
+      </section>
+
+      <section>
+        <h2>2. Supprimer toutes les données via Android</h2>
+        <p>Pour supprimer l'intégralité des données de l'application (traces, paramètres, cache) :</p>
+        <ol>
+          <li>Ouvrez <strong>Paramètres Android</strong></li>
+          <li>Applications → <strong>MapInBlue</strong></li>
+          <li>Stockage → <strong>Effacer les données</strong></li>
+        </ol>
+        <p>Désinstaller MapInBlue supprime également toutes les données automatiquement.</p>
+      </section>
+
+      <section>
+        <h2>3. Données concernées</h2>
+        <ul>
+          <li><strong>Traces GPS</strong> — vos parcours enregistrés (fichiers <code>tracks.json</code> et <code>in_progress.json</code>)</li>
+          <li><strong>Paramètres</strong> — préférences et statut Pro (<code>settings.json</code>)</li>
+          <li><strong>Cache cartographique</strong> — tuiles OpenStreetMap mises en cache localement</li>
+        </ul>
+        <p>
+          Aucune de ces données n'est stockée sur les serveurs de SquirrelLab. La suppression est donc immédiate et définitive, sans démarche auprès de l'éditeur.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Contact</h2>
+        <p>
+          Pour toute question relative à vos données, contactez-nous à l'adresse :<br />
+          <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>
+        </p>
+        <p>
+          Consultez également notre <a href="/legal/privacy-mapinblue">politique de confidentialité complète</a>.
+        </p>
+      </section>
+
+      <footer>
+        <p><a href="/projets/mapinblue">← MapInBlue</a> · <a href="/">SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+      .topnav {
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 2.5rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 2.5rem 0 0.75rem;
+        color: var(--fg);
+      }
+      p { margin: 0.75rem 0; }
+      ul, ol { padding-left: 1.4rem; }
+      li { margin: 0.4rem 0; }
+      a { color: var(--accent); }
+      strong { color: var(--fg); }
+      code {
+        background: var(--bg-card);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: #cdd6f4;
+      }
+      .tldr {
+        background: var(--bg-card);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+      .tldr h2 { margin-top: 0; }
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
