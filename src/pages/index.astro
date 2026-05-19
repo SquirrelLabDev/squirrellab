@@ -81,6 +81,7 @@ const sections = [
       </section>
 
       <footer>
+        <p>Contact : <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a></p>
         <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
       </footer>
     </main>
@@ -104,26 +105,26 @@ const sections = [
         min-height: 100vh;
       }
       main {
-        max-width: 800px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 4rem 1.5rem 2rem;
       }
-      .hero { margin-bottom: 2rem; text-align: center; }
-      .logo { display: block; margin: 0 auto 1rem; width: 120px; height: auto; }
+      .hero { text-align: center; margin-bottom: 4rem; }
+      .logo { display: block; margin: 0 auto 1rem; width: 160px; height: auto; }
       h1 {
-        font-size: clamp(2rem, 5vw, 3rem);
+        font-size: clamp(2.5rem, 6vw, 4rem);
         margin: 0 0 0.5rem;
         letter-spacing: -0.02em;
       }
       .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
-      .bio { margin-bottom: 2.5rem; }
+      .bio { max-width: 680px; margin: 0 auto 3rem; }
       .bio p { line-height: 1.7; color: var(--fg); margin: 0 0 1rem; }
       .bio a { color: var(--accent); }
       .nav-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-        margin-bottom: 3rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 4rem;
       }
       .card {
         display: flex;
@@ -132,23 +133,27 @@ const sections = [
         border: 1px solid var(--border);
         border-top: 3px solid var(--accent);
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 1.5rem;
+        transition: transform 150ms ease, border-color 150ms ease;
       }
+      .card:hover { transform: translateY(-2px); border-color: var(--accent); }
       .card-title { text-decoration: none; color: var(--fg); }
       .card-title:hover h2 { color: var(--accent); }
-      .card h2 { margin: 0 0 0.4rem; font-size: 1.1rem; transition: color 0.15s; }
-      .card p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      .card h2 { margin: 0 0 0.5rem; font-size: 1.25rem; transition: color 0.15s; }
+      .card p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
       .sublinks { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--border); padding-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
       .sublinks a { color: var(--accent); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 0.15rem 0.5rem; transition: background 0.15s; }
       .sublinks a:hover { background: var(--border); }
       footer {
         border-top: 1px solid var(--border);
-        padding-top: 1.5rem;
+        padding-top: 2rem;
         text-align: center;
         color: var(--muted);
-        font-size: 0.85rem;
+        font-size: 0.9rem;
       }
-      .copy { margin: 0; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
     </style>
   </body>
 </html>
