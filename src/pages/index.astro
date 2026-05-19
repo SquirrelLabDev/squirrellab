@@ -48,19 +48,6 @@ const sections = [
         <p class="tagline">Consultant data & développeur — Power BI, apps mobiles, outils numériques.</p>
       </header>
 
-      <section class="bio">
-        <p>
-          Passionné d'informatique depuis bientôt 10 ans, je crée des outils pour améliorer
-          le quotidien de mes clients, avec une spécialisation dans la data : Power BI en tête,
-          suivi de la Power Platform, Azure, et bien d'autres. Formateur, j'ai accompagné de nombreuses équipes dans le développement l'adoption de Power BI
-          et la réalisation de projet en mode Agile Scrum — meetups, communautés, centres d'expertise.
-        </p>
-        <p>
-          Vous retrouverez ici mes créations, tâtonnements et découvertes.
-          N'hésitez pas à <a href="mailto:contact@squirrellab.fr">me contacter</a> si vous avez
-          des besoins particuliers.
-        </p>
-      </section>
 
       <section class="nav-grid">
         {sections.map((s) => (
@@ -117,9 +104,6 @@ const sections = [
         letter-spacing: -0.02em;
       }
       .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
-      .bio { max-width: 680px; margin: 0 auto 3rem; }
-      .bio p { line-height: 1.7; color: var(--fg); margin: 0 0 1rem; }
-      .bio a { color: var(--accent); }
       .nav-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
