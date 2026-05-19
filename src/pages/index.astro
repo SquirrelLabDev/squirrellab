@@ -6,14 +6,15 @@ const sections = [
     desc: 'Apps mobiles & projets numériques.',
     links: [
       { href: '/projets/mapinblue', label: 'MapInBlue' },
-      { href: '/projets/speechtimer', label: 'SpeechTimer' },
     ],
   },
   {
     href: '/outils',
     label: 'Outils',
     desc: 'Outils interactifs en ligne.',
-    links: [],
+    links: [
+      { href: '/projets/speechtimer', label: 'SpeechTimer' },
+    ],
   },
   {
     href: '/data',
@@ -35,6 +36,8 @@ const sections = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content="Matthieu Rancinan — consultant data, développeur d'apps et créateur d'outils numériques." />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <title>Matthieu Rancinan</title>
   </head>
   <body>

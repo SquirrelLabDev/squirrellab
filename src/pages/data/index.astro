@@ -1,12 +1,103 @@
 ---
+const sections = [
+  { href: '/data/dashboards', label: 'Dashboards', desc: 'CV interactif et escape game Power BI.', live: true },
+  { href: '/data/scripts', label: 'Scripts', desc: 'Automatisations, notebooks et repos.', live: false },
+  { href: '/data/articles', label: 'Articles', desc: 'Analyses, tutoriels et retours d\'expérience.', live: false },
+  { href: '/data/videos', label: 'Vidéos', desc: 'Chaîne YouTube — Power BI et data.', live: false },
+];
 ---
+
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Réalisations Data de Matthieu Rancinan — Power BI, scripts, articles et vidéos." />
     <title>Réalisations Data — Matthieu Rancinan</title>
   </head>
   <body>
-    <h1>Réalisations Data</h1>
+    <main>
+      <nav class="topnav">
+        <a href="/">← Accueil</a>
+      </nav>
+
+      <header class="hero">
+        <h1>Réalisations Data</h1>
+        <p class="tagline">Power BI, scripts, articles et vidéos.</p>
+      </header>
+
+      <section class="grid">
+        {sections.map((s) => (
+          <a href={s.href} class="card">
+            <div class={s.live ? 'badge-live' : 'badge-wip'}>{s.live ? 'En ligne' : 'En développement'}</div>
+            <h2>{s.label}</h2>
+            <p>{s.desc}</p>
+            <span class="arrow">→</span>
+          </a>
+        ))}
+      </section>
+
+      <footer>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #8b9d7e;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+      .card {
+        display: flex; flex-direction: column;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-decoration: none;
+        color: var(--fg);
+        transition: background 0.15s;
+      }
+      .card:hover { background: #452e26; }
+      .badge-live, .badge-wip {
+        display: inline-block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.75rem;
+        align-self: flex-start;
+      }
+      .badge-live { color: #7ec88a; border: 1px solid #7ec88a; }
+      .badge-wip { color: var(--muted); border: 1px solid var(--border); }
+      .card h2 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; flex: 1; }
+      .arrow { margin-top: 1rem; color: var(--accent); }
+      footer { border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+      .copy { margin: 0; }
+    </style>
   </body>
 </html>

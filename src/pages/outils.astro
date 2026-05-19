@@ -1,12 +1,130 @@
 ---
+const appUrl = 'https://jolly-pebble-0de24bc03.7.azurestaticapps.net/';
 ---
+
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Outils interactifs en ligne par Matthieu Rancinan." />
     <title>Outils — Matthieu Rancinan</title>
   </head>
   <body>
-    <h1>Outils</h1>
+    <main>
+      <nav class="topnav">
+        <a href="/">← Accueil</a>
+      </nav>
+
+      <header class="hero">
+        <h1>Outils</h1>
+        <p class="tagline">Des outils interactifs en ligne pour vous faciliter la vie.</p>
+      </header>
+
+      <section class="tool">
+        <div class="tool-header">
+          <h2>SpeechTimer</h2>
+          <span class="badge-live">En ligne</span>
+        </div>
+        <p class="desc">Chronomètre de prise de parole pour réunions, débats et formations. Sans installation, depuis n'importe quel navigateur.</p>
+        <div class="embed-wrapper">
+          <iframe
+            class="embed"
+            src={appUrl}
+            title="SpeechTimer"
+            loading="lazy"
+            allow="microphone"
+          ></iframe>
+          <p class="embed-note">
+            <a href={appUrl} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
+          </p>
+        </div>
+      </section>
+
+      <section class="wip">
+        <div class="badge-wip">En développement</div>
+        <p>D'autres outils arrivent bientôt — calculette de changement de job et plus encore.</p>
+      </section>
+
+      <footer>
+        <p><a href="/">← Accueil</a></p>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2.5rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .tool { margin-bottom: 2.5rem; }
+      .tool-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+      .tool-header h2 { margin: 0; font-size: 1.5rem; }
+      .badge-live {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #7ec88a;
+        border: 1px solid #7ec88a;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+      }
+      .desc { color: var(--muted); margin: 0 0 1.25rem; line-height: 1.5; }
+      .embed {
+        width: 100%;
+        height: min(75vh, 720px);
+        min-height: 500px;
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg-card);
+      }
+      .embed-note { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 0.75rem; }
+      .embed-note a { color: var(--accent); }
+      .wip {
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--muted);
+        margin-bottom: 3rem;
+      }
+      .badge-wip {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.75rem;
+      }
+      .wip p { margin: 0; font-size: 0.95rem; }
+      footer { border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
   </body>
 </html>
