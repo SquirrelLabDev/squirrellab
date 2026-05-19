@@ -1,0 +1,84 @@
+---
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="À propos de Matthieu Rancinan — consultant data, développeur et formateur." />
+    <title>À propos — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/">← Accueil</a>
+      </nav>
+
+      <header class="hero">
+        <img class="avatar" src="/mascot.jpg" alt="Matthieu Rancinan" width="120" height="120" />
+        <h1>Matthieu Rancinan</h1>
+        <p class="tagline">Consultant data & développeur — Power BI, apps mobiles, outils numériques.</p>
+      </header>
+
+      <section class="bio">
+        <p>
+          Passionné d'informatique depuis bientôt 10 ans, il me tient à cœur de fournir à mes
+          clients des outils pour améliorer leur quotidien, avec une spécialisation dans la data :
+          Power BI en tête, suivi des outils de la Power Platform, mais aussi Azure SQL DB,
+          Teradata, Oracle, Informatica, Talend, SSIS.
+        </p>
+        <p>
+          Formateur, j'ai accompagné de nombreuses équipes dans le développement et l'adoption de
+          Power BI et la réalisation de projets en mode Agile Scrum — meetups, communautés, centres
+          d'expertise.
+        </p>
+        <p>
+          Vous retrouverez dans ce site mes tâtonnements, créations et autres découvertes.
+          N'hésitez pas à <a href="mailto:contact@squirrellab.fr">me contacter</a> si vous avez
+          des besoins particuliers.
+        </p>
+      </section>
+
+      <footer>
+        <p><a href="/">← Accueil</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { text-align: center; margin-bottom: 2.5rem; }
+      .avatar { display: block; margin: 0 auto 1rem; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0; }
+      .bio p { line-height: 1.8; margin: 0 0 1.25rem; }
+      .bio a { color: var(--accent); }
+      footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
