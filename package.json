@@ -13,5 +13,8 @@
   },
   "dependencies": {
     "astro": "^6.2.1"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
   }
 }

@@ -1,25 +1,19 @@
 ---
-const projects = [
+const sections = [
   {
-    name: 'MapInBlue',
-    tagline: 'Tracez vos parcours, coloriez votre carte personnelle. 100 % local, sans compte.',
-    status: 'En développement',
-    href: '/projets/mapinblue',
-    accent: '#5b8def',
+    href: '/creations',
+    label: 'Créations',
+    desc: 'Apps mobiles & projets numériques — MapInBlue, SpeechTimer et la suite.',
   },
   {
-    name: 'SpeechTimer',
-    tagline: 'Chronomètre de prise de parole pour réunions, débats et formations.',
-    status: 'En ligne',
-    href: '/projets/speechtimer',
-    accent: '#f5b840',
+    href: '/outils',
+    label: 'Outils',
+    desc: 'Des outils interactifs en ligne pour vous faciliter la vie.',
   },
   {
-    name: 'Data viz',
-    tagline: 'Dashboards Power BI : CV interactif, escape game data.',
-    status: 'En ligne',
     href: '/data',
-    accent: '#8b9d7e',
+    label: 'Réalisations Data',
+    desc: 'Dashboards Power BI, scripts, articles et vidéos.',
   },
 ];
 ---
@@ -27,53 +21,44 @@ const projects = [
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="apple-touch-icon" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content="SquirrelLab — studio indépendant. Apps mobiles, data viz, expérimentations tech." />
-    <title>SquirrelLab</title>
+    <meta name="description" content="Matthieu Rancinan — consultant data, développeur d'apps et créateur d'outils numériques." />
+    <title>Matthieu Rancinan</title>
   </head>
   <body>
     <main>
       <header class="hero">
-        <img class="totem" src="/logo.png" alt="SquirrelLab" width="160" height="160" />
-        <h1>SquirrelLab</h1>
-        <p class="tagline">Studio indépendant. Apps mobiles, data viz, expérimentations tech.</p>
+        <h1>Matthieu Rancinan</h1>
+        <p class="tagline">Consultant data & développeur — Power BI, apps mobiles, outils numériques.</p>
       </header>
 
-      <section class="projects">
-        {projects.map((p) => {
-          const isLive = p.href !== '#';
-          return isLive ? (
-            <a
-              class="card card--link"
-              href={p.href}
-              style={`--accent: ${p.accent}`}
-              target={p.external ? '_blank' : undefined}
-              rel={p.external ? 'noopener' : undefined}
-            >
-              <div class="status">{p.status}</div>
-              <h2>{p.name}</h2>
-              <p>{p.tagline}</p>
-              <span class="cta">{p.external ? 'Ouvrir ↗' : 'En savoir plus →'}</span>
-            </a>
-          ) : (
-            <article class="card card--soon" style={`--accent: ${p.accent}`}>
-              <div class="status">{p.status}</div>
-              <h2>{p.name}</h2>
-              <p>{p.tagline}</p>
-            </article>
-          );
-        })}
+      <section class="bio">
+        <p>
+          Passionné d'informatique depuis bientôt 10 ans, je crée des outils pour améliorer
+          le quotidien de mes clients, avec une spécialisation dans la data : Power BI en tête,
+          suivi de la Power Platform, Azure, et bien d'autres. Formateur, j'ai accompagné de nombreuses équipes dans le développement l'adoption de Power BI
+          et la réalisation de projet en mode Agile Scrum — meetups, communautés, centres d'expertise.
+        </p>
+        <p>
+          Vous retrouverez ici mes créations, tâtonnements et découvertes.
+          N'hésitez pas à <a href="mailto:contact@squirrellab.fr">me contacter</a> si vous avez
+          des besoins particuliers.
+        </p>
+      </section>
+
+      <section class="nav-grid">
+        {sections.map((s) => (
+          <a href={s.href} class="card">
+            <h2>{s.label}</h2>
+            <p>{s.desc}</p>
+            <span class="arrow">→</span>
+          </a>
+        ))}
       </section>
 
       <footer>
-        <p>
-          Contact :
-          <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>
-        </p>
-        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
       </footer>
     </main>
 
@@ -85,7 +70,7 @@ const projects = [
         --fg: #f5e6d5;
         --muted: #b8a491;
         --border: #4a332a;
-        --accent-brand: #e07840;
+        --accent: #e07840;
       }
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; }
@@ -96,92 +81,50 @@ const projects = [
         min-height: 100vh;
       }
       main {
-        max-width: 1100px;
+        max-width: 800px;
         margin: 0 auto;
-        padding: 4rem 1.5rem 2rem;
+        padding: 2rem 1.5rem;
       }
-      .hero {
-        text-align: center;
-        margin-bottom: 4rem;
-      }
-      .totem {
-        display: block;
-        margin: 0 auto 1rem;
-        width: 160px;
-        height: auto;
-      }
+      .hero { margin-bottom: 2rem; }
       h1 {
-        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-size: clamp(2rem, 5vw, 3rem);
         margin: 0 0 0.5rem;
         letter-spacing: -0.02em;
       }
-      .tagline {
-        color: var(--muted);
-        font-size: 1.1rem;
-        margin: 0;
-      }
-      .projects {
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .bio { margin-bottom: 2.5rem; }
+      .bio p { line-height: 1.7; color: var(--fg); margin: 0 0 1rem; }
+      .bio a { color: var(--accent); }
+      .nav-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 4rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 3rem;
       }
       .card {
+        display: flex;
+        flex-direction: column;
         background: var(--bg-card);
         border: 1px solid var(--border);
         border-top: 3px solid var(--accent);
         border-radius: 12px;
-        padding: 1.5rem;
-        transition: transform 150ms ease, border-color 150ms ease;
-        display: block;
-        color: inherit;
+        padding: 1.25rem;
         text-decoration: none;
+        color: var(--fg);
+        transition: border-color 0.15s, background 0.15s;
       }
-      .card--link { cursor: pointer; }
-      .card--link:hover {
-        transform: translateY(-2px);
-        border-color: var(--accent);
-      }
-      .card--soon { opacity: 0.75; }
-      .cta {
-        display: inline-block;
-        margin-top: 1rem;
-        font-size: 0.85rem;
-        color: var(--accent);
-        font-weight: 500;
-      }
-      .status {
-        display: inline-block;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--accent);
-        margin-bottom: 0.75rem;
-      }
-      .card h2 {
-        margin: 0 0 0.5rem;
-        font-size: 1.25rem;
-      }
-      .card p {
-        color: var(--muted);
-        margin: 0;
-        font-size: 0.95rem;
-        line-height: 1.5;
-      }
+      .card:hover { background: #452e26; border-color: #5a3d32; }
+      .card h2 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; flex: 1; }
+      .arrow { margin-top: 1rem; color: var(--accent); font-size: 1.1rem; }
       footer {
+        border-top: 1px solid var(--border);
+        padding-top: 1.5rem;
         text-align: center;
         color: var(--muted);
-        font-size: 0.9rem;
-        padding-top: 2rem;
-        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
       }
-      footer a {
-        color: var(--fg);
-        text-decoration: none;
-        border-bottom: 1px dashed var(--muted);
-      }
-      footer a:hover { border-bottom-style: solid; }
-      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+      .copy { margin: 0; }
     </style>
   </body>
 </html>
