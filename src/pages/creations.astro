@@ -1,12 +1,111 @@
 ---
+const projets = [
+  {
+    href: '/projets/mapinblue',
+    label: 'MapInBlue',
+    badge: 'Android',
+    desc: 'Application de cartographie personnelle — explorez et coloriez vos territoires parcourus. 100 % local, sans compte.',
+  },
+  {
+    href: '/projets/speechtimer',
+    label: 'SpeechTimer',
+    badge: 'Web',
+    desc: 'Chronomètre de prise de parole pour réunions, débats et formations. Accessible depuis n\'importe quel navigateur.',
+  },
+];
 ---
+
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Créations de Matthieu Rancinan — apps mobiles et outils numériques." />
     <title>Créations — Matthieu Rancinan</title>
   </head>
   <body>
-    <h1>Créations</h1>
+    <main>
+      <nav class="topnav">
+        <a href="/">← Accueil</a>
+      </nav>
+
+      <header class="hero">
+        <h1>Créations</h1>
+        <p class="tagline">Apps mobiles & projets numériques.</p>
+      </header>
+
+      <section class="grid">
+        {projets.map((p) => (
+          <a href={p.href} class="card">
+            <div class="badge">{p.badge}</div>
+            <h2>{p.label}</h2>
+            <p>{p.desc}</p>
+            <span class="arrow">→</span>
+          </a>
+        ))}
+      </section>
+
+      <footer>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+      .card {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-decoration: none;
+        color: var(--fg);
+        transition: background 0.15s;
+      }
+      .card:hover { background: #452e26; }
+      .badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.75rem;
+        align-self: flex-start;
+      }
+      .card h2 { margin: 0 0 0.4rem; font-size: 1.15rem; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; flex: 1; }
+      .arrow { margin-top: 1rem; color: var(--accent); }
+      footer { border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+      .copy { margin: 0; }
+    </style>
   </body>
 </html>
