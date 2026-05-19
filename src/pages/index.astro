@@ -3,17 +3,28 @@ const sections = [
   {
     href: '/creations',
     label: 'Créations',
-    desc: 'Apps mobiles & projets numériques — MapInBlue, SpeechTimer et la suite.',
+    desc: 'Apps mobiles & projets numériques.',
+    links: [
+      { href: '/projets/mapinblue', label: 'MapInBlue' },
+      { href: '/projets/speechtimer', label: 'SpeechTimer' },
+    ],
   },
   {
     href: '/outils',
     label: 'Outils',
-    desc: 'Des outils interactifs en ligne pour vous faciliter la vie.',
+    desc: 'Outils interactifs en ligne.',
+    links: [],
   },
   {
     href: '/data',
     label: 'Réalisations Data',
     desc: 'Dashboards Power BI, scripts, articles et vidéos.',
+    links: [
+      { href: '/data/dashboards', label: 'Dashboards' },
+      { href: '/data/scripts', label: 'Scripts' },
+      { href: '/data/articles', label: 'Articles' },
+      { href: '/data/videos', label: 'Vidéos' },
+    ],
   },
 ];
 ---
@@ -49,11 +60,19 @@ const sections = [
 
       <section class="nav-grid">
         {sections.map((s) => (
-          <a href={s.href} class="card">
-            <h2>{s.label}</h2>
+          <div class="card">
+            <a href={s.href} class="card-title">
+              <h2>{s.label} →</h2>
+            </a>
             <p>{s.desc}</p>
-            <span class="arrow">→</span>
-          </a>
+            {s.links.length > 0 && (
+              <ul class="sublinks">
+                {s.links.map((l) => (
+                  <li><a href={l.href}>{l.label}</a></li>
+                ))}
+              </ul>
+            )}
+          </div>
         ))}
       </section>
 
@@ -109,14 +128,14 @@ const sections = [
         border-top: 3px solid var(--accent);
         border-radius: 12px;
         padding: 1.25rem;
-        text-decoration: none;
-        color: var(--fg);
-        transition: border-color 0.15s, background 0.15s;
       }
-      .card:hover { background: #452e26; border-color: #5a3d32; }
-      .card h2 { margin: 0 0 0.4rem; font-size: 1.1rem; }
-      .card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; flex: 1; }
-      .arrow { margin-top: 1rem; color: var(--accent); font-size: 1.1rem; }
+      .card-title { text-decoration: none; color: var(--fg); }
+      .card-title:hover h2 { color: var(--accent); }
+      .card h2 { margin: 0 0 0.4rem; font-size: 1.1rem; transition: color 0.15s; }
+      .card p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      .sublinks { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--border); padding-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .sublinks a { color: var(--accent); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 0.15rem 0.5rem; transition: background 0.15s; }
+      .sublinks a:hover { background: var(--border); }
       footer {
         border-top: 1px solid var(--border);
         padding-top: 1.5rem;
