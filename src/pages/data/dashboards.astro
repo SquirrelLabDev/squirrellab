@@ -12,6 +12,13 @@ const dashboards = [
     src: 'https://app.powerbi.com/view?r=eyJrIjoiODg5NTMwZjItY2MxMS00N2U2LTk4ZTEtYTZlOTYxNjc3ZjAxIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
     iframeTitle: 'ReportFinal',
   },
+  {
+    title: 'Rapport Formation Power BI',
+    desc: "Un rapport Power BI dédié à la formation — découvrez les fonctionnalités clés à travers un exemple concret.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiYWJlZTU5NjItOWQ2Yy00NmViLWFmZTctYjBjY2Y4YmI0YjdmIiwidCI6Ijg5MmIzNDQ2LWQ1ZjAtNDg5ZS1hNjhkLTYwNWMxNjEzYWVhZCIsImMiOjh9&embedImagePlaceholder=true',
+    iframeTitle: 'FormationPowerBI',
+    youtube: 'https://www.youtube.com/live/5WZMZ82XnD0?si=HmzqbBR1uiIT9fSR',
+  },
 ];
 ---
 
@@ -49,6 +56,9 @@ const dashboards = [
             ></iframe>
             <p class="embed-note">
               <a href={d.src} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
+              {d.youtube && (
+                <a href={d.youtube} target="_blank" rel="noopener" class="yt-link">Vidéo de présentation (YouTube) ↗</a>
+              )}
             </p>
           </div>
         </section>
@@ -107,8 +117,9 @@ const dashboards = [
         border-radius: 12px;
         background: var(--bg-card);
       }
-      .embed-note { text-align: right; color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+      .embed-note { display: flex; justify-content: flex-end; gap: 1.5rem; color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; flex-wrap: wrap; }
       .embed-note a { color: var(--accent); }
+      .yt-link { color: #ff6b6b; }
       footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
       footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
       .copy { margin-top: 0.5rem; font-size: 0.8rem; }
