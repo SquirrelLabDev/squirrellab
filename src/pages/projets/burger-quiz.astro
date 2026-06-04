@@ -1,0 +1,158 @@
+---
+const appUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francecentral-01.azurewebsites.net';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Burger Quiz — Simulez l'émission culte d'Alain Chabat avec buzzers, transitions et système de points en temps réel." />
+    <title>Burger Quiz — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge">En ligne</div>
+        <h1>Burger Quiz</h1>
+        <p class="tagline">Simulez l'émission culte d'Alain Chabat — buzzers en temps réel, transitions et points pour Ketchup vs Mayo.</p>
+      </header>
+
+      <section class="about">
+        <p>
+          Une application web multi-appareils qui reproduit le format de l'émission Burger Quiz.
+          L'animateur pilote la partie depuis sa télécommande, les joueurs buzzent depuis leur téléphone
+          et le grand écran affiche le score en direct. Aucune installation — tout fonctionne depuis un navigateur.
+        </p>
+      </section>
+
+      <section class="features">
+        <div class="feature">
+          <h3>🍔 Deux équipes</h3>
+          <p>Ketchup vs Mayo — chaque joueur rejoint son équipe en scannant un QR code.</p>
+        </div>
+        <div class="feature">
+          <h3>⚡ Buzzers en temps réel</h3>
+          <p>Socket.IO synchronise les buzzers instantanément sur tous les appareils connectés.</p>
+        </div>
+        <div class="feature">
+          <h3>🎬 Transitions vidéo</h3>
+          <p>Nuggets, Sel ou Poivre, Les Menus, L'Addition, Burger de la Mort — chaque épreuve a sa transition.</p>
+        </div>
+        <div class="feature">
+          <h3>📱 Télécommande admin</h3>
+          <p>Gérez les points, bloquez les buzzers et lancez les transitions depuis votre téléphone.</p>
+        </div>
+      </section>
+
+      <section class="launch">
+        <h2>Lancer une partie</h2>
+        <p class="desc">Ouvrez la page de démarrage pour accéder aux QR codes de chaque rôle.</p>
+        <a class="btn-launch" href={`${appUrl}/setup`} target="_blank" rel="noopener">
+          Démarrer Burger Quiz ↗
+        </a>
+        <div class="roles">
+          <div class="role">
+            <span class="role-badge animateur">Animateur</span>
+            <span>Ouvre <strong>/setup</strong> puis <strong>/admin</strong></span>
+          </div>
+          <div class="role">
+            <span class="role-badge ecran">Écran TV</span>
+            <span>Affiche <strong>/game</strong> sur le projecteur</span>
+          </div>
+          <div class="role">
+            <span class="role-badge joueur">Joueurs</span>
+            <span>Scannent le QR code pour rejoindre</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="credits">
+        <p>Application inspirée de la réalisation de <a href="https://github.com/BenjaminPoutriquet35800/app-burger-quiz" target="_blank" rel="noopener">Benjamin Poutriquet</a>.</p>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Retour à SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #f5b840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 1.5rem; }
+      .badge {
+        display: inline-block; font-size: 0.75rem; text-transform: uppercase;
+        letter-spacing: 0.08em; color: #7ec88a; border: 1px solid #7ec88a;
+        border-radius: 999px; padding: 0.2rem 0.6rem; margin-bottom: 1rem;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      h2 { font-size: 1.3rem; margin: 0 0 0.5rem; }
+      h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .about { margin-bottom: 2rem; line-height: 1.6; }
+      .features {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem; margin-bottom: 2.5rem;
+      }
+      .feature {
+        background: var(--bg-card); border-top: 3px solid var(--accent);
+        border-radius: 12px; padding: 1rem 1.25rem;
+      }
+      .feature p { color: var(--muted); font-size: 0.9rem; margin: 0; line-height: 1.5; }
+      .launch {
+        background: var(--bg-card); border-radius: 12px;
+        padding: 1.5rem; margin-bottom: 2rem;
+      }
+      .launch .desc { color: var(--muted); margin: 0.25rem 0 1.25rem; font-size: 0.95rem; }
+      .btn-launch {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.65rem 1.5rem; border-radius: 8px;
+        text-decoration: none; margin-bottom: 1.5rem; font-size: 0.95rem;
+      }
+      .btn-launch:hover { opacity: 0.9; }
+      .roles { display: flex; flex-direction: column; gap: 0.6rem; }
+      .role { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: var(--muted); }
+      .role-badge {
+        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+        border-radius: 999px; padding: 0.15rem 0.6rem; white-space: nowrap;
+      }
+      .role-badge.animateur { background: #28a745; color: white; }
+      .role-badge.ecran     { background: #007bff; color: white; }
+      .role-badge.joueur    { background: #C71000; color: white; }
+      .credits { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+      .credits a { color: var(--muted); }
+      footer {
+        margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);
+        text-align: center; color: var(--muted); font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

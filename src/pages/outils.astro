@@ -1,5 +1,6 @@
 ---
 const appUrl = 'https://jolly-pebble-0de24bc03.7.azurestaticapps.net/';
+const burgerQuizUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francecentral-01.azurewebsites.net';
 ---
 
 <html lang="fr">
@@ -40,6 +41,16 @@ const appUrl = 'https://jolly-pebble-0de24bc03.7.azurestaticapps.net/';
             <a href={appUrl} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
           </p>
         </div>
+      </section>
+
+      <section class="tool">
+        <div class="tool-header">
+          <h2>Burger Quiz</h2>
+          <span class="badge-live">En ligne</span>
+        </div>
+        <p class="desc">Simulez l'émission culte d'Alain Chabat — buzzers en temps réel, transitions vidéo et système de points Ketchup vs Mayo. Multi-appareils, sans installation.</p>
+        <a class="btn-tool" href={`${burgerQuizUrl}/setup`} target="_blank" rel="noopener">Lancer une partie ↗</a>
+        <a class="btn-tool-secondary" href="/projets/burger-quiz">En savoir plus</a>
       </section>
 
       <section class="wip">
@@ -102,6 +113,17 @@ const appUrl = 'https://jolly-pebble-0de24bc03.7.azurestaticapps.net/';
       }
       .embed-note { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 0.75rem; }
       .embed-note a { color: var(--accent); }
+      .btn-tool {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.55rem 1.25rem; border-radius: 8px;
+        text-decoration: none; font-size: 0.9rem; margin-right: 0.75rem;
+      }
+      .btn-tool:hover { opacity: 0.9; }
+      .btn-tool-secondary {
+        display: inline-block; color: var(--muted); font-size: 0.9rem;
+        text-decoration: none; border-bottom: 1px dashed var(--border);
+      }
+      .btn-tool-secondary:hover { color: var(--fg); }
       .wip {
         border: 1px dashed var(--border);
         border-radius: 12px;
