@@ -20,6 +20,79 @@ const dashboards = [
     youtube: 'https://www.youtube.com/live/5WZMZ82XnD0?si=HmzqbBR1uiIT9fSR',
   },
 ];
+
+const eceReports = [
+  {
+    ep: 1,
+    title: 'La Formule 1',
+    desc: "Un sujet qui sort des tableaux de chiffres comptables, avec un vrai jeu sur les images : circuits et pilotes mis en scène.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiODc4ZGFmMDItYjQ4ZS00NDVkLWExZDgtYTk2MzNjOWJiZDVkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Ziyad Amzil', 'Alexandre Danoffre', 'Laureline Grassin', 'Nicolas Kaupp'],
+  },
+  {
+    ep: 2,
+    title: 'Tourisme & habitudes dans le monde',
+    desc: 'Un peu de tourisme autour du monde et une analyse des différentes habitudes des gens, avec un design épuré.',
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiY2IxZTlmYzYtOTQ5OC00NzU5LWEyZWItMDI0ZjE0OTVhM2FlIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Mouhsine Badirou', 'Hanay Joud', 'Naveen Malayappa', 'Anotan Srikaran'],
+  },
+  {
+    ep: 3,
+    title: 'La criminalité',
+    desc: "Étude de la criminalité suivant différents axes — avec un modèle de données particulièrement soigné.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiNDJiNjljM2YtNjlmNi00YjI5LThmNTUtMDc4NTY4Y2IwOTE3IiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Elika Allary', 'Mouna Chihab', 'Dorian Lartigue', 'Isabelle Lin'],
+  },
+  {
+    ep: 4,
+    title: 'Pokémon',
+    desc: "Preuve qu'on peut faire des rapports Power BI sur tout ! Cerise sur le gâteau : images dynamiques et musiques intégrées directement aux pages, via la custom viz HTML Viewer.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiZTUxZmJhOTMtMTExZS00MWEwLTgyMzMtN2QwMWU4N2U5MzM0IiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Amine Benyoucef', 'Souheil Bouderbala', 'Jad Bourhabi', 'Hamza Laisne'],
+  },
+  {
+    ep: 5,
+    title: 'Inazuma Eleven',
+    desc: "Le travail réalisé autour de la franchise de jeux vidéo/manga de football Inazuma Eleven. Design épuré et affichage dynamique des joueurs, classe !",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiNWY2YmU4OWItMzgyYi00ZmNhLTgyNjMtYjhkMWVkYThlZDAyIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Cenzo Halbeher', 'Pierre Hamonic', 'Adrien Hubert'],
+  },
+  {
+    ep: 6,
+    title: 'La Finance',
+    desc: "Un classique revisité : prenez le temps de regarder la page simulation, très bien faite — choisissez votre budget d'investissement, répartissez-le et observez ce que vous auriez gagné (ou pas).",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiN2U0ZTI5ZDctZDFmMC00ZGZhLTg1YTItODA0ODc4YmYzZTRmIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Aldorith Chouna Nguefa', 'Josué Miengue', 'Raphael Noubiengang', 'Gilles Gaetan Tagne Wowoua'],
+  },
+  {
+    ep: 7,
+    title: 'Les musiques qui font du Hit',
+    desc: "Une analyse des musiques à succès. Prenez le temps d'observer la page Versus qui permet de comparer deux hits entre eux.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiNzYwYzI3ZDMtZjI0My00OWZiLWJmNDEtZGM3ODI0MGUzYjVjIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Yohan Marcel', 'Fabio Oliveira', 'Anthony Sabbagh'],
+  },
+  {
+    ep: 8,
+    title: 'Les femmes dans la Tech',
+    desc: "Un sujet qui compte : la place des femmes dans la Tech. Des analyses pertinentes autour de 5 grandes sociétés du secteur, sous un design épuré et soigné.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiN2EzNTZkZDEtODA4YS00N2E3LWEyZjEtYzE4ODNlZjYxZjhlIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Margaux Leroy', 'Eléonore Tran', 'Nina Tuil', 'Julien Lin'],
+  },
+  {
+    ep: 9,
+    title: "L'immobilier",
+    desc: 'Un sujet qui en intéresse plus d’un : l’immobilier. Le tout porté par un design osé.',
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiYmQyMTBjNmQtNTEzOC00ZTU2LTk4N2YtOGQyNTA5ZTliY2RlIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Walid L.', 'Naïm M.', 'Nicolas Pereira', 'David Veillepeau'],
+  },
+  {
+    ep: 10,
+    title: 'La politique',
+    desc: "L'impact des différents présidents sur les 30 dernières années — et du son, comme dans l'épisode Pokémon. Bluffant !",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiZTI0ZDEzNzctNjNmNS00OTc5LWEwY2YtODgzNTBkODNkODFkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    students: ['Naya Cessot', 'Maxence Gatard', 'Myriam Haoudi', 'Jean-Cédric Le Philippe'],
+  },
+];
 ---
 
 <html lang="fr">
@@ -64,11 +137,85 @@ const dashboards = [
         </section>
       ))}
 
+      <section class="ece-section">
+        <div class="ece-header">
+          <div class="badge">Formation ECE</div>
+          <h2>Projets étudiants — École d'ingénieurs</h2>
+          <p class="tagline-sub">
+            10 rapports Power BI réalisés de A à Z par mes étudiants de l'ECE (choix des données,
+            modélisation, mise en forme). Chaque semaine, une découverte présentée sur LinkedIn.
+          </p>
+        </div>
+
+        <div class="carousel" id="ece-carousel">
+          <div class="carousel-track">
+            {eceReports.map((r, i) => (
+              <article class="slide" data-index={i}>
+                <div class="slide-meta">
+                  <span class="ep-badge">ECE épisode #{r.ep}</span>
+                  <h3>{r.title}</h3>
+                  <p class="slide-desc">{r.desc}</p>
+                  <p class="students">
+                    <span class="students-label">Bravo à :</span> {r.students.join(', ')}
+                  </p>
+                  <a href={r.src} target="_blank" rel="noopener" class="btn-open">Ouvrir en plein écran ↗</a>
+                </div>
+                <div class="slide-embed">
+                  <iframe
+                    class="embed"
+                    title={r.title}
+                    src={r.src}
+                    loading="lazy"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <button class="nav prev" id="ece-prev" aria-label="Rapport précédent">‹</button>
+          <button class="nav next" id="ece-next" aria-label="Rapport suivant">›</button>
+
+          <div class="dots" id="ece-dots">
+            {eceReports.map((_, i) => (
+              <button class="dot" data-index={i} aria-label={`Aller au rapport ${i + 1}`}></button>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <footer>
         <p><a href="/data">← Réalisations Data</a></p>
         <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
       </footer>
     </main>
+
+    <script>
+      const track = document.querySelector('#ece-carousel .carousel-track') as HTMLElement | null;
+      const slides = document.querySelectorAll('#ece-carousel .slide');
+      const dots = document.querySelectorAll('#ece-dots .dot');
+      const prevBtn = document.getElementById('ece-prev');
+      const nextBtn = document.getElementById('ece-next');
+      let current = 0;
+
+      function goTo(index: number) {
+        if (!track) return;
+        current = (index + slides.length) % slides.length;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      }
+
+      prevBtn?.addEventListener('click', () => goTo(current - 1));
+      nextBtn?.addEventListener('click', () => goTo(current + 1));
+      dots.forEach((d) => {
+        d.addEventListener('click', () => {
+          const idx = Number((d as HTMLElement).dataset.index);
+          goTo(idx);
+        });
+      });
+
+      goTo(0);
+    </script>
 
     <style is:global>
       :root {
@@ -123,6 +270,100 @@ const dashboards = [
       footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
       footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
       .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+
+      /* ECE carousel section */
+      .ece-section { margin: 4rem 0 3rem; padding-top: 2.5rem; border-top: 1px solid var(--border); }
+      .ece-header { margin-bottom: 1.5rem; }
+      .ece-header h2 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+      .tagline-sub { color: var(--muted); line-height: 1.6; margin: 0; max-width: 640px; }
+
+      .carousel { position: relative; overflow: hidden; border-radius: 14px; }
+      .carousel-track {
+        display: flex;
+        transition: transform 0.35s ease;
+      }
+      .slide {
+        flex: 0 0 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.5rem;
+      }
+      .slide-meta { display: flex; flex-direction: column; }
+      .ep-badge {
+        display: inline-block;
+        align-self: flex-start;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .slide-meta h3 { margin: 0 0 0.6rem; font-size: 1.3rem; }
+      .slide-desc { color: var(--fg); line-height: 1.6; margin: 0 0 1rem; font-size: 0.95rem; }
+      .students { color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin: 0 0 1.25rem; }
+      .students-label { color: var(--accent); font-weight: 600; }
+      .btn-open {
+        display: inline-block;
+        align-self: flex-start;
+        margin-top: auto;
+        color: var(--accent);
+        font-size: 0.85rem;
+        text-decoration: none;
+        border-bottom: 1px dashed var(--accent);
+      }
+      .btn-open:hover { border-bottom-style: solid; }
+      .slide-embed .embed {
+        width: 100%;
+        aspect-ratio: 600 / 373.5;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg);
+      }
+
+      .nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--fg);
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+      .nav:hover { background: var(--border); }
+      .nav.prev { left: 0.75rem; }
+      .nav.next { right: 0.75rem; }
+
+      .dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+      .dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+      }
+      .dot.active { background: var(--accent); border-color: var(--accent); }
+
+      @media (max-width: 720px) {
+        .slide { grid-template-columns: 1fr; }
+      }
     </style>
   </body>
 </html>
