@@ -21,6 +21,24 @@ const dashboards = [
   },
 ];
 
+const worldChallengeReports = [
+  {
+    week: 1,
+    title: 'Spécial Saint-Valentin',
+    desc: "Premier défi du World Challenge Dataviz organisé par Microsoft, sur un thème de saison : l'amour et la Saint-Valentin. Une première vue pour comparer votre score de satisfaction (Cantril Ladder Score) aux autres pays et années, et une seconde vue pour analyser votre bonheur en fonction de plusieurs facteurs et estimer votre niveau de bien-être.",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiMTE5YTY3NDUtZDc4OC00YTNkLWI0MmYtMGIxNTAwNmIxYWEwIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    iframeTitle: 'WorldChallenge Semaine 1',
+    note: "Merci Anaïs Mokdad de m'avoir parlé de cette opportunité !",
+  },
+  {
+    week: 2,
+    title: 'The Power of Travel',
+    desc: "Deuxième semaine du World Challenge Dataviz Power BI, sur le thème du voyage. Venez comparer votre profil de voyageur avec d'autres, récupérer des infos sur les habitudes de voyage du monde entier... et serez-vous capable de trouver le trésor ?!",
+    src: 'https://app.powerbi.com/view?r=eyJrIjoiNDk5ZDg4ZjItMTE3Ni00MWRlLTkwMTEtYjRkMzdmNjg0ZTQ1IiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
+    iframeTitle: 'WorldChallenge Semaine 2',
+  },
+];
+
 const eceReports = [
   {
     ep: 1,
@@ -136,6 +154,37 @@ const eceReports = [
           </div>
         </section>
       ))}
+
+      <section class="wc-section">
+        <div class="wc-header">
+          <div class="badge">World Challenge Dataviz</div>
+          <h2>World Challenge Dataviz — Microsoft</h2>
+          <p class="tagline-sub">
+            Participation au concours hebdomadaire Power BI DataViz World Challenge organisé
+            par Microsoft — un thème imposé chaque semaine, une visualisation à créer.
+          </p>
+        </div>
+
+        {worldChallengeReports.map((w) => (
+          <div class="wc-card">
+            <h3>Semaine {w.week} — {w.title}</h3>
+            <p class="desc">{w.desc}</p>
+            <div class="embed-wrapper">
+              <iframe
+                class="embed"
+                title={w.iframeTitle}
+                src={w.src}
+                loading="lazy"
+                allowfullscreen
+              ></iframe>
+              <p class="embed-note">
+                <a href={w.src} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
+              </p>
+            </div>
+            {w.note && <p class="wc-note">{w.note}</p>}
+          </div>
+        ))}
+      </section>
 
       <section class="ece-section">
         <div class="ece-header">
@@ -270,6 +319,15 @@ const eceReports = [
       footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
       footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
       .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+
+      /* World Challenge Dataviz section */
+      .wc-section { margin: 4rem 0 3rem; padding-top: 2.5rem; border-top: 1px solid var(--border); }
+      .wc-header { margin-bottom: 1.5rem; }
+      .wc-header h2 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+      .wc-card { background: var(--bg-card); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
+      .wc-card h3 { margin: 0 0 0.75rem; font-size: 1.3rem; }
+      .wc-card .desc { color: var(--fg); line-height: 1.6; margin: 0 0 1.25rem; }
+      .wc-note { color: var(--muted); font-size: 0.85rem; font-style: italic; margin: 1rem 0 0; }
 
       /* ECE carousel section */
       .ece-section { margin: 4rem 0 3rem; padding-top: 2.5rem; border-top: 1px solid var(--border); }
