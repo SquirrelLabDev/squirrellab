@@ -1,38 +1,5 @@
 ---
 const cvUrl = 'https://app.powerbi.com/view?r=eyJrIjoiZDNkYjVjMWUtZmE2ZC00MWI3LWE3OWEtQTQ4YjYxMGMwZWJkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9';
-
-const clients = [
-  { file: 'Africa_Global_Logistics_logo.png', name: 'Africa Global Logistics' },
-  { file: 'Avanade.jpg', name: 'Avanade' },
-  { file: 'Azeo.jpg', name: 'Azeo' },
-  { file: 'CEVA_Logistics_New_Logo.png', name: 'CEVA Logistics' },
-  { file: 'Colas_Digital-Solutions.png', name: 'Colas Digital Solutions' },
-  { file: 'Danone.png', name: 'Danone' },
-  { file: 'Dior.png', name: 'Dior' },
-  { file: 'EDF.svg', name: 'EDF' },
-  { file: 'EIGSI.jpg', name: 'EIGSI' },
-  { file: 'Formiris.svg', name: 'Formiris' },
-  { file: 'HOPITAL-SAINT-JOSEPH.png', name: 'Hôpital Saint Joseph' },
-  { file: 'Inqom.svg', name: 'Inqom' },
-  { file: 'Insiders.png', name: 'Insiders' },
-  { file: 'Logo-OCP.png', name: 'OCP' },
-  { file: 'LogoGRTgaz2023.svg.png', name: 'GRTgaz' },
-  { file: 'Logo_GRDF.png', name: 'GRDF' },
-  { file: 'Logo_Groupe_FDJ.svg.png', name: 'Groupe FDJ' },
-  { file: 'Logo_SGDF.svg.png', name: 'Scouts et Guides de France' },
-  { file: 'Logo_groupe_savencia.png', name: 'Groupe Savencia' },
-  { file: 'OCEANIS.webp', name: 'Oceanis' },
-  { file: 'Orano.png', name: 'Orano' },
-  { file: 'SAINT-LAURENT.svg', name: 'Saint Laurent' },
-  { file: 'Sonepar.png', name: 'Sonepar' },
-  { file: 'Sopra_Steria_logo.svg.png', name: 'Sopra Steria' },
-  { file: 'Transavia_logo.svg.png', name: 'Transavia' },
-  { file: 'UPMC.png', name: 'UPMC' },
-  { file: 'Vinci.svg', name: 'Vinci' },
-  { file: 'air-liquide.svg', name: 'Air Liquide' },
-  { file: 'logo-ks_services.png', name: 'KS Services' },
-  { file: 'worldline-logo.svg', name: 'Worldline' },
-];
 ---
 
 <html lang="fr">
@@ -76,37 +43,20 @@ const clients = [
         </p>
       </section>
 
-      <section class="quick-links">
-        <details class="dropdown">
-          <summary>📄 Mon CV interactif</summary>
-          <div class="dropdown-body">
-            <div class="embed-wrapper">
-              <iframe
-                class="embed"
-                title="CV interactif"
-                src={cvUrl}
-                loading="lazy"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <p class="embed-note">
-              <a href={cvUrl} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
-            </p>
-          </div>
-        </details>
-
-        <details class="dropdown">
-          <summary>🤝 Mes clients</summary>
-          <div class="dropdown-body">
-            <div class="clients-grid">
-              {clients.map((c) => (
-                <div class="client-logo" title={c.name}>
-                  <img src={`/clients/${c.file}`} alt={c.name} loading="lazy" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </details>
+      <section class="cv-section">
+        <h2>Mon CV interactif</h2>
+        <div class="embed-wrapper">
+          <iframe
+            class="embed"
+            title="CV interactif"
+            src={cvUrl}
+            loading="lazy"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="embed-note">
+          <a href={cvUrl} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
+        </p>
       </section>
 
       <footer>
@@ -133,7 +83,8 @@ const clients = [
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         min-height: 100vh;
       }
-      main { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem; }
+      main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .bio, .hero { max-width: 680px; margin-left: auto; margin-right: auto; }
       .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
       .topnav a { color: var(--muted); text-decoration: none; }
       .topnav a:hover { color: var(--fg); }
@@ -144,59 +95,17 @@ const clients = [
       .bio p { line-height: 1.8; margin: 0 0 1.25rem; }
       .bio a { color: var(--accent); }
 
-      .quick-links { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem; }
-
-      .dropdown {
-        flex: 1 1 260px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-left: 3px solid var(--accent);
-        border-radius: 10px;
-        padding: 0.7rem 1.25rem;
-      }
-      .dropdown summary {
-        cursor: pointer;
-        font-size: 0.95rem;
-        color: var(--fg);
-        list-style: none;
-      }
-      .dropdown summary::-webkit-details-marker { display: none; }
-      .dropdown summary::after {
-        content: ' ▸';
-        color: var(--muted);
-      }
-      .dropdown[open] summary::after { content: ' ▾'; }
-      .dropdown-body { margin-top: 1.25rem; }
-
+      .cv-section { margin-top: 3rem; }
+      .cv-section h2 { font-size: 1.4rem; margin: 0 0 1rem; text-align: center; }
       .embed-wrapper .embed {
         width: 100%;
         aspect-ratio: 600 / 373.5;
         border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--bg);
+        border-radius: 12px;
+        background: var(--bg-card);
       }
       .embed-note { text-align: right; margin: 0.5rem 0 0; font-size: 0.85rem; }
       .embed-note a { color: var(--accent); }
-
-      .clients-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        gap: 0.75rem;
-      }
-      .client-logo {
-        background: #fff;
-        border-radius: 8px;
-        padding: 0.6rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 70px;
-      }
-      .client-logo img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-      }
 
       footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
       footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
