@@ -1,4 +1,38 @@
 ---
+const cvUrl = 'https://app.powerbi.com/view?r=eyJrIjoiZDNkYjVjMWUtZmE2ZC00MWI3LWE3OWEtQTQ4YjYxMGMwZWJkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9';
+
+const clients = [
+  { file: 'Africa_Global_Logistics_logo.png', name: 'Africa Global Logistics' },
+  { file: 'Avanade.jpg', name: 'Avanade' },
+  { file: 'Azeo.jpg', name: 'Azeo' },
+  { file: 'CEVA_Logistics_New_Logo.png', name: 'CEVA Logistics' },
+  { file: 'Colas_Digital-Solutions.png', name: 'Colas Digital Solutions' },
+  { file: 'Danone.png', name: 'Danone' },
+  { file: 'Dior.png', name: 'Dior' },
+  { file: 'EDF.svg', name: 'EDF' },
+  { file: 'EIGSI.jpg', name: 'EIGSI' },
+  { file: 'Formiris.svg', name: 'Formiris' },
+  { file: 'HOPITAL-SAINT-JOSEPH.png', name: 'Hôpital Saint Joseph' },
+  { file: 'Inqom.svg', name: 'Inqom' },
+  { file: 'Insiders.png', name: 'Insiders' },
+  { file: 'Logo-OCP.png', name: 'OCP' },
+  { file: 'LogoGRTgaz2023.svg.png', name: 'GRTgaz' },
+  { file: 'Logo_GRDF.png', name: 'GRDF' },
+  { file: 'Logo_Groupe_FDJ.svg.png', name: 'Groupe FDJ' },
+  { file: 'Logo_SGDF.svg.png', name: 'Scouts et Guides de France' },
+  { file: 'Logo_groupe_savencia.png', name: 'Groupe Savencia' },
+  { file: 'OCEANIS.webp', name: 'Oceanis' },
+  { file: 'Orano.png', name: 'Orano' },
+  { file: 'SAINT-LAURENT.svg', name: 'Saint Laurent' },
+  { file: 'Sonepar.png', name: 'Sonepar' },
+  { file: 'Sopra_Steria_logo.svg.png', name: 'Sopra Steria' },
+  { file: 'Transavia_logo.svg.png', name: 'Transavia' },
+  { file: 'UPMC.png', name: 'UPMC' },
+  { file: 'Vinci.svg', name: 'Vinci' },
+  { file: 'air-liquide.svg', name: 'Air Liquide' },
+  { file: 'logo-ks_services.png', name: 'KS Services' },
+  { file: 'worldline-logo.svg', name: 'Worldline' },
+];
 ---
 
 <html lang="fr">
@@ -42,6 +76,23 @@
         </p>
       </section>
 
+      <section class="quick-links">
+        <a href={cvUrl} target="_blank" rel="noopener" class="cv-link">
+          📄 Voir mon CV interactif ↗
+        </a>
+
+        <details class="clients-details">
+          <summary>🤝 Mes clients</summary>
+          <div class="clients-grid">
+            {clients.map((c) => (
+              <div class="client-logo" title={c.name}>
+                <img src={`/clients/${c.file}`} alt={c.name} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </details>
+      </section>
+
       <footer>
         <p><a href="/">← Accueil</a></p>
         <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
@@ -52,6 +103,7 @@
       :root {
         color-scheme: dark;
         --bg: #2a1b14;
+        --bg-card: #3a2620;
         --fg: #f5e6d5;
         --muted: #b8a491;
         --border: #4a332a;
@@ -75,6 +127,64 @@
       .tagline { color: var(--muted); font-size: 1rem; margin: 0; }
       .bio p { line-height: 1.8; margin: 0 0 1.25rem; }
       .bio a { color: var(--accent); }
+
+      .quick-links { margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+
+      .cv-link {
+        display: inline-block;
+        align-self: flex-start;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 10px;
+        padding: 0.7rem 1.25rem;
+        color: var(--fg);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: background 0.15s;
+      }
+      .cv-link:hover { background: #452e26; }
+
+      .clients-details {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 10px;
+        padding: 0.7rem 1.25rem;
+      }
+      .clients-details summary {
+        cursor: pointer;
+        font-size: 0.95rem;
+        color: var(--fg);
+        list-style: none;
+      }
+      .clients-details summary::-webkit-details-marker { display: none; }
+      .clients-details summary::after {
+        content: ' ▸';
+        color: var(--muted);
+      }
+      .clients-details[open] summary::after { content: ' ▾'; }
+      .clients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+      }
+      .client-logo {
+        background: #fff;
+        border-radius: 8px;
+        padding: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 70px;
+      }
+      .client-logo img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
       footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.9rem; }
       footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
       footer a:hover { border-bottom-style: solid; }
