@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(until gh run list *)",
+      "Bash(adb logcat *)",
+      "Bash(git -C * log *)",
+      "Bash(git -C * fetch *)"
+    ]
+  }
+}
