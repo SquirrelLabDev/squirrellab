@@ -1,0 +1,189 @@
+---
+// Page non listée dans la navigation, non indexée (voir meta robots
+// ci-dessous) — accessible par lien direct uniquement.
+const lastUpdated = '4 août 2026';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Comment supprimer vos données dans l'application Cash Noisette, éditée par SquirrelLab." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Suppression des données — Cash Noisette</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/projets/cashnoisette">← Cash Noisette</a>
+        <span> · </span>
+        <a href="/">SquirrelLab</a>
+      </nav>
+
+      <header>
+        <h1>Suppression des données — Cash Noisette</h1>
+        <p class="meta">Dernière mise à jour : {lastUpdated}</p>
+      </header>
+
+      <section class="tldr">
+        <h2>En résumé</h2>
+        <p>
+          Toutes vos données Cash Noisette (comptes, catégories, opérations, budgets, récurrences) sont stockées <strong>uniquement sur votre appareil</strong>. Aucune donnée n'est envoyée à SquirrelLab. Vous pouvez les supprimer à tout moment, directement depuis l'application ou via les paramètres Android.
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Supprimer une opération depuis l'application</h2>
+        <p>Pour supprimer une seule opération :</p>
+        <ol>
+          <li>Sur le tableau de bord, glissez l'opération vers la gauche, ou</li>
+          <li>Appui long pour sélectionner une ou plusieurs opérations, puis appuyez sur l'icône <strong>Corbeille</strong></li>
+        </ol>
+        <p>Un <strong>Annuler</strong> reste disponible juste après (icône en haut de l'écran).</p>
+      </section>
+
+      <section>
+        <h2>2. Supprimer toutes les données depuis l'application</h2>
+        <p>Pour effacer entièrement comptes, catégories, opérations, budgets et récurrences :</p>
+        <ol>
+          <li>Ouvrez <strong>Cash Noisette</strong></li>
+          <li>Appuyez sur l'icône <strong>Réglages</strong></li>
+          <li><strong>Tout supprimer</strong> → confirmez</li>
+        </ol>
+        <p>Cette action supprime définitivement toutes vos données de l'appareil.</p>
+      </section>
+
+      <section>
+        <h2>3. Supprimer toutes les données via Android</h2>
+        <p>Pour supprimer l'intégralité des données de l'application (y compris le cache) :</p>
+        <ol>
+          <li>Ouvrez <strong>Paramètres Android</strong></li>
+          <li>Applications → <strong>Cash Noisette</strong></li>
+          <li>Stockage → <strong>Effacer les données</strong></li>
+        </ol>
+        <p>Désinstaller Cash Noisette supprime également toutes les données automatiquement.</p>
+      </section>
+
+      <section>
+        <h2>4. Données concernées</h2>
+        <ul>
+          <li><strong>Comptes</strong> — noms et soldes d'ouverture (<code>accounts.json</code>)</li>
+          <li><strong>Catégories</strong> — catégories, sous-catégories et icônes personnalisées (<code>categories.json</code>)</li>
+          <li><strong>Opérations</strong> — dépenses, recettes et virements, confirmés ou à venir (<code>transactions.json</code>, <code>pending_transactions.json</code>)</li>
+          <li><strong>Budgets et récurrences</strong> (<code>budgets.json</code>, <code>recurring_rules.json</code>)</li>
+          <li><strong>Préférences</strong> — réglages et statut Pro (<code>settings.json</code>)</li>
+        </ul>
+        <p>
+          Aucune de ces données n'est stockée sur les serveurs de SquirrelLab. La suppression est donc immédiate et définitive, sans démarche auprès de l'éditeur.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Contact</h2>
+        <p>
+          Pour toute question relative à vos données, contactez-nous à l'adresse :<br />
+          <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>
+        </p>
+        <p>
+          Consultez également notre <a href="/legal/privacy-cashnoisette">politique de confidentialité complète</a>.
+        </p>
+      </section>
+
+      <footer>
+        <p><a href="/projets/cashnoisette">← Cash Noisette</a> · <a href="/">SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+      .topnav {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .draft-flag {
+        display: inline-block;
+        background: #4a2a1d;
+        border: 1px dashed var(--accent);
+        color: var(--accent);
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 2.5rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 2.5rem 0 0.75rem;
+        color: var(--fg);
+      }
+      p { margin: 0.75rem 0; }
+      ul, ol { padding-left: 1.4rem; }
+      li { margin: 0.4rem 0; }
+      a { color: var(--accent); }
+      strong { color: var(--fg); }
+      code {
+        background: var(--bg-card);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: #cdd6f4;
+      }
+      .tldr {
+        background: var(--bg-card);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+      .tldr h2 { margin-top: 0; }
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

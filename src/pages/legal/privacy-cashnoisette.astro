@@ -1,0 +1,270 @@
+---
+// Page non listée dans la navigation, non indexée (voir meta robots
+// ci-dessous) — accessible par lien direct uniquement (fiche Play Store).
+const lastUpdated = '4 août 2026';
+const appVersion = '1.0.0+1';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Politique de confidentialité de l'application Cash Noisette, éditée par SquirrelLab." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Politique de confidentialité — Cash Noisette</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/projets/cashnoisette">← Cash Noisette</a>
+        <span> · </span>
+        <a href="/">SquirrelLab</a>
+      </nav>
+
+      <header>
+        <h1>Politique de confidentialité — Cash Noisette</h1>
+        <p class="meta">Dernière mise à jour : {lastUpdated} — Version applicative concernée : {appVersion}</p>
+      </header>
+
+      <section class="tldr">
+        <h2>En résumé</h2>
+        <p>
+          Cash Noisette <strong>ne collecte aucune donnée personnelle</strong> sur ses propres serveurs : il n'y a ni compte utilisateur, ni base de données distante, ni service d'analyse, ni publicité, ni service de remontée d'erreurs. Toutes vos données (comptes, catégories, opérations, budgets, récurrences) restent sur votre appareil et sont supprimées lorsque vous désinstallez l'application.
+        </p>
+        <p>
+          Deux flux externes existent et sont décrits ci-dessous : (1) les rapports techniques collectés automatiquement par Google Play, (2) les actions que vous initiez vous-même via le système Android (export/partage CSV, ouverture d'un lien).
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Éditeur de l'application</h2>
+        <p>
+          L'application <strong>Cash Noisette</strong> est éditée par <strong>SquirrelLab</strong>, studio indépendant.
+        </p>
+        <p>
+          Contact : <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a><br />
+          Site web : <a href="https://squirrellab.fr">https://squirrellab.fr</a>
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Données traitées localement par l'application</h2>
+        <p>
+          Cash Noisette lit et stocke les informations suivantes <strong>exclusivement sur votre appareil</strong>, dans le répertoire privé de l'application (sandbox Android). Ces données ne sont jamais transmises à SquirrelLab ni à un quelconque serveur tiers.
+        </p>
+        <ul>
+          <li>
+            <strong>Comptes</strong> : noms et soldes d'ouverture que vous saisissez (<code>accounts.json</code>).
+          </li>
+          <li>
+            <strong>Catégories</strong> : catégories et sous-catégories, y compris leur icône si vous la personnalisez (<code>categories.json</code>).
+          </li>
+          <li>
+            <strong>Opérations</strong> : dépenses, recettes et virements que vous enregistrez, confirmés ou à venir (<code>transactions.json</code>, <code>pending_transactions.json</code>).
+          </li>
+          <li>
+            <strong>Budgets et récurrences</strong> : vos budgets mensuels et règles de récurrence (<code>budgets.json</code>, <code>recurring_rules.json</code>).
+          </li>
+          <li>
+            <strong>Préférences</strong> : réglages de l'application, dont votre statut Pro (<code>settings.json</code>).
+          </li>
+        </ul>
+        <p>
+          Ces fichiers sont stockés dans le répertoire renvoyé par <code>getApplicationDocumentsDirectory()</code> du système Android. Ils sont supprimés automatiquement par Android lorsque vous désinstallez Cash Noisette ou videz les données de l'application.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Données collectées automatiquement par Google Play</h2>
+        <p>
+          Cash Noisette étant distribuée via le Google Play Store, Google collecte automatiquement, indépendamment de l'éditeur :
+        </p>
+        <ul>
+          <li>les <strong>rapports de crash et d'ANR</strong> (Application Not Responding) lorsque l'application rencontre une erreur, sauf si vous désactivez cette transmission dans les paramètres Android ;</li>
+          <li>des <strong>métriques d'installation</strong>, de désinstallation, de version d'Android, et de modèle d'appareil utilisé pour exécuter l'application.</li>
+        </ul>
+        <p>
+          Ces données sont traitées par <strong>Google</strong> selon ses propres conditions et permettent à l'éditeur de consulter des statistiques agrégées et anonymes via la Google Play Console. Pour plus d'informations : <a href="https://policies.google.com/privacy" rel="noopener">https://policies.google.com/privacy</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Actions initiées par l'utilisateur</h2>
+        <p>
+          Certaines fonctions de l'application déclenchent des actions du système Android qui sortent du périmètre de Cash Noisette :
+        </p>
+        <ul>
+          <li>
+            <strong>Export et import CSV de vos données</strong> (fonction Pro) : le fichier est écrit à l'emplacement de votre choix via le sélecteur système, ou partagé via le partage natif d'Android (Sharesheet) si vous utilisez la fonction de partage. Ce qui se passe ensuite dépend du service que vous avez choisi et Cash Noisette ne le contrôle pas.
+          </li>
+          <li>
+            <strong>Liens externes</strong> (par exemple le lien <code>mailto:contact@squirrellab.fr</code> dans les paramètres) : ouvert dans votre navigateur ou client mail par défaut, sans qu'aucune donnée ne soit envoyée par Cash Noisette elle-même.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. Permissions Android demandées</h2>
+        <p>
+          Cash Noisette ne déclare <strong>aucune permission Android sensible</strong>. L'export et l'import de fichiers passent par le sélecteur système (Storage Access Framework) : aucune permission de stockage à accorder, et vous choisissez vous-même l'emplacement du fichier à chaque fois. L'application ne demande ni accès à la localisation, ni à l'appareil photo, ni aux contacts, ni à internet.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Ce que Cash Noisette n'utilise pas</h2>
+        <p>Pour lever toute ambiguïté, Cash Noisette n'utilise <strong>aucun</strong> des services suivants :</p>
+        <ul>
+          <li>aucun système d'authentification (Google Sign-In, Apple Sign-In, Firebase Auth, etc.) ;</li>
+          <li>aucune base de données distante ;</li>
+          <li>aucun service d'analyse de comportement (Firebase Analytics, Mixpanel, Amplitude, GA, etc.) ;</li>
+          <li>aucun service de remontée d'erreurs tiers (Crashlytics, Sentry, Bugsnag, etc.) ;</li>
+          <li>aucun service de notification push (FCM, OneSignal, APNs, etc.) ;</li>
+          <li>aucune publicité, aucun pixel publicitaire, aucun identifiant publicitaire (AAID) ;</li>
+          <li>aucun SDK de profilage ou de suivi inter-applications.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7. Vos droits (RGPD)</h2>
+        <p>
+          Cash Noisette ne stockant <strong>aucune donnée personnelle sur ses serveurs</strong>, l'exercice de la majorité des droits RGPD est immédiat et ne nécessite aucune démarche auprès de l'éditeur :
+        </p>
+        <ul>
+          <li><strong>Droit d'accès</strong> : vos données sont visibles dans l'application, et exportables en CSV (fonction Pro).</li>
+          <li><strong>Droit de rectification et d'effacement</strong> : vous pouvez modifier ou supprimer vos opérations individuellement dans l'application, tout effacer via Réglages → Tout supprimer, ou désinstaller Cash Noisette (ou via Paramètres Android → Applications → Cash Noisette → Effacer les données).</li>
+          <li><strong>Droit à la portabilité</strong> : exercé via l'export CSV.</li>
+        </ul>
+        <p>
+          Pour les données traitées par <strong>Google Play</strong>, l'exercice de vos droits relève de sa politique (section 3).
+        </p>
+        <p>
+          Pour toute question, contactez <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a>. Vous disposez également du droit d'introduire une réclamation auprès de la <abbr title="Commission Nationale de l'Informatique et des Libertés">CNIL</abbr> (<a href="https://www.cnil.fr" rel="noopener">www.cnil.fr</a>).
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Sécurité</h2>
+        <p>
+          Cash Noisette n'effectuant aucune communication réseau qui lui soit propre, il n'y a pas de données en transit à protéger. Les données stockées localement reposent sur l'isolation par défaut du système Android (sandbox applicative).
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Enfants</h2>
+        <p>
+          Cash Noisette n'est pas destinée spécifiquement aux enfants de moins de 13 ans. Aucune donnée n'étant transmise à l'éditeur, aucune collecte involontaire concernant des mineurs ne peut avoir lieu côté SquirrelLab.
+        </p>
+      </section>
+
+      <section>
+        <h2>10. Achats intégrés</h2>
+        <p>
+          La version Pro de Cash Noisette est proposée via un achat intégré unique, géré par Google Play. SquirrelLab ne reçoit et ne traite aucune information de paiement : ces données sont gérées exclusivement par Google, conformément à sa propre politique de confidentialité.
+        </p>
+      </section>
+
+      <section>
+        <h2>11. Modifications de cette politique</h2>
+        <p>
+          Cette politique peut être mise à jour pour refléter les évolutions de l'application (ajout de nouvelles fonctionnalités, intégration de services tiers, etc.) ou de la réglementation. La date de dernière mise à jour figure en haut de cette page. Les modifications substantielles seront signalées dans l'application et par mise à jour de la fiche Play Store.
+        </p>
+      </section>
+
+      <footer>
+        <p><a href="/projets/cashnoisette">← Cash Noisette</a> · <a href="/">SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+      .topnav {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .draft-flag {
+        display: inline-block;
+        background: #4a2a1d;
+        border: 1px dashed var(--accent);
+        color: var(--accent);
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 2.5rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 2.5rem 0 0.75rem;
+        color: var(--fg);
+      }
+      p { margin: 0.75rem 0; }
+      ul { padding-left: 1.4rem; }
+      li { margin: 0.4rem 0; }
+      a { color: var(--accent); }
+      strong { color: var(--fg); }
+      code {
+        background: var(--bg-card);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: #cdd6f4;
+      }
+      .tldr {
+        background: var(--bg-card);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+      .tldr h2 { margin-top: 0; }
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

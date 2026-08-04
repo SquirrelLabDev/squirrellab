@@ -1,0 +1,305 @@
+---
+// Page non listée depuis /creations, non indexée — accessible par lien
+// direct uniquement. Capture(s) d'écran et vidéo(s) à ajouter par Matthieu
+// (voir sections commentées ci-dessous une fois les fichiers disponibles
+// dans /public : cashnoisette-feature.png, cashnoisette-demo-free.mp4,
+// cashnoisette-demo-pro.mp4).
+const features = [
+  {
+    title: 'Saisie rapide',
+    desc: 'Dépense, recette ou virement entre comptes, en quelques taps.',
+  },
+  {
+    title: 'Budgets visuels',
+    desc: 'Des anneaux de progression pour ne jamais dépasser sans le voir venir.',
+  },
+  {
+    title: '100 % local, 100 % privé',
+    desc: 'Aucun compte, aucun serveur, aucune publicité. Vos données restent sur votre téléphone.',
+  },
+];
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Cash Noisette — application Android de suivi de budget personnel. Comptes, catégories, budgets et récurrences, sans compte ni serveur. Testeurs recherchés !" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Cash Noisette — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/creations">← Créations</a>
+      </nav>
+
+      <header class="hero">
+        <img class="app-logo" src="/cashnoisette-logo.png" alt="Logo Cash Noisette" />
+        <div>
+          <div class="badge">En test — Android</div>
+          <h1>Cash Noisette</h1>
+          <p class="tagline">Maîtrisez votre budget — sans jamais le confier à personne d'autre que vous.</p>
+        </div>
+      </header>
+
+      <!-- Image de présentation à ajouter une fois disponible :
+      <img class="feature-graphic" src="/cashnoisette-feature.png" alt="Aperçu Cash Noisette" />
+      -->
+
+      <section class="about">
+        <p>
+          Cash Noisette est une application Android de suivi de budget personnel : comptes,
+          catégories, budgets mensuels et récurrences, pour qui veut garder un œil précis sur
+          son argent sans y passer sa vie. Le tout sans compte, sans serveur, sans pub : vos
+          données restent sur votre téléphone.
+        </p>
+      </section>
+
+      <section class="cta-testers">
+        <div class="cta-inner">
+          <div class="cta-icon">🌰</div>
+          <h2>Testeurs recherchés !</h2>
+          <p>
+            Cash Noisette entre en test fermé avant sa sortie publique sur le Play Store. Si vous
+            souhaitez essayer l'application <strong>en avant-première</strong>, envoyez-moi votre
+            <strong>adresse Gmail</strong> — je vous ajouterai à la liste des testeurs.
+          </p>
+          <a class="btn-cta" href="mailto:contact@squirrellab.fr?subject=Testeur%20Cash%20Noisette&body=Bonjour%2C%0A%0AJe%20souhaite%20devenir%20testeur%20de%20Cash%20Noisette.%0AMon%20adresse%20Gmail%20:%20">
+            Devenir testeur →
+          </a>
+          <p class="cta-note">contact@squirrellab.fr · Précisez votre adresse Gmail dans le mail</p>
+        </div>
+      </section>
+
+      <section class="features">
+        <h2>Fonctionnalités</h2>
+        <div class="features-grid">
+          {features.map((f) => (
+            <article class="feature">
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Démos vidéo à ajouter une fois disponibles :
+      <section class="videos">
+        <h2>Démos</h2>
+        <div class="videos-grid">
+          <div class="video-card">
+            <div class="video-label">Version Gratuite</div>
+            <video controls playsinline preload="metadata" poster="/cashnoisette-feature.png">
+              <source src="/cashnoisette-demo-free.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div class="video-card">
+            <div class="video-label">Version Pro</div>
+            <video controls playsinline preload="metadata" poster="/cashnoisette-feature.png">
+              <source src="/cashnoisette-demo-pro.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </section>
+      -->
+
+      <section class="status">
+        <h2>État du projet</h2>
+        <ul>
+          <li>Test fermé à venir — accès sur invitation via le Play Store.</li>
+          <li>Plateforme : Android (Flutter).</li>
+          <li>Version gratuite complète pour le suivi quotidien ; option Pro (analytique, export/import CSV, catégories personnalisées, comptes illimités) prévue pour soutenir le développement.</li>
+        </ul>
+      </section>
+
+      <section class="links">
+        <h2>Liens</h2>
+        <ul>
+          <li>Google Play Store : <em>accès sur invitation — <a href="mailto:contact@squirrellab.fr?subject=Testeur%20Cash%20Noisette&body=Bonjour%2C%0A%0AJe%20souhaite%20devenir%20testeur%20de%20Cash%20Noisette.%0AMon%20adresse%20Gmail%20:%20">contactez-moi</a></em></li>
+          <li>Politique de confidentialité : <a href="/legal/privacy-cashnoisette">/legal/privacy-cashnoisette</a></li>
+          <li>Suppression des données : <a href="/legal/delete-cashnoisette">/legal/delete-cashnoisette</a></li>
+          <li>Contact : <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a></li>
+        </ul>
+      </section>
+
+      <footer>
+        <p><a href="/creations">← Retour à SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+        --blue: #2196F3;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 1rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .draft-flag {
+        display: inline-block;
+        background: #4a2a1d;
+        border: 1px dashed var(--accent);
+        color: var(--accent);
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Hero */
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .app-logo {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px;
+        flex-shrink: 0;
+        background: var(--bg-card);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--blue);
+        border: 1px solid var(--blue);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0; }
+
+      /* Feature graphic */
+      .feature-graphic {
+        width: 100%;
+        border-radius: 14px;
+        margin-bottom: 2rem;
+        display: block;
+      }
+
+      /* About */
+      .about p { line-height: 1.7; color: var(--fg); margin: 0 0 2rem; }
+
+      /* CTA Testeurs */
+      .cta-testers {
+        background: linear-gradient(135deg, #1a2a3d 0%, #0d1f35 100%);
+        border: 1px solid var(--blue);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        text-align: center;
+      }
+      .cta-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+      .cta-inner h2 { margin: 0 0 1rem; font-size: 1.5rem; color: #fff; }
+      .cta-inner p { color: #c8d8ea; line-height: 1.6; margin: 0 0 1.5rem; }
+      .cta-inner strong { color: #fff; }
+      .btn-cta {
+        display: inline-block;
+        background: var(--blue);
+        color: #fff;
+        font-weight: 700;
+        padding: 0.7rem 1.75rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: opacity 0.15s;
+        margin-bottom: 1rem;
+      }
+      .btn-cta:hover { opacity: 0.85; }
+      .cta-note { color: #8aaac8; font-size: 0.8rem; margin: 0; }
+
+      /* Features */
+      .features h2 { font-size: 1.25rem; margin: 0 0 1rem; }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .feature h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+      /* Videos */
+      .videos h2 { font-size: 1.25rem; margin: 0 0 1rem; }
+      .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+      }
+      .video-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .video-label {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+      }
+      .video-card video {
+        width: 100%;
+        display: block;
+        background: #000;
+        max-height: 480px;
+      }
+
+      /* Status & links */
+      section h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+      ul { line-height: 1.8; padding-left: 1.2rem; }
+      a { color: var(--accent); }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+
+      @media (max-width: 480px) {
+        .hero { flex-direction: column; align-items: flex-start; }
+        .app-logo { width: 72px; height: 72px; }
+      }
+    </style>
+  </body>
+</html>
