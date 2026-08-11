@@ -37,25 +37,22 @@
         <p>
           Une série de questions tirées au hasard dans un pool plus large, réparties sur deux dimensions :
           votre <strong>poste actuel</strong> (évolution, compétences, salaire, ambiance, lieu de travail) et
-          votre <strong>métier</strong> en tant que tel. Vous classez d'abord ce qui compte le plus pour vous,
-          puis répondez aux questions, avec en option un comparateur de salaire si vous avez une offre en tête.
+          votre <strong>métier</strong> en tant que tel.
         </p>
         <ul class="bullets">
-          <li>⏱️ Environ 5 à 8 minutes</li>
+          <li>⏱️ Environ 5 minutes</li>
           <li>🔒 Rien n'est envoyé ni stocké — tout se passe dans votre navigateur</li>
           <li>🧭 Un outil de réflexion, pas un diagnostic professionnel</li>
         </ul>
-        <button id="start-btn" class="btn-launch" type="button">Commencer le test</button>
-      </section>
 
-      <section id="priorities" class="panel" hidden>
         <h2>Vos priorités</h2>
         <p class="step-desc">
           Classez ces cinq thèmes du <strong>plus</strong> au <strong>moins</strong> important pour vous
           aujourd'hui. Glissez-déposez les cartes, ou utilisez les flèches. Cet ordre sert à pondérer votre résultat.
         </p>
         <ul id="priority-list" class="priority-list"></ul>
-        <button id="priorities-continue-btn" class="btn-launch" type="button">Continuer</button>
+
+        <button id="start-btn" class="btn-launch" type="button">Commencer les questions</button>
       </section>
 
       <section id="quiz" class="panel" hidden>
@@ -107,12 +104,20 @@
 
         <div id="advice" class="advice"></div>
 
-        <h3 class="breakdown-title">
-          💶 Comparateur de salaire <span class="badge-optional">Optionnel</span>
-        </h3>
+        <p class="disclaimer">
+          Ce test est un outil de réflexion personnelle, pas un diagnostic professionnel.
+          Pour une décision importante, un bilan de compétences ou l'avis d'un professionnel
+          de l'orientation reste la meilleure option.
+        </p>
+
+        <button id="restart-btn" class="btn-launch" type="button">Refaire le test</button>
+      </section>
+
+      <section id="salary-comparator" class="panel">
+        <h2>💶 Comparateur de salaire</h2>
         <p class="step-desc">
-          Si vous avez une offre en tête, comparez-la à votre situation actuelle. Chaque ligne est
-          facultative — ne remplissez que ce que vous connaissez.
+          Indépendant du test ci-dessus : si vous avez une offre en tête, comparez-la à votre situation
+          actuelle. Chaque ligne est facultative — ne remplissez que ce que vous connaissez.
         </p>
         <div class="salary-grid">
           <div class="salary-col">
@@ -130,14 +135,6 @@
           <p id="salary-delta-row">Écart : <strong id="salary-delta"></strong></p>
         </div>
         <div id="salary-insight" class="salary-insight" hidden></div>
-
-        <p class="disclaimer">
-          Ce test est un outil de réflexion personnelle, pas un diagnostic professionnel.
-          Pour une décision importante, un bilan de compétences ou l'avis d'un professionnel
-          de l'orientation reste la meilleure option.
-        </p>
-
-        <button id="restart-btn" class="btn-launch" type="button">Refaire le test</button>
       </section>
 
       <footer>
@@ -247,11 +244,6 @@
       .option-btn:hover { border-color: var(--accent); background: #34231b; }
 
       /* Salary */
-      .badge-optional {
-        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
-        color: var(--muted); border: 1px solid var(--border); border-radius: 999px;
-        padding: 0.1rem 0.5rem; margin-left: 0.4rem; vertical-align: middle;
-      }
       .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.25rem 0; }
       @media (max-width: 560px) { .salary-grid { grid-template-columns: 1fr; } }
       .salary-fields { display: flex; flex-direction: column; gap: 0.9rem; }
@@ -434,13 +426,11 @@
       }
 
       const introEl = document.getElementById('intro') as HTMLElement;
-      const prioritiesEl = document.getElementById('priorities') as HTMLElement;
       const quizEl = document.getElementById('quiz') as HTMLElement;
       const resultEl = document.getElementById('result') as HTMLElement;
 
       const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
       const priorityListEl = document.getElementById('priority-list') as HTMLElement;
-      const prioritiesContinueBtn = document.getElementById('priorities-continue-btn') as HTMLButtonElement;
 
       const progressBar = document.getElementById('progress-bar') as HTMLElement;
       const progressLabel = document.getElementById('progress-label') as HTMLElement;
@@ -472,9 +462,8 @@
       let index = 0;
       let scores: Record<Axis, number[]> = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
 
-      function showStep(step: 'intro' | 'priorities' | 'quiz' | 'result') {
+      function showStep(step: 'intro' | 'quiz' | 'result') {
         introEl.hidden = step !== 'intro';
-        prioritiesEl.hidden = step !== 'priorities';
         quizEl.hidden = step !== 'quiz';
         resultEl.hidden = step !== 'result';
       }
@@ -747,19 +736,13 @@
         resultTitle.textContent = title;
         resultText.textContent = text;
         adviceEl.innerHTML = `<ul>${tips.map((t) => `<li>${t}</li>`).join('')}</ul>`;
-
-        renderSalaryColumn(salaryCurrentEl, 'cur');
-        renderSalaryColumn(salaryNewEl, 'new');
-        salaryLiveEl.hidden = true;
-        salaryInsightEl.hidden = true;
       }
 
       // --- Flow control ---
 
-      function beginFlow() {
+      function resetPriorities() {
         priorityOrder = [...DEFAULT_ORDER];
         renderPriorities();
-        showStep('priorities');
       }
 
       function beginQuiz() {
@@ -770,9 +753,19 @@
         showQuestion();
       }
 
-      startBtn.addEventListener('click', beginFlow);
-      prioritiesContinueBtn.addEventListener('click', beginQuiz);
-      restartBtn.addEventListener('click', beginFlow);
+      function restart() {
+        resetPriorities();
+        showStep('intro');
+      }
+
+      startBtn.addEventListener('click', beginQuiz);
+      restartBtn.addEventListener('click', restart);
+
+      // Le comparateur de salaire est indépendant du test : initialisé une
+      // fois au chargement, jamais réinitialisé par le quiz.
+      resetPriorities();
+      renderSalaryColumn(salaryCurrentEl, 'cur');
+      renderSalaryColumn(salaryNewEl, 'new');
 
       [salaryCurrentEl, salaryNewEl].forEach((el) => {
         el.addEventListener('input', () => {
