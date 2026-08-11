@@ -67,36 +67,19 @@
         <div id="options" class="options"></div>
       </section>
 
-      <section id="salary" class="panel" hidden>
-        <h2>Comparateur de salaire <span class="badge-optional">Optionnel</span></h2>
-        <p class="step-desc">
-          Si vous avez une offre en tête, comparez-la à votre situation actuelle. Chaque ligne est
-          facultative — ne remplissez que ce que vous connaissez.
-        </p>
-        <div class="salary-grid">
-          <div class="salary-col">
-            <h3>Poste actuel</h3>
-            <div id="salary-current" class="salary-fields"></div>
-          </div>
-          <div class="salary-col">
-            <h3>Poste proposé</h3>
-            <div id="salary-new" class="salary-fields"></div>
-          </div>
-        </div>
-        <div id="salary-live" class="salary-live" hidden>
-          <p>Total actuel : <strong id="salary-total-cur"></strong></p>
-          <p id="salary-total-new-row">Total proposé : <strong id="salary-total-new"></strong></p>
-          <p id="salary-delta-row">Écart : <strong id="salary-delta"></strong></p>
-        </div>
-        <div class="salary-actions">
-          <button id="salary-continue-btn" class="btn-launch" type="button">Voir mes résultats</button>
-          <button id="salary-skip-btn" class="btn-skip" type="button">Passer cette étape</button>
-        </div>
-      </section>
-
       <section id="result" class="panel" hidden>
         <h2 id="result-title" class="result-title"></h2>
         <p id="result-text" class="result-text"></p>
+
+        <div class="legend-note">
+          <p>
+            <strong>Comment lire ces scores :</strong> chaque pourcentage mesure l'intensité du signal
+            indiquant qu'un changement pourrait être bénéfique sur ce thème — ce n'est <strong>pas</strong>
+            une note de satisfaction. <strong>0 %</strong> = aucun signal, tout semble aller sur ce point.
+            <strong>100 %</strong> = signal très fort. Par exemple, 80 % sur "Ambiance" signifie que vos
+            réponses pointent une forte insatisfaction sur ce thème — pas 80 % de bonheur au travail.
+          </p>
+        </div>
 
         <div class="scores">
           <div class="score-row">
@@ -124,6 +107,28 @@
 
         <div id="advice" class="advice"></div>
 
+        <h3 class="breakdown-title">
+          💶 Comparateur de salaire <span class="badge-optional">Optionnel</span>
+        </h3>
+        <p class="step-desc">
+          Si vous avez une offre en tête, comparez-la à votre situation actuelle. Chaque ligne est
+          facultative — ne remplissez que ce que vous connaissez.
+        </p>
+        <div class="salary-grid">
+          <div class="salary-col">
+            <h3>Poste actuel</h3>
+            <div id="salary-current" class="salary-fields"></div>
+          </div>
+          <div class="salary-col">
+            <h3>Poste proposé</h3>
+            <div id="salary-new" class="salary-fields"></div>
+          </div>
+        </div>
+        <div id="salary-live" class="salary-live" hidden>
+          <p>Total actuel : <strong id="salary-total-cur"></strong></p>
+          <p id="salary-total-new-row">Total proposé : <strong id="salary-total-new"></strong></p>
+          <p id="salary-delta-row">Écart : <strong id="salary-delta"></strong></p>
+        </div>
         <div id="salary-insight" class="salary-insight" hidden></div>
 
         <p class="disclaimer">
@@ -199,12 +204,6 @@
         cursor: pointer; font-size: 0.95rem;
       }
       .btn-launch:hover { opacity: 0.9; }
-      .btn-skip {
-        display: inline-block; background: none; color: var(--muted);
-        font-weight: 500; padding: 0.65rem 1rem; border: 1px solid var(--border);
-        border-radius: 8px; cursor: pointer; font-size: 0.9rem;
-      }
-      .btn-skip:hover { color: var(--fg); border-color: var(--muted); }
 
       /* Priorities */
       .priority-list { list-style: none; padding: 0; margin: 1.25rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -269,11 +268,16 @@
         padding: 0.9rem 1.1rem; margin-bottom: 1.25rem; font-size: 0.9rem;
       }
       .salary-live p { margin: 0.15rem 0; }
-      .salary-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
       /* Results */
       .result-title { font-size: 1.6rem; margin-bottom: 0.5rem; }
       .result-text { color: var(--muted); }
+
+      .legend-note {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.9rem 1.1rem; margin: 1.25rem 0;
+      }
+      .legend-note p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; margin: 0; }
 
       .scores { margin: 1.5rem 0; display: flex; flex-direction: column; gap: 1.1rem; }
       .score-row { display: flex; flex-direction: column; gap: 0.4rem; }
@@ -432,7 +436,6 @@
       const introEl = document.getElementById('intro') as HTMLElement;
       const prioritiesEl = document.getElementById('priorities') as HTMLElement;
       const quizEl = document.getElementById('quiz') as HTMLElement;
-      const salaryEl = document.getElementById('salary') as HTMLElement;
       const resultEl = document.getElementById('result') as HTMLElement;
 
       const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
@@ -452,8 +455,6 @@
       const salaryTotalNewRow = document.getElementById('salary-total-new-row') as HTMLElement;
       const salaryDeltaEl = document.getElementById('salary-delta') as HTMLElement;
       const salaryDeltaRow = document.getElementById('salary-delta-row') as HTMLElement;
-      const salaryContinueBtn = document.getElementById('salary-continue-btn') as HTMLButtonElement;
-      const salarySkipBtn = document.getElementById('salary-skip-btn') as HTMLButtonElement;
 
       const resultTitle = document.getElementById('result-title') as HTMLElement;
       const resultText = document.getElementById('result-text') as HTMLElement;
@@ -470,13 +471,11 @@
       let questions: Question[] = [];
       let index = 0;
       let scores: Record<Axis, number[]> = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
-      let salaryData: { curTotal: number; newTotal: number; curFields: Record<string, number>; newFields: Record<string, number> } | null = null;
 
-      function showStep(step: 'intro' | 'priorities' | 'quiz' | 'salary' | 'result') {
+      function showStep(step: 'intro' | 'priorities' | 'quiz' | 'result') {
         introEl.hidden = step !== 'intro';
         prioritiesEl.hidden = step !== 'priorities';
         quizEl.hidden = step !== 'quiz';
-        salaryEl.hidden = step !== 'salary';
         resultEl.hidden = step !== 'result';
       }
 
@@ -558,7 +557,7 @@
         index += 1;
         if (index >= questions.length) {
           progressBar.style.width = '100%';
-          startSalaryStep();
+          showResult();
         } else {
           showQuestion();
         }
@@ -621,35 +620,6 @@
         }
       }
 
-      function startSalaryStep() {
-        renderSalaryColumn(salaryCurrentEl, 'cur');
-        renderSalaryColumn(salaryNewEl, 'new');
-        salaryLiveEl.hidden = true;
-        showStep('salary');
-      }
-
-      function captureSalaryAndFinish() {
-        const cur = salaryTotal('cur');
-        const neu = salaryTotal('new');
-        if (cur > 0 && neu > 0) {
-          const curFields: Record<string, number> = {};
-          const newFields: Record<string, number> = {};
-          SALARY_FIELDS.forEach((f) => {
-            curFields[f.key] = salaryFieldValue('cur', f.key);
-            newFields[f.key] = salaryFieldValue('new', f.key);
-          });
-          salaryData = { curTotal: cur, newTotal: neu, curFields, newFields };
-        } else {
-          salaryData = null;
-        }
-        showResult();
-      }
-
-      function skipSalaryStep() {
-        salaryData = null;
-        showResult();
-      }
-
       // --- Results ---
 
       function salaryDeltaTier(delta: number): string {
@@ -669,18 +639,20 @@
       }
 
       function buildSalaryInsight() {
-        if (!salaryData) {
+        const curTotal = salaryTotal('cur');
+        const newTotal = salaryTotal('new');
+        if (curTotal <= 0 || newTotal <= 0) {
           salaryInsightEl.hidden = true;
           return;
         }
-        const { curTotal, newTotal, curFields, newFields } = salaryData;
+
         const delta = ((newTotal - curTotal) / curTotal) * 100;
         const tips: string[] = [salaryDeltaTier(delta)];
 
         let biggestKey: string | null = null;
         let biggestDiff = 0;
         SALARY_FIELDS.forEach((f) => {
-          const diff = newFields[f.key] - curFields[f.key];
+          const diff = salaryFieldValue('new', f.key) - salaryFieldValue('cur', f.key);
           if (Math.abs(diff) > Math.abs(biggestDiff)) {
             biggestDiff = diff;
             biggestKey = f.key;
@@ -692,7 +664,7 @@
           tips.push(`La plus grande différence vient de "${label}" : ${sign}${formatEuro(biggestDiff)}.`);
         }
 
-        const variableShare = newTotal > 0 ? newFields.variable / newTotal : 0;
+        const variableShare = newTotal > 0 ? salaryFieldValue('new', 'variable') / newTotal : 0;
         if (variableShare > 0.3) {
           tips.push("La part variable du poste proposé dépasse 30 % du package : contrairement au fixe, elle n'est pas garantée — à pondérer dans votre décision.");
         }
@@ -776,7 +748,10 @@
         resultText.textContent = text;
         adviceEl.innerHTML = `<ul>${tips.map((t) => `<li>${t}</li>`).join('')}</ul>`;
 
-        buildSalaryInsight();
+        renderSalaryColumn(salaryCurrentEl, 'cur');
+        renderSalaryColumn(salaryNewEl, 'new');
+        salaryLiveEl.hidden = true;
+        salaryInsightEl.hidden = true;
       }
 
       // --- Flow control ---
@@ -797,12 +772,13 @@
 
       startBtn.addEventListener('click', beginFlow);
       prioritiesContinueBtn.addEventListener('click', beginQuiz);
-      salaryContinueBtn.addEventListener('click', captureSalaryAndFinish);
-      salarySkipBtn.addEventListener('click', skipSalaryStep);
       restartBtn.addEventListener('click', beginFlow);
 
       [salaryCurrentEl, salaryNewEl].forEach((el) => {
-        el.addEventListener('input', updateSalaryLive);
+        el.addEventListener('input', () => {
+          updateSalaryLive();
+          buildSalaryInsight();
+        });
       });
     </script>
   </body>
