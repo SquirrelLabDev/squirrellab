@@ -1,0 +1,790 @@
+---
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Boussole Carrière — un test de réflexion pour savoir s'il vaut mieux changer de poste, changer d'entreprise, ou envisager une vraie réorientation professionnelle." />
+    <title>Boussole Carrière — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge">En ligne</div>
+        <h1>Boussole Carrière</h1>
+        <p class="tagline">Faut-il changer de poste, changer d'entreprise, ou vraiment se réorienter ? Un test de réflexion pour y voir plus clair.</p>
+      </header>
+
+      <section id="intro" class="panel">
+        <p>
+          Une série de questions tirées au hasard dans un pool plus large, réparties sur deux dimensions :
+          votre <strong>poste actuel</strong> (évolution, compétences, salaire, ambiance, lieu de travail) et
+          votre <strong>métier</strong> en tant que tel. Vous classez d'abord ce qui compte le plus pour vous,
+          puis répondez aux questions, avec en option un comparateur de salaire si vous avez une offre en tête.
+        </p>
+        <ul class="bullets">
+          <li>⏱️ Environ 5 à 8 minutes</li>
+          <li>🔒 Rien n'est envoyé ni stocké — tout se passe dans votre navigateur</li>
+          <li>🧭 Un outil de réflexion, pas un diagnostic professionnel</li>
+        </ul>
+        <button id="start-btn" class="btn-launch" type="button">Commencer le test</button>
+      </section>
+
+      <section id="priorities" class="panel" hidden>
+        <h2>Vos priorités</h2>
+        <p class="step-desc">
+          Classez ces cinq thèmes du <strong>plus</strong> au <strong>moins</strong> important pour vous
+          aujourd'hui. Glissez-déposez les cartes, ou utilisez les flèches. Cet ordre sert à pondérer votre résultat.
+        </p>
+        <ul id="priority-list" class="priority-list"></ul>
+        <button id="priorities-continue-btn" class="btn-launch" type="button">Continuer</button>
+      </section>
+
+      <section id="quiz" class="panel" hidden>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="progress-label" class="progress-label"></p>
+        <h2 id="question-text" class="question-text"></h2>
+        <div id="options" class="options"></div>
+      </section>
+
+      <section id="salary" class="panel" hidden>
+        <h2>Comparateur de salaire <span class="badge-optional">Optionnel</span></h2>
+        <p class="step-desc">
+          Si vous avez une offre en tête, comparez-la à votre situation actuelle. Chaque ligne est
+          facultative — ne remplissez que ce que vous connaissez.
+        </p>
+        <div class="salary-grid">
+          <div class="salary-col">
+            <h3>Poste actuel</h3>
+            <div id="salary-current" class="salary-fields"></div>
+          </div>
+          <div class="salary-col">
+            <h3>Poste proposé</h3>
+            <div id="salary-new" class="salary-fields"></div>
+          </div>
+        </div>
+        <div id="salary-live" class="salary-live" hidden>
+          <p>Total actuel : <strong id="salary-total-cur"></strong></p>
+          <p id="salary-total-new-row">Total proposé : <strong id="salary-total-new"></strong></p>
+          <p id="salary-delta-row">Écart : <strong id="salary-delta"></strong></p>
+        </div>
+        <div class="salary-actions">
+          <button id="salary-continue-btn" class="btn-launch" type="button">Voir mes résultats</button>
+          <button id="salary-skip-btn" class="btn-skip" type="button">Passer cette étape</button>
+        </div>
+      </section>
+
+      <section id="result" class="panel" hidden>
+        <h2 id="result-title" class="result-title"></h2>
+        <p id="result-text" class="result-text"></p>
+
+        <div class="scores">
+          <div class="score-row">
+            <div class="score-label">
+              <span>Poste actuel <span class="hint">(pondéré selon vos priorités)</span></span>
+              <span id="score-poste-value" class="score-value"></span>
+            </div>
+            <div class="score-track">
+              <div id="score-poste-bar" class="score-bar bar-poste"></div>
+            </div>
+          </div>
+          <div class="score-row">
+            <div class="score-label">
+              <span>Métier</span>
+              <span id="score-metier-value" class="score-value"></span>
+            </div>
+            <div class="score-track">
+              <div id="score-metier-bar" class="score-bar bar-metier"></div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="breakdown-title">Détail par thème <span class="hint">(dans votre ordre de priorité)</span></h3>
+        <div id="axis-breakdown" class="axis-breakdown"></div>
+
+        <div id="advice" class="advice"></div>
+
+        <div id="salary-insight" class="salary-insight" hidden></div>
+
+        <p class="disclaimer">
+          Ce test est un outil de réflexion personnelle, pas un diagnostic professionnel.
+          Pour une décision importante, un bilan de compétences ou l'avis d'un professionnel
+          de l'orientation reste la meilleure option.
+        </p>
+
+        <button id="restart-btn" class="btn-launch" type="button">Refaire le test</button>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Retour à SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #6bc6b3;
+        --accent-2: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 1.5rem; }
+      .badge {
+        display: inline-block; font-size: 0.75rem; text-transform: uppercase;
+        letter-spacing: 0.08em; color: #7ec88a; border: 1px solid #7ec88a;
+        border-radius: 999px; padding: 0.2rem 0.6rem; margin-bottom: 1rem;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      h2 { font-size: 1.3rem; margin: 0 0 0.5rem; }
+      h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+
+      .panel {
+        background: var(--bg-card); border-radius: 12px;
+        padding: 1.5rem 1.5rem 1.75rem; margin-bottom: 2rem;
+      }
+      .panel p { line-height: 1.6; }
+      .step-desc { color: var(--muted); font-size: 0.95rem; }
+      .hint { color: var(--muted); font-weight: 400; font-size: 0.85em; }
+      .bullets { list-style: none; padding: 0; margin: 1rem 0 1.5rem; color: var(--muted); font-size: 0.95rem; }
+      .bullets li { margin-bottom: 0.4rem; }
+      .btn-launch {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.65rem 1.5rem; border: none; border-radius: 8px;
+        cursor: pointer; font-size: 0.95rem;
+      }
+      .btn-launch:hover { opacity: 0.9; }
+      .btn-skip {
+        display: inline-block; background: none; color: var(--muted);
+        font-weight: 500; padding: 0.65rem 1rem; border: 1px solid var(--border);
+        border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      }
+      .btn-skip:hover { color: var(--fg); border-color: var(--muted); }
+
+      /* Priorities */
+      .priority-list { list-style: none; padding: 0; margin: 1.25rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+      .priority-item {
+        display: flex; align-items: center; gap: 0.75rem;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.65rem 0.85rem; cursor: grab;
+      }
+      .priority-item.dragging { opacity: 0.4; }
+      .priority-rank {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--accent);
+        color: #1a1a1a; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+      }
+      .drag-handle { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
+      .priority-label { flex: 1; font-size: 0.95rem; }
+      .priority-arrows { display: flex; gap: 0.3rem; }
+      .arrow-btn {
+        background: none; border: 1px solid var(--border); color: var(--fg);
+        border-radius: 6px; width: 1.8rem; height: 1.8rem; cursor: pointer; font-size: 0.8rem;
+      }
+      .arrow-btn:hover:not(:disabled) { border-color: var(--accent); }
+      .arrow-btn:disabled { opacity: 0.3; cursor: default; }
+
+      /* Quiz */
+      .progress-track {
+        width: 100%; height: 6px; border-radius: 999px;
+        background: var(--border); overflow: hidden; margin-bottom: 0.5rem;
+      }
+      .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
+      .progress-label { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.25rem; }
+      .question-text { font-size: 1.25rem; line-height: 1.4; margin-bottom: 1.5rem; }
+
+      .options { display: flex; flex-direction: column; gap: 0.6rem; }
+      .option-btn {
+        text-align: left; background: var(--bg); color: var(--fg);
+        border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.75rem 1rem; font-size: 0.95rem; cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .option-btn:hover { border-color: var(--accent); background: #34231b; }
+
+      /* Salary */
+      .badge-optional {
+        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--muted); border: 1px solid var(--border); border-radius: 999px;
+        padding: 0.1rem 0.5rem; margin-left: 0.4rem; vertical-align: middle;
+      }
+      .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.25rem 0; }
+      @media (max-width: 560px) { .salary-grid { grid-template-columns: 1fr; } }
+      .salary-fields { display: flex; flex-direction: column; gap: 0.9rem; }
+      .salary-field { display: flex; flex-direction: column; gap: 0.25rem; }
+      .salary-field-label { font-size: 0.85rem; }
+      .salary-field input {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+        color: var(--fg); padding: 0.5rem 0.6rem; font-size: 0.95rem; width: 100%;
+      }
+      .salary-field input:focus { outline: none; border-color: var(--accent); }
+      .salary-field-help { color: var(--muted); font-size: 0.75rem; line-height: 1.4; }
+      .salary-live {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.9rem 1.1rem; margin-bottom: 1.25rem; font-size: 0.9rem;
+      }
+      .salary-live p { margin: 0.15rem 0; }
+      .salary-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+      /* Results */
+      .result-title { font-size: 1.6rem; margin-bottom: 0.5rem; }
+      .result-text { color: var(--muted); }
+
+      .scores { margin: 1.5rem 0; display: flex; flex-direction: column; gap: 1.1rem; }
+      .score-row { display: flex; flex-direction: column; gap: 0.4rem; }
+      .score-label { display: flex; justify-content: space-between; font-size: 0.9rem; }
+      .score-value { color: var(--muted); font-variant-numeric: tabular-nums; }
+      .score-track {
+        width: 100%; height: 10px; border-radius: 999px;
+        background: var(--border); overflow: hidden;
+      }
+      .score-bar { height: 100%; width: 0%; border-radius: 999px; transition: width 0.4s ease; }
+      .bar-poste { background: var(--accent-2); }
+      .bar-metier { background: var(--accent); }
+
+      .breakdown-title { margin-top: 1.75rem; }
+      .axis-breakdown { display: flex; flex-direction: column; gap: 0.75rem; margin: 0.75rem 0 1.5rem; }
+      .axis-row { display: flex; flex-direction: column; gap: 0.3rem; }
+      .axis-row .score-label { font-size: 0.85rem; }
+      .axis-row .score-track { height: 7px; }
+      .bar-axis { background: var(--accent-2); }
+
+      .advice { margin: 1.5rem 0; }
+      .advice ul { padding-left: 1.2rem; line-height: 1.6; }
+      .advice li { margin-bottom: 0.4rem; }
+
+      .salary-insight {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 1.1rem 1.25rem; margin: 1.5rem 0;
+      }
+      .salary-insight h3 { margin-bottom: 0.6rem; }
+      .salary-insight ul { padding-left: 1.2rem; line-height: 1.6; margin: 0; }
+      .salary-insight li { margin-bottom: 0.4rem; }
+
+      .disclaimer { color: var(--muted); font-size: 0.8rem; line-height: 1.5; margin: 1.5rem 0; }
+
+      footer {
+        margin-top: 1rem; padding-top: 2rem; border-top: 1px solid var(--border);
+        text-align: center; color: var(--muted); font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+
+    <script>
+      type PosteAxis = 'evolution' | 'competences' | 'salaire' | 'ambiance' | 'lieu';
+      type Axis = PosteAxis | 'metier';
+      interface Question {
+        axis: Axis;
+        text: string;
+      }
+
+      const POSTE_AXES: PosteAxis[] = ['evolution', 'competences', 'salaire', 'ambiance', 'lieu'];
+      const DEFAULT_ORDER: PosteAxis[] = ['evolution', 'competences', 'salaire', 'ambiance', 'lieu'];
+      const AXIS_LABELS: Record<PosteAxis, string> = {
+        evolution: 'Évolution',
+        competences: 'Compétences',
+        salaire: 'Salaire',
+        ambiance: 'Ambiance',
+        lieu: 'Lieu de travail',
+      };
+
+      const QUESTIONS_PER_POSTE_AXIS = 2;
+      const QUESTIONS_METIER = 6;
+
+      const POOL_METIER: string[] = [
+        "Même avec un meilleur poste ou un meilleur salaire, le fond de mon métier ne me satisferait pas.",
+        "Je ne me reconnais plus dans les compétences que ce métier me demande d'exercer au quotidien.",
+        "Quand j'imagine exercer ce métier encore dix ans, ça ne me fait pas envie.",
+        "Si je devais recommencer mes études ou ma carrière, je choisirais un métier différent.",
+        "Le sens de mon travail m'échappe : je ne vois plus vraiment à quoi il sert.",
+        "Je suis plus attiré(e) par d'autres domaines que par le mien, même en dehors du travail.",
+        "Mes talents naturels sont peu ou pas utilisés dans ce type de métier.",
+        "Je me sens décalé(e) par rapport aux personnes qui exercent ce métier avec passion.",
+        "Je passe du temps libre à me renseigner sur d'autres métiers ou formations.",
+        "J'ai l'impression de m'être engagé(e) dans cette voie par hasard ou par défaut.",
+        "Même bien réalisées, les tâches centrales de mon métier ne me procurent aucune satisfaction.",
+        "Si l'argent n'était pas un problème, je ferais un métier complètement différent.",
+        "Je me sens vidé(e) de sens quand je pense à la nature même de mon travail, indépendamment du contexte.",
+        "Je rêve régulièrement de me reconvertir vers un autre secteur d'activité.",
+      ];
+
+      const POOL_POSTE: Record<PosteAxis, string[]> = {
+        evolution: [
+          "Je ne vois pas de possibilité d'évoluer vers un poste à plus de responsabilités dans ma structure actuelle.",
+          "Mon employeur ne propose pas de trajectoire d'évolution claire pour mon profil.",
+          "Personne dans mon entourage professionnel proche n'a évolué vers un poste supérieur ces dernières années.",
+          "J'ai le sentiment d'être \"plafonné(e)\" dans mon poste actuel.",
+          "Si je voulais monter en responsabilités, il faudrait que je change d'entreprise.",
+        ],
+        competences: [
+          "Je n'apprends plus grand-chose de nouveau dans mes missions actuelles.",
+          "Mes missions ne me permettent pas de développer de nouvelles compétences.",
+          "Je fais essentiellement les mêmes tâches depuis longtemps, sans nouveauté.",
+          "Je n'ai pas accès à des formations qui m'intéressent dans mon poste actuel.",
+          "Je me sens en train de stagner professionnellement sur le plan des compétences.",
+        ],
+        salaire: [
+          "Mon salaire actuel ne correspond pas à ce que j'estime être ma valeur sur le marché.",
+          "Je pense que je serais mieux payé(e) ailleurs, pour un poste équivalent.",
+          "Mon salaire ne me permet pas de vivre aussi confortablement que je le souhaiterais.",
+          "Mes augmentations ou primes ne sont pas à la hauteur de mes attentes.",
+          "Je ressens une frustration récurrente liée à ma rémunération.",
+        ],
+        ambiance: [
+          "L'équipe avec laquelle je travaille n'est pas vraiment soudée.",
+          "Il manque de collaboration entre les membres de mon équipe.",
+          "L'ambiance générale au travail est plutôt tendue ou froide.",
+          "Je ne me sens pas à l'aise pour être moi-même avec mes collègues.",
+          "Les moments de convivialité sont rares ou absents dans mon environnement de travail.",
+        ],
+        lieu: [
+          "Le trajet pour me rendre sur mon lieu de travail est trop long ou fatigant.",
+          "Les locaux dans lesquels je travaille ne sont pas agréables au quotidien.",
+          "Je perds un temps significatif chaque jour à cause de mes trajets domicile-travail.",
+          "Les conditions matérielles de mon lieu de travail (espace, équipement, confort) ne me conviennent pas.",
+          "Si je pouvais choisir, je changerais volontiers de lieu de travail.",
+        ],
+      };
+
+      const OPTIONS = [
+        { label: "Pas du tout d'accord", points: 0 },
+        { label: "Plutôt pas d'accord", points: 1 },
+        { label: 'Neutre', points: 2 },
+        { label: "Plutôt d'accord", points: 3 },
+        { label: 'Tout à fait d\'accord', points: 4 },
+      ];
+
+      const SALARY_FIELDS: { key: string; label: string; help: string }[] = [
+        { key: 'fixe', label: 'Fixe brut annuel', help: "Salaire de base, hors primes et variable (13e mois inclus si applicable)." },
+        { key: 'variable', label: 'Variable / primes', help: 'Bonus, commissions, primes sur objectifs — montant annuel moyen ou cible.' },
+        { key: 'avantages', label: 'Avantages en nature', help: 'Voiture de fonction, logement, matériel, forfait télétravail — valorisation annuelle estimée.' },
+        { key: 'epargne', label: 'Épargne salariale', help: 'Intéressement, participation, abondement PEE/PERCO, actions — montant annuel estimé.' },
+        { key: 'autres', label: 'Autres avantages', help: 'Mutuelle (part employeur), titres-restaurant, chèques vacances, remboursement transport — valorisation annuelle estimée.' },
+      ];
+
+      function shuffle<T>(arr: T[]): T[] {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function pickQuestions(): Question[] {
+        const metier: Question[] = shuffle(POOL_METIER).slice(0, QUESTIONS_METIER).map((text) => ({ axis: 'metier' as Axis, text }));
+        const poste: Question[] = POSTE_AXES.flatMap((axis) =>
+          shuffle(POOL_POSTE[axis]).slice(0, QUESTIONS_PER_POSTE_AXIS).map((text) => ({ axis, text }))
+        );
+        return shuffle([...metier, ...poste]);
+      }
+
+      function formatEuro(n: number): string {
+        return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' €';
+      }
+
+      const introEl = document.getElementById('intro') as HTMLElement;
+      const prioritiesEl = document.getElementById('priorities') as HTMLElement;
+      const quizEl = document.getElementById('quiz') as HTMLElement;
+      const salaryEl = document.getElementById('salary') as HTMLElement;
+      const resultEl = document.getElementById('result') as HTMLElement;
+
+      const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
+      const priorityListEl = document.getElementById('priority-list') as HTMLElement;
+      const prioritiesContinueBtn = document.getElementById('priorities-continue-btn') as HTMLButtonElement;
+
+      const progressBar = document.getElementById('progress-bar') as HTMLElement;
+      const progressLabel = document.getElementById('progress-label') as HTMLElement;
+      const questionText = document.getElementById('question-text') as HTMLElement;
+      const optionsEl = document.getElementById('options') as HTMLElement;
+
+      const salaryCurrentEl = document.getElementById('salary-current') as HTMLElement;
+      const salaryNewEl = document.getElementById('salary-new') as HTMLElement;
+      const salaryLiveEl = document.getElementById('salary-live') as HTMLElement;
+      const salaryTotalCurEl = document.getElementById('salary-total-cur') as HTMLElement;
+      const salaryTotalNewEl = document.getElementById('salary-total-new') as HTMLElement;
+      const salaryTotalNewRow = document.getElementById('salary-total-new-row') as HTMLElement;
+      const salaryDeltaEl = document.getElementById('salary-delta') as HTMLElement;
+      const salaryDeltaRow = document.getElementById('salary-delta-row') as HTMLElement;
+      const salaryContinueBtn = document.getElementById('salary-continue-btn') as HTMLButtonElement;
+      const salarySkipBtn = document.getElementById('salary-skip-btn') as HTMLButtonElement;
+
+      const resultTitle = document.getElementById('result-title') as HTMLElement;
+      const resultText = document.getElementById('result-text') as HTMLElement;
+      const scorePosteValue = document.getElementById('score-poste-value') as HTMLElement;
+      const scorePosteBar = document.getElementById('score-poste-bar') as HTMLElement;
+      const scoreMetierValue = document.getElementById('score-metier-value') as HTMLElement;
+      const scoreMetierBar = document.getElementById('score-metier-bar') as HTMLElement;
+      const axisBreakdownEl = document.getElementById('axis-breakdown') as HTMLElement;
+      const adviceEl = document.getElementById('advice') as HTMLElement;
+      const salaryInsightEl = document.getElementById('salary-insight') as HTMLElement;
+      const restartBtn = document.getElementById('restart-btn') as HTMLButtonElement;
+
+      let priorityOrder: PosteAxis[] = [...DEFAULT_ORDER];
+      let questions: Question[] = [];
+      let index = 0;
+      let scores: Record<Axis, number[]> = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
+      let salaryData: { curTotal: number; newTotal: number; curFields: Record<string, number>; newFields: Record<string, number> } | null = null;
+
+      function showStep(step: 'intro' | 'priorities' | 'quiz' | 'salary' | 'result') {
+        introEl.hidden = step !== 'intro';
+        prioritiesEl.hidden = step !== 'priorities';
+        quizEl.hidden = step !== 'quiz';
+        salaryEl.hidden = step !== 'salary';
+        resultEl.hidden = step !== 'result';
+      }
+
+      // --- Priorities step ---
+
+      let draggedAxis: PosteAxis | null = null;
+
+      function renderPriorities() {
+        priorityListEl.innerHTML = '';
+        priorityOrder.forEach((axis, i) => {
+          const li = document.createElement('li');
+          li.className = 'priority-item';
+          li.draggable = true;
+          li.innerHTML = `
+            <span class="priority-rank">${i + 1}</span>
+            <span class="drag-handle" aria-hidden="true">⠿</span>
+            <span class="priority-label">${AXIS_LABELS[axis]}</span>
+            <span class="priority-arrows">
+              <button type="button" class="arrow-btn" data-dir="up" ${i === 0 ? 'disabled' : ''} aria-label="Monter ${AXIS_LABELS[axis]}">▲</button>
+              <button type="button" class="arrow-btn" data-dir="down" ${i === priorityOrder.length - 1 ? 'disabled' : ''} aria-label="Descendre ${AXIS_LABELS[axis]}">▼</button>
+            </span>
+          `;
+          li.addEventListener('dragstart', () => {
+            draggedAxis = axis;
+            li.classList.add('dragging');
+          });
+          li.addEventListener('dragend', () => {
+            draggedAxis = null;
+            li.classList.remove('dragging');
+          });
+          li.addEventListener('dragover', (e) => e.preventDefault());
+          li.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!draggedAxis || draggedAxis === axis) return;
+            const from = priorityOrder.indexOf(draggedAxis);
+            const to = priorityOrder.indexOf(axis);
+            priorityOrder.splice(from, 1);
+            priorityOrder.splice(to, 0, draggedAxis);
+            renderPriorities();
+          });
+          li.querySelectorAll('.arrow-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const dir = (btn as HTMLElement).dataset.dir;
+              const idx = priorityOrder.indexOf(axis);
+              const swapWith = dir === 'up' ? idx - 1 : idx + 1;
+              if (swapWith < 0 || swapWith >= priorityOrder.length) return;
+              [priorityOrder[idx], priorityOrder[swapWith]] = [priorityOrder[swapWith], priorityOrder[idx]];
+              renderPriorities();
+            });
+          });
+          priorityListEl.appendChild(li);
+        });
+      }
+
+      function priorityWeight(axis: PosteAxis): number {
+        return priorityOrder.length - priorityOrder.indexOf(axis);
+      }
+
+      // --- Quiz step ---
+
+      function showQuestion() {
+        const q = questions[index];
+        progressLabel.textContent = `Question ${index + 1} / ${questions.length}`;
+        progressBar.style.width = `${(index / questions.length) * 100}%`;
+        questionText.textContent = q.text;
+        optionsEl.innerHTML = '';
+        OPTIONS.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option-btn';
+          btn.textContent = opt.label;
+          btn.addEventListener('click', () => answer(q.axis, opt.points));
+          optionsEl.appendChild(btn);
+        });
+      }
+
+      function answer(axis: Axis, points: number) {
+        scores[axis].push(points);
+        index += 1;
+        if (index >= questions.length) {
+          progressBar.style.width = '100%';
+          startSalaryStep();
+        } else {
+          showQuestion();
+        }
+      }
+
+      function axisScore(axis: Axis): number {
+        const vals = scores[axis];
+        if (vals.length === 0) return 0;
+        const sum = vals.reduce((a, b) => a + b, 0);
+        return Math.round((sum / (vals.length * 4)) * 100);
+      }
+
+      function level(score: number): 'faible' | 'modere' | 'eleve' {
+        if (score < 34) return 'faible';
+        if (score < 67) return 'modere';
+        return 'eleve';
+      }
+
+      // --- Salary step ---
+
+      function renderSalaryColumn(container: HTMLElement, prefix: string) {
+        container.innerHTML = SALARY_FIELDS.map(
+          (f) => `
+            <label class="salary-field">
+              <span class="salary-field-label">${f.label}</span>
+              <input type="number" min="0" step="100" inputmode="numeric" id="sal-${prefix}-${f.key}" placeholder="€ / an" />
+              <span class="salary-field-help">${f.help}</span>
+            </label>
+          `
+        ).join('');
+      }
+
+      function salaryFieldValue(prefix: string, key: string): number {
+        const input = document.getElementById(`sal-${prefix}-${key}`) as HTMLInputElement | null;
+        return input ? parseFloat(input.value) || 0 : 0;
+      }
+
+      function salaryTotal(prefix: string): number {
+        return SALARY_FIELDS.reduce((sum, f) => sum + salaryFieldValue(prefix, f.key), 0);
+      }
+
+      function updateSalaryLive() {
+        const cur = salaryTotal('cur');
+        const neu = salaryTotal('new');
+        if (cur <= 0) {
+          salaryLiveEl.hidden = true;
+          return;
+        }
+        salaryLiveEl.hidden = false;
+        salaryTotalCurEl.textContent = formatEuro(cur);
+        if (neu > 0) {
+          salaryTotalNewRow.hidden = false;
+          salaryTotalNewEl.textContent = formatEuro(neu);
+          salaryDeltaRow.hidden = false;
+          const delta = ((neu - cur) / cur) * 100;
+          salaryDeltaEl.textContent = `${delta >= 0 ? '+' : ''}${Math.round(delta)} %`;
+        } else {
+          salaryTotalNewRow.hidden = true;
+          salaryDeltaRow.hidden = true;
+        }
+      }
+
+      function startSalaryStep() {
+        renderSalaryColumn(salaryCurrentEl, 'cur');
+        renderSalaryColumn(salaryNewEl, 'new');
+        salaryLiveEl.hidden = true;
+        showStep('salary');
+      }
+
+      function captureSalaryAndFinish() {
+        const cur = salaryTotal('cur');
+        const neu = salaryTotal('new');
+        if (cur > 0 && neu > 0) {
+          const curFields: Record<string, number> = {};
+          const newFields: Record<string, number> = {};
+          SALARY_FIELDS.forEach((f) => {
+            curFields[f.key] = salaryFieldValue('cur', f.key);
+            newFields[f.key] = salaryFieldValue('new', f.key);
+          });
+          salaryData = { curTotal: cur, newTotal: neu, curFields, newFields };
+        } else {
+          salaryData = null;
+        }
+        showResult();
+      }
+
+      function skipSalaryStep() {
+        salaryData = null;
+        showResult();
+      }
+
+      // --- Results ---
+
+      function salaryDeltaTier(delta: number): string {
+        if (delta >= 20) {
+          return "Hausse importante : c'est un argument financier fort en faveur du changement. Vérifiez tout de même que les avantages non-salariaux ne se dégradent pas malgré la hausse affichée.";
+        }
+        if (delta >= 5) {
+          return "Hausse modérée : un vrai plus, mais probablement pas suffisant à lui seul pour décider — à peser avec les autres critères (évolution, ambiance, sens du métier...).";
+        }
+        if (delta > -5) {
+          return "Écart quasi nul entre les deux packages : la rémunération ne sera probablement pas le facteur décisif de votre choix.";
+        }
+        if (delta > -20) {
+          return "Baisse modérée : à n'accepter que si d'autres bénéfices (sens, évolution, cadre de vie...) compensent clairement cette perte.";
+        }
+        return "Baisse importante : soyez vigilant, ce niveau de perte financière est rarement compensé par des avantages non-salariaux seuls.";
+      }
+
+      function buildSalaryInsight() {
+        if (!salaryData) {
+          salaryInsightEl.hidden = true;
+          return;
+        }
+        const { curTotal, newTotal, curFields, newFields } = salaryData;
+        const delta = ((newTotal - curTotal) / curTotal) * 100;
+        const tips: string[] = [salaryDeltaTier(delta)];
+
+        let biggestKey: string | null = null;
+        let biggestDiff = 0;
+        SALARY_FIELDS.forEach((f) => {
+          const diff = newFields[f.key] - curFields[f.key];
+          if (Math.abs(diff) > Math.abs(biggestDiff)) {
+            biggestDiff = diff;
+            biggestKey = f.key;
+          }
+        });
+        if (biggestKey && Math.abs(biggestDiff) > 0) {
+          const label = SALARY_FIELDS.find((f) => f.key === biggestKey)!.label;
+          const sign = biggestDiff >= 0 ? '+' : '';
+          tips.push(`La plus grande différence vient de "${label}" : ${sign}${formatEuro(biggestDiff)}.`);
+        }
+
+        const variableShare = newTotal > 0 ? newFields.variable / newTotal : 0;
+        if (variableShare > 0.3) {
+          tips.push("La part variable du poste proposé dépasse 30 % du package : contrairement au fixe, elle n'est pas garantée — à pondérer dans votre décision.");
+        }
+
+        tips.push('Ce calcul ne remplace pas une analyse complète : coût de la vie, temps de trajet, fiscalité et stabilité de l\'entreprise comptent aussi.');
+
+        salaryInsightEl.hidden = false;
+        salaryInsightEl.innerHTML = `
+          <h3>💰 Analyse salariale (${delta >= 0 ? '+' : ''}${Math.round(delta)} % — ${formatEuro(curTotal)} → ${formatEuro(newTotal)})</h3>
+          <ul>${tips.map((t) => `<li>${t}</li>`).join('')}</ul>
+        `;
+      }
+
+      function showResult() {
+        showStep('result');
+
+        const weightedSum = POSTE_AXES.reduce((sum, axis) => sum + axisScore(axis) * priorityWeight(axis), 0);
+        const weightTotal = POSTE_AXES.reduce((sum, axis) => sum + priorityWeight(axis), 0);
+        const posteGlobal = Math.round(weightedSum / weightTotal);
+        const metierGlobal = axisScore('metier');
+        const posteLevel = level(posteGlobal);
+        const metierLevel = level(metierGlobal);
+
+        scorePosteValue.textContent = `${posteGlobal}%`;
+        scoreMetierValue.textContent = `${metierGlobal}%`;
+        scorePosteBar.style.width = `${posteGlobal}%`;
+        scoreMetierBar.style.width = `${metierGlobal}%`;
+
+        axisBreakdownEl.innerHTML = priorityOrder
+          .map((axis, i) => {
+            const s = axisScore(axis);
+            return `
+              <div class="axis-row">
+                <div class="score-label"><span>${i + 1}. ${AXIS_LABELS[axis]}</span><span class="score-value">${s}%</span></div>
+                <div class="score-track"><div class="score-bar bar-axis" style="width:${s}%"></div></div>
+              </div>
+            `;
+          })
+          .join('');
+
+        const topAxis = POSTE_AXES.reduce((best, axis) => (axisScore(axis) > axisScore(best) ? axis : best), POSTE_AXES[0]);
+
+        let title = '';
+        let text = '';
+        let tips: string[] = [];
+
+        if (posteLevel === 'faible' && metierLevel === 'faible') {
+          title = 'Vous semblez à votre place';
+          text = "Les deux signaux sont bas : ni votre poste actuel, ni votre métier, ne ressortent comme une source de mal-être marquée aujourd'hui. Restez toutefois à l'écoute de ces signaux dans le temps.";
+          tips = [
+            'Prenez quand même un moment régulier pour faire le point sur votre satisfaction au travail.',
+            'Continuez à entretenir vos compétences et votre réseau, même quand tout va bien.',
+          ];
+        } else if (posteLevel !== 'faible' && metierLevel === 'faible') {
+          title = "Le problème semble lié au poste ou à l'entreprise";
+          text = `Le métier en lui-même ne semble pas en cause. Le thème le plus problématique dans votre poste actuel est "${AXIS_LABELS[topAxis]}" (${axisScore(topAxis)}%). Un changement d'employeur ou de poste, à métier constant, pourrait suffire à améliorer nettement les choses.`;
+          tips = [
+            `Creusez en priorité ce qui vous pèse sur l'axe "${AXIS_LABELS[topAxis]}".`,
+            'Explorez des offres sur le même métier, dans d\'autres entreprises ou équipes.',
+            'Si possible, une discussion franche avec votre hiérarchie peut aussi débloquer la situation en interne.',
+          ];
+        } else if (posteLevel === 'faible' && metierLevel !== 'faible') {
+          title = 'Le poste va plutôt bien, mais le métier interroge';
+          text = "Votre poste et votre entreprise actuels ne semblent pas être le problème principal. Le signal vient plutôt du métier lui-même, ce qui mérite d'être creusé même si votre quotidien professionnel est par ailleurs correct.";
+          tips = [
+            'Interrogez-vous sur ce qui, dans la nature même de vos missions, ne vous convient plus.',
+            'Un bilan de compétences peut aider à identifier des métiers plus alignés avec vos aspirations.',
+            'Testez le terrain avant de tout changer : missions transverses, formation courte, échanges avec des personnes reconverties.',
+          ];
+        } else {
+          title = "Double signal : le moment d'une vraie réflexion";
+          text = `Le poste actuel et le métier ressortent tous les deux comme des sources de tension, avec "${AXIS_LABELS[topAxis]}" (${axisScore(topAxis)}%) comme point le plus marquant côté poste. Le sujet mérite clairement d'être exploré en profondeur.`;
+          tips = [
+            'Un bilan de compétences ou un accompagnement par un professionnel de l\'orientation est particulièrement indiqué ici.',
+            'Avant de démissionner, structurez une réflexion : compétences transférables, secteurs qui vous attirent, contraintes financières.',
+            "Parlez-en autour de vous — d'autres personnes ont probablement déjà vécu une transition similaire.",
+          ];
+        }
+
+        resultTitle.textContent = title;
+        resultText.textContent = text;
+        adviceEl.innerHTML = `<ul>${tips.map((t) => `<li>${t}</li>`).join('')}</ul>`;
+
+        buildSalaryInsight();
+      }
+
+      // --- Flow control ---
+
+      function beginFlow() {
+        priorityOrder = [...DEFAULT_ORDER];
+        renderPriorities();
+        showStep('priorities');
+      }
+
+      function beginQuiz() {
+        questions = pickQuestions();
+        index = 0;
+        scores = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
+        showStep('quiz');
+        showQuestion();
+      }
+
+      startBtn.addEventListener('click', beginFlow);
+      prioritiesContinueBtn.addEventListener('click', beginQuiz);
+      salaryContinueBtn.addEventListener('click', captureSalaryAndFinish);
+      salarySkipBtn.addEventListener('click', skipSalaryStep);
+      restartBtn.addEventListener('click', beginFlow);
+
+      [salaryCurrentEl, salaryNewEl].forEach((el) => {
+        el.addEventListener('input', updateSalaryLive);
+      });
+    </script>
+  </body>
+</html>
