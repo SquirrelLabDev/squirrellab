@@ -62,6 +62,7 @@
         <p id="progress-label" class="progress-label"></p>
         <h2 id="question-text" class="question-text"></h2>
         <div id="options" class="options"></div>
+        <button id="prev-btn" class="btn-back" type="button" hidden>← Question précédente</button>
       </section>
 
       <section id="result" class="panel" hidden>
@@ -110,7 +111,10 @@
           de l'orientation reste la meilleure option.
         </p>
 
-        <button id="restart-btn" class="btn-launch" type="button">Refaire le test</button>
+        <div class="result-actions">
+          <button id="restart-btn" class="btn-launch" type="button">Refaire le test</button>
+          <button id="export-csv-btn" class="btn-secondary" type="button">📄 Exporter en CSV</button>
+        </div>
       </section>
 
       <section id="salary-comparator" class="panel">
@@ -201,6 +205,13 @@
         cursor: pointer; font-size: 0.95rem;
       }
       .btn-launch:hover { opacity: 0.9; }
+      .btn-secondary {
+        display: inline-block; background: none; color: var(--fg);
+        font-weight: 600; padding: 0.6rem 1.4rem; border: 1px solid var(--border);
+        border-radius: 8px; cursor: pointer; font-size: 0.95rem;
+      }
+      .btn-secondary:hover { border-color: var(--accent); }
+      .result-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
       /* Priorities */
       .priority-list { list-style: none; padding: 0; margin: 1.25rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -242,6 +253,15 @@
         transition: border-color 0.15s ease, background 0.15s ease;
       }
       .option-btn:hover { border-color: var(--accent); background: #34231b; }
+      .option-btn.selected { border-color: var(--accent); background: #34231b; }
+      .option-btn.selected::before { content: "✓ "; color: var(--accent); }
+
+      .btn-back {
+        display: block; background: none; border: none; color: var(--muted);
+        font-size: 0.85rem; cursor: pointer; margin-top: 1.25rem; padding: 0;
+      }
+      .btn-back:hover { color: var(--fg); }
+      .btn-back[hidden] { display: none; }
 
       /* Salary */
       .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.25rem 0; }
@@ -329,6 +349,7 @@
         ambiance: 'Ambiance',
         lieu: 'Lieu de travail',
       };
+      const ALL_AXIS_LABELS: Record<Axis, string> = { ...AXIS_LABELS, metier: 'Métier' };
 
       const QUESTIONS_PER_POSTE_AXIS = 2;
       const QUESTIONS_METIER = 6;
@@ -436,6 +457,7 @@
       const progressLabel = document.getElementById('progress-label') as HTMLElement;
       const questionText = document.getElementById('question-text') as HTMLElement;
       const optionsEl = document.getElementById('options') as HTMLElement;
+      const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
 
       const salaryCurrentEl = document.getElementById('salary-current') as HTMLElement;
       const salaryNewEl = document.getElementById('salary-new') as HTMLElement;
@@ -456,11 +478,12 @@
       const adviceEl = document.getElementById('advice') as HTMLElement;
       const salaryInsightEl = document.getElementById('salary-insight') as HTMLElement;
       const restartBtn = document.getElementById('restart-btn') as HTMLButtonElement;
+      const exportCsvBtn = document.getElementById('export-csv-btn') as HTMLButtonElement;
 
       let priorityOrder: PosteAxis[] = [...DEFAULT_ORDER];
       let questions: Question[] = [];
       let index = 0;
-      let scores: Record<Axis, number[]> = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
+      let answers: (number | null)[] = [];
 
       function showStep(step: 'intro' | 'quiz' | 'result') {
         introEl.hidden = step !== 'intro';
@@ -535,25 +558,35 @@
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'option-btn';
+          if (answers[index] === opt.points) btn.classList.add('selected');
           btn.textContent = opt.label;
-          btn.addEventListener('click', () => answer(q.axis, opt.points));
+          btn.addEventListener('click', () => answer(opt.points));
           optionsEl.appendChild(btn);
         });
+        prevBtn.hidden = index === 0;
       }
 
-      function answer(axis: Axis, points: number) {
-        scores[axis].push(points);
-        index += 1;
-        if (index >= questions.length) {
-          progressBar.style.width = '100%';
+      function answer(points: number) {
+        answers[index] = points;
+        if (index >= questions.length - 1) {
           showResult();
         } else {
+          index += 1;
           showQuestion();
         }
       }
 
+      function goToPreviousQuestion() {
+        if (index === 0) return;
+        index -= 1;
+        showQuestion();
+      }
+
       function axisScore(axis: Axis): number {
-        const vals = scores[axis];
+        const vals: number[] = [];
+        questions.forEach((q, i) => {
+          if (q.axis === axis && answers[i] !== null) vals.push(answers[i] as number);
+        });
         if (vals.length === 0) return 0;
         const sum = vals.reduce((a, b) => a + b, 0);
         return Math.round((sum / (vals.length * 4)) * 100);
@@ -667,6 +700,53 @@
         `;
       }
 
+      // --- CSV export ---
+
+      function csvEscape(value: string): string {
+        if (/[",\n]/.test(value)) {
+          return '"' + value.replace(/"/g, '""') + '"';
+        }
+        return value;
+      }
+
+      function buildCsv(): string {
+        const weightedSum = POSTE_AXES.reduce((sum, axis) => sum + axisScore(axis) * priorityWeight(axis), 0);
+        const weightTotal = POSTE_AXES.reduce((sum, axis) => sum + priorityWeight(axis), 0);
+        const posteGlobal = Math.round(weightedSum / weightTotal);
+        const metierGlobal = axisScore('metier');
+
+        const rows: string[][] = [];
+        rows.push(['Boussole Carrière — résultats']);
+        rows.push(['Date', new Date().toLocaleDateString('fr-FR')]);
+        rows.push([]);
+        rows.push(['Thème', 'Score (%)']);
+        rows.push(['Poste actuel (pondéré selon vos priorités)', String(posteGlobal)]);
+        rows.push(['Métier', String(metierGlobal)]);
+        priorityOrder.forEach((axis) => rows.push([AXIS_LABELS[axis], String(axisScore(axis))]));
+        rows.push([]);
+        rows.push(['#', 'Thème', 'Question', 'Réponse', 'Points (0-4)']);
+        questions.forEach((q, i) => {
+          const points = answers[i];
+          const optionLabel = OPTIONS.find((o) => o.points === points)?.label ?? '';
+          rows.push([String(i + 1), ALL_AXIS_LABELS[q.axis], q.text, optionLabel, points === null ? '' : String(points)]);
+        });
+
+        return rows.map((r) => r.map(csvEscape).join(',')).join('\n');
+      }
+
+      function downloadCsv() {
+        const csv = '﻿' + buildCsv();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boussole-carriere-resultats-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
       function showResult() {
         showStep('result');
 
@@ -748,7 +828,7 @@
       function beginQuiz() {
         questions = pickQuestions();
         index = 0;
-        scores = { metier: [], evolution: [], competences: [], salaire: [], ambiance: [], lieu: [] };
+        answers = questions.map(() => null);
         showStep('quiz');
         showQuestion();
       }
@@ -759,7 +839,9 @@
       }
 
       startBtn.addEventListener('click', beginQuiz);
+      prevBtn.addEventListener('click', goToPreviousQuestion);
       restartBtn.addEventListener('click', restart);
+      exportCsvBtn.addEventListener('click', downloadCsv);
 
       // Le comparateur de salaire est indépendant du test : initialisé une
       // fois au chargement, jamais réinitialisé par le quiz.
