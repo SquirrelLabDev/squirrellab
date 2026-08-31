@@ -5,9 +5,13 @@ sans installation (dans l'esprit d'un outil comme ZoomIt), qui affiche exactemen
 interface que le site (`../token-manager/public`, réutilisée telle quelle via `frontendDist`
 dans `src-tauri/tauri.conf.json`).
 
-L'application ne contient **pas** de serveur : au premier lancement, elle demande l'adresse du
-serveur du Gestionnaire de tokens (celui déployé sur le site, ou une instance interne) et la
-retient localement. Elle se comporte ensuite exactement comme la version web.
+L'application ne contient **pas** de serveur ni de données propres : c'est une simple fenêtre qui
+affiche le site. Au premier lancement, elle demande l'adresse du serveur du Gestionnaire de tokens
+(celui déployé en ligne, ou une instance interne) et la retient **localement, sur ce poste
+uniquement** (adresse du serveur, session admin/créateur·rice, identité de participant·e — rien
+n'est synchronisé entre postes). Deux personnes qui lancent chacune cet exécutable et se
+connectent au même serveur voient bien les mêmes sessions (les données vivent sur le serveur, pas
+dans l'exécutable), mais chaque poste garde sa propre configuration locale.
 
 ## Compiler
 

@@ -9,12 +9,12 @@ const features = [
     desc: 'Reposer le token demande une description du travail effectué, comme un message de commit. Tout s\'affiche dans un historique horodaté.',
   },
   {
-    title: 'Sessions par équipe',
-    desc: 'Un·e admin crée une session (nom, description, participant·es), puis partage un simple lien à toute l\'équipe. Aucun compte à créer.',
+    title: 'Sessions privées par équipe',
+    desc: 'Créez-vous un compte, montez une session (nom, description, participant·es), puis partagez un simple lien. Personne d\'autre que vous ne voit vos sessions.',
   },
   {
-    title: 'Sans installation',
-    desc: 'Utilisable directement depuis un navigateur, ou via une version portable à double-cliquer, sans droits admin.',
+    title: 'Participation sans compte',
+    desc: 'Les personnes à qui vous partagez le lien n\'ont rien à créer : elles choisissent juste leur nom dans la liste.',
   },
 ];
 ---
@@ -69,10 +69,59 @@ const features = [
         </div>
       </section>
 
+      <section class="privacy">
+        <h2>Qui voit quoi</h2>
+        <p>
+          Trois niveaux d'accès, bien séparés :
+        </p>
+        <ul>
+          <li>
+            <strong>Vous, en tant que créateur·rice</strong> — vous créez un compte (identifiant +
+            mot de passe) dans votre espace et montez vos sessions. Vous êtes seul·e à les voir et
+            à les gérer, jusqu'à ce que vous partagiez un lien de session.
+          </li>
+          <li>
+            <strong>Les participant·es</strong> — les personnes à qui vous donnez un lien
+            <code>/session/...</code> accèdent uniquement à cette session-là. Pas de compte, pas
+            de visibilité sur vos autres sessions ni sur celles d'autres créateur·rices.
+          </li>
+          <li>
+            <strong>L'administrateur·rice du site</strong> — la personne qui héberge l'outil garde
+            une vue d'ensemble (qui a un compte, combien de sessions) et peut supprimer un compte
+            ou une session en cas de besoin, mais n'en crée pas à votre place.
+          </li>
+        </ul>
+      </section>
+
+      <section class="two-ways">
+        <h2>Deux façons de l'utiliser</h2>
+        <div class="features-grid">
+          <article class="feature">
+            <h3>🌐 En ligne (le site)</h3>
+            <p>
+              Directement dans le navigateur. Vos sessions sont hébergées sur le serveur du
+              Gestionnaire de tokens et accessibles depuis n'importe quel appareil connecté.
+            </p>
+          </article>
+          <article class="feature">
+            <h3>💻 Version portable</h3>
+            <p>
+              Un exécutable unique à double-cliquer, sans installation — mais <strong>ce n'est
+              qu'une fenêtre</strong> qui affiche le même outil : elle ne stocke aucune donnée
+              elle-même. Au premier lancement, elle demande l'adresse du serveur en ligne à
+              utiliser, et ne retient ce choix (ainsi que votre connexion) que <strong>sur le
+              poste où elle tourne</strong>. Deux collègues qui lancent chacun·e l'exécutable et
+              se connectent au même serveur voient bien les mêmes sessions — mais rien n'est
+              partagé entre les postes eux-mêmes.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section class="status">
         <h2>État du projet</h2>
         <ul>
-          <li>Application web (admin + sessions partagées) fonctionnelle, déploiement en cours.</li>
+          <li>Application web (comptes créateur·rice, sessions partagées, supervision admin du site) fonctionnelle, déploiement en cours.</li>
           <li>Version portable (exécutable unique, sans installation) en cours de finalisation.</li>
           <li>Code source : dossier <code>apps/token-manager</code> du dépôt du site.</li>
         </ul>
