@@ -15,9 +15,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://token-manager-squirrellab.azurewebsites.net
     defaults:
       run:
         working-directory: apps/token-manager
