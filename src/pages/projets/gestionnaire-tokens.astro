@@ -1,4 +1,5 @@
 ---
+const tokenManagerUrl = 'https://token-manager-squirrellab-erd5cqb6dnhwhdfe.francecentral-01.azurewebsites.net';
 const features = [
   {
     title: 'Un token, un droit d\'écriture',
@@ -36,9 +37,10 @@ const features = [
 
       <header class="hero">
         <div>
-          <div class="badge">En développement</div>
+          <div class="badge badge-live-status">En ligne</div>
           <h1>Gestionnaire de tokens</h1>
           <p class="tagline">Travaillez à plusieurs sur un même fichier sans vous marcher dessus — sans Git.</p>
+          <p><a class="btn-tool" href={tokenManagerUrl} target="_blank" rel="noopener">Accéder à l'outil ↗</a></p>
         </div>
       </header>
 
@@ -121,7 +123,7 @@ const features = [
       <section class="status">
         <h2>État du projet</h2>
         <ul>
-          <li>Application web (comptes créateur·rice, sessions partagées, supervision admin du site) fonctionnelle, déploiement en cours.</li>
+          <li>Application web (comptes créateur·rice, sessions partagées, supervision admin du site) <strong>en ligne</strong>.</li>
           <li>Version portable (exécutable unique, sans installation) en cours de finalisation.</li>
           <li>Code source : dossier <code>apps/token-manager</code> du dépôt du site.</li>
         </ul>
@@ -168,8 +170,15 @@ const features = [
         padding: 0.2rem 0.6rem;
         margin-bottom: 0.6rem;
       }
+      .badge-live-status { color: #7ec88a; border-color: #7ec88a; }
       h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
-      .tagline { color: var(--muted); font-size: 1rem; margin: 0; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 1rem; }
+      .btn-tool {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.55rem 1.25rem; border-radius: 8px;
+        text-decoration: none; font-size: 0.9rem;
+      }
+      .btn-tool:hover { opacity: 0.9; }
 
       .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
 
