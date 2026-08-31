@@ -1,0 +1,52 @@
+name: token-manager CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/token-manager/**'
+      - '.github/workflows/token-manager.yml'
+  pull_request:
+    paths:
+      - 'apps/token-manager/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: apps/token-manager
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/token-manager/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server and check health
+        env:
+          ADMIN_PASSWORD: ci-smoke-test
+          PORT: 3000
+        run: |
+          npm start &
+          SERVER_PID=$!
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "Server is healthy"
+              kill $SERVER_PID
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "Server did not become healthy in time"
+          kill $SERVER_PID
+          exit 1

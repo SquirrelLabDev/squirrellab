@@ -1,0 +1,211 @@
+---
+const features = [
+  {
+    title: 'Un token, un droit d\'écriture',
+    desc: 'Prendre le token exige une justification. Tant qu\'il est pris, personne d\'autre ne peut y toucher — et tout le monde voit qui l\'a.',
+  },
+  {
+    title: 'Historique "qui, quoi, quand"',
+    desc: 'Reposer le token demande une description du travail effectué, comme un message de commit. Tout s\'affiche dans un historique horodaté.',
+  },
+  {
+    title: 'Sessions privées par équipe',
+    desc: 'Créez-vous un compte, montez une session (nom, description, participant·es), puis partagez un simple lien. Personne d\'autre que vous ne voit vos sessions.',
+  },
+  {
+    title: 'Participation sans compte',
+    desc: 'Les personnes à qui vous partagez le lien n\'ont rien à créer : elles choisissent juste leur nom dans la liste.',
+  },
+];
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Gestionnaire de tokens — travaillez à plusieurs sur un même fichier (rapport Power BI...) sans outil de versionning." />
+    <title>Gestionnaire de tokens — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <div>
+          <div class="badge">En développement</div>
+          <h1>Gestionnaire de tokens</h1>
+          <p class="tagline">Travaillez à plusieurs sur un même fichier sans vous marcher dessus — sans Git.</p>
+        </div>
+      </header>
+
+      <section class="about">
+        <p>
+          Power BI (et bien d'autres outils métier) peut se coupler à Git, mais c'est souvent
+          trop technique pour des équipes qui n'ont pas l'habitude du versionning. Le
+          <strong>Gestionnaire de tokens</strong> reprend l'idée avec un vocabulaire simple : un
+          "jeton" représente le droit exclusif de modifier un fichier ou une ressource.
+        </p>
+        <p>
+          Un·e développeur·se prend le token, indique pourquoi (justification), et devient seul·e
+          à pouvoir le reposer. Une fois la fonctionnalité terminée, iel repose le token avec une
+          description de ce qui a été fait — et le suivant peut prendre le relais. Tout l'historique
+          reste visible en dessous.
+        </p>
+      </section>
+
+      <section class="features">
+        <h2>Fonctionnalités</h2>
+        <div class="features-grid">
+          {features.map((f) => (
+            <article class="feature">
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="privacy">
+        <h2>Qui voit quoi</h2>
+        <p>
+          Trois niveaux d'accès, bien séparés :
+        </p>
+        <ul>
+          <li>
+            <strong>Vous, en tant que créateur·rice</strong> — vous créez un compte (identifiant +
+            mot de passe) dans votre espace et montez vos sessions. Vous êtes seul·e à les voir et
+            à les gérer, jusqu'à ce que vous partagiez un lien de session.
+          </li>
+          <li>
+            <strong>Les participant·es</strong> — les personnes à qui vous donnez un lien
+            <code>/session/...</code> accèdent uniquement à cette session-là. Pas de compte, pas
+            de visibilité sur vos autres sessions ni sur celles d'autres créateur·rices.
+          </li>
+          <li>
+            <strong>L'administrateur·rice du site</strong> — la personne qui héberge l'outil garde
+            une vue d'ensemble (qui a un compte, combien de sessions) et peut supprimer un compte
+            ou une session en cas de besoin, mais n'en crée pas à votre place.
+          </li>
+        </ul>
+      </section>
+
+      <section class="two-ways">
+        <h2>Deux façons de l'utiliser</h2>
+        <div class="features-grid">
+          <article class="feature">
+            <h3>🌐 En ligne (le site)</h3>
+            <p>
+              Directement dans le navigateur. Vos sessions sont hébergées sur le serveur du
+              Gestionnaire de tokens et accessibles depuis n'importe quel appareil connecté.
+            </p>
+          </article>
+          <article class="feature">
+            <h3>💻 Version portable</h3>
+            <p>
+              Un exécutable unique à double-cliquer, sans installation — mais <strong>ce n'est
+              qu'une fenêtre</strong> qui affiche le même outil : elle ne stocke aucune donnée
+              elle-même. Au premier lancement, elle demande l'adresse du serveur en ligne à
+              utiliser, et ne retient ce choix (ainsi que votre connexion) que <strong>sur le
+              poste où elle tourne</strong>. Deux collègues qui lancent chacun·e l'exécutable et
+              se connectent au même serveur voient bien les mêmes sessions — mais rien n'est
+              partagé entre les postes eux-mêmes.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="status">
+        <h2>État du projet</h2>
+        <ul>
+          <li>Application web (comptes créateur·rice, sessions partagées, supervision admin du site) fonctionnelle, déploiement en cours.</li>
+          <li>Version portable (exécutable unique, sans installation) en cours de finalisation.</li>
+          <li>Code source : dossier <code>apps/token-manager</code> du dépôt du site.</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Retour aux outils</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+
+      .hero { margin-bottom: 2rem; }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0; }
+
+      .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
+
+      .features h2 { font-size: 1.25rem; margin: 2rem 0 1rem; }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .feature h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+      section h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+      ul { line-height: 1.8; padding-left: 1.2rem; }
+      code { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.9em; }
+      a { color: var(--accent); }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

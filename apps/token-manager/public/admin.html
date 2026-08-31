@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Administration du site — Gestionnaire de tokens</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main>
+    <header class="row-between">
+      <div>
+        <h1>Administration du site</h1>
+        <p class="tagline">Vue d'ensemble pour l'administrateur·rice du site : qui utilise l'outil, et suppression si besoin.</p>
+      </div>
+      <button id="logout-btn" class="btn-secondary" hidden>Se déconnecter</button>
+    </header>
+
+    <div id="error" class="error-banner" hidden></div>
+
+    <section id="login-view" class="card">
+      <h2 style="margin-top:0;">Connexion</h2>
+      <div class="field">
+        <label for="password">Mot de passe admin</label>
+        <input type="password" id="password" autocomplete="current-password" />
+      </div>
+      <button id="login-btn" class="btn-primary">Se connecter</button>
+    </section>
+
+    <section id="app-view" hidden>
+      <div class="card">
+        <h2 style="margin-top:0;">Créateur·rices de sessions</h2>
+        <div id="creators-list" class="empty-state">Chargement…</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0;">Toutes les sessions</h2>
+        <div id="sessions-list" class="empty-state">Chargement…</div>
+      </div>
+    </section>
+
+    <template id="creator-row-template">
+      <div class="card creator-row">
+        <div class="row-between">
+          <div>
+            <strong class="c-username"></strong>
+            <div class="field-hint">Compte créé le <span class="c-created"></span> · <span class="c-sessions"></span> session(s)</div>
+          </div>
+          <button class="btn-danger c-delete">Supprimer le compte</button>
+        </div>
+      </div>
+    </template>
+
+    <template id="session-row-template">
+      <div class="card session-row">
+        <div class="row-between">
+          <div>
+            <strong class="s-name"></strong>
+            <div class="field-hint s-desc"></div>
+            <div class="field-hint">Créée par <span class="s-owner"></span></div>
+          </div>
+          <button class="btn-danger s-delete">Supprimer</button>
+        </div>
+        <p class="field-hint">
+          <span class="s-participants"></span> participant·es · <span class="s-resources"></span> ressource(s)
+        </p>
+        <div class="row-between">
+          <p class="field-hint s-expiry" style="margin:0;"></p>
+          <button class="btn-secondary s-edit-expiry">Modifier la date</button>
+        </div>
+        <div class="field s-expiry-form" hidden style="margin-top:0.75rem;">
+          <label>Nouveau délai avant suppression automatique (jours à partir d'aujourd'hui, 0 = jamais)</label>
+          <div class="row">
+            <input type="number" class="s-expiry-input" min="0" max="3650" style="max-width:8rem;" />
+            <button class="btn-primary s-expiry-save">Enregistrer</button>
+            <button class="btn-secondary s-expiry-cancel">Annuler</button>
+          </div>
+        </div>
+        <div class="row">
+          <input type="text" class="s-link" readonly />
+          <a class="btn-secondary s-open" target="_blank" style="text-decoration:none;">Ouvrir →</a>
+        </div>
+      </div>
+    </template>
+
+    <footer>
+      <p><a href="/">← Accueil</a></p>
+    </footer>
+  </main>
+
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>
