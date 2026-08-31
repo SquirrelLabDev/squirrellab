@@ -1,0 +1,47 @@
+name: Deploy token-manager to Azure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/token-manager/**'
+      - '.github/workflows/deploy-token-manager.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://token-manager-squirrellab.azurewebsites.net
+    defaults:
+      run:
+        working-directory: apps/token-manager
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install production dependencies
+        run: npm ci --omit=dev
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: token-manager-squirrellab
+          package: apps/token-manager
