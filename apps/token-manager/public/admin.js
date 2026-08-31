@@ -43,6 +43,10 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { dateStyle: 'medium' });
 }
 
+function expiryText(expiresAt) {
+  return expiresAt ? `Suppression prévue le ${formatDate(expiresAt)}.` : 'Pas de suppression automatique.';
+}
+
 async function refreshCreators() {
   creatorsList.textContent = 'Chargement…';
   try {
@@ -93,6 +97,7 @@ async function refreshSessions() {
       node.querySelector('.s-owner').textContent = session.ownerUsername;
       node.querySelector('.s-participants').textContent = session.participantCount;
       node.querySelector('.s-resources').textContent = session.resourceCount;
+      node.querySelector('.s-expiry').textContent = expiryText(session.expiresAt);
       const link = sessionLink(session.slug);
       node.querySelector('.s-link').value = link;
       node.querySelector('.s-open').href = link;
@@ -105,6 +110,32 @@ async function refreshSessions() {
           showError(err.message);
         }
       });
+
+      const expiryForm = node.querySelector('.s-expiry-form');
+      const expiryInput = node.querySelector('.s-expiry-input');
+      node.querySelector('.s-edit-expiry').addEventListener('click', () => {
+        expiryInput.value = '';
+        expiryForm.hidden = false;
+      });
+      node.querySelector('.s-expiry-cancel').addEventListener('click', () => {
+        expiryForm.hidden = true;
+      });
+      node.querySelector('.s-expiry-save').addEventListener('click', async () => {
+        if (expiryInput.value === '') {
+          showError('Indiquez un nombre de jours (0 pour ne jamais supprimer).');
+          return;
+        }
+        try {
+          await adminFetch(`/api/admin/sessions/${session.slug}/expiry`, {
+            method: 'PATCH',
+            body: JSON.stringify({ expiryDays: Number(expiryInput.value) }),
+          });
+          await refreshSessions();
+        } catch (err) {
+          showError(err.message);
+        }
+      });
+
       sessionsList.appendChild(node);
     }
   } catch (err) {

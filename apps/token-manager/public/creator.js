@@ -40,6 +40,12 @@ function sessionLink(slug) {
   return `${origin}/session/${slug}`;
 }
 
+function expiryText(expiresAt) {
+  if (!expiresAt) return 'Pas de suppression automatique.';
+  const date = new Date(expiresAt).toLocaleDateString('fr-FR', { dateStyle: 'long' });
+  return `Suppression automatique prévue le ${date}.`;
+}
+
 async function refreshSessions() {
   sessionsList.textContent = 'Chargement…';
   try {
@@ -58,6 +64,7 @@ async function refreshSessions() {
       node.querySelector('.s-desc').textContent = session.description || '';
       node.querySelector('.s-participants').textContent = session.participantCount;
       node.querySelector('.s-resources').textContent = session.resourceCount;
+      node.querySelector('.s-expiry').textContent = expiryText(session.expiresAt);
       const link = sessionLink(session.slug);
       node.querySelector('.s-link').value = link;
       node.querySelector('.s-open').href = link;
@@ -93,6 +100,7 @@ async function handleCreate() {
   const description = document.getElementById('new-description').value;
   const participants = linesToList(document.getElementById('new-participants').value);
   const resources = linesToList(document.getElementById('new-resources').value);
+  const expiryDays = document.getElementById('new-expiry-days').value;
 
   if (!name.trim()) {
     showError('Le nom de la session est requis.');
@@ -102,12 +110,13 @@ async function handleCreate() {
   try {
     await creatorFetch('/api/creator/sessions', {
       method: 'POST',
-      body: JSON.stringify({ name, description, participants, resources }),
+      body: JSON.stringify({ name, description, participants, resources, expiryDays: Number(expiryDays) }),
     });
     document.getElementById('new-name').value = '';
     document.getElementById('new-description').value = '';
     document.getElementById('new-participants').value = '';
     document.getElementById('new-resources').value = '';
+    document.getElementById('new-expiry-days').value = '365';
     await refreshSessions();
   } catch (err) {
     showError(err.message);

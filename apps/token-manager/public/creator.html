@@ -72,6 +72,11 @@
           <label for="new-resources">Ressources / tokens à gérer (un nom par ligne, optionnel — "Accès principal" par défaut)</label>
           <textarea id="new-resources" placeholder="Rapport Ventes.pbix"></textarea>
         </div>
+        <div class="field">
+          <label for="new-expiry-days">Suppression automatique après (jours)</label>
+          <input type="number" id="new-expiry-days" min="0" max="3650" value="365" />
+          <p class="field-hint">365 par défaut. Mettez 0 pour ne jamais supprimer automatiquement. Seul l'administrateur du site pourra changer cette valeur ensuite.</p>
+        </div>
         <button id="create-btn" class="btn-primary">Créer la session</button>
       </div>
 
@@ -93,6 +98,7 @@
         <p class="field-hint">
           <span class="s-participants"></span> participant·es · <span class="s-resources"></span> ressource(s)
         </p>
+        <p class="field-hint s-expiry"></p>
         <div class="row">
           <input type="text" class="s-link" readonly />
           <button class="btn-secondary s-copy">Copier le lien</button>

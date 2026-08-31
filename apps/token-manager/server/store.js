@@ -48,12 +48,27 @@ function makeSlug() {
   return randomBytes(4).toString('hex');
 }
 
+const DEFAULT_EXPIRY_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// expiryDays: undefined -> default (1 year); 0 or null -> never expires; N -> N days from now.
+function computeExpiresAt(expiryDays) {
+  if (expiryDays === undefined) return new Date(Date.now() + DEFAULT_EXPIRY_DAYS * DAY_MS).toISOString();
+  if (!expiryDays) return null;
+  return new Date(Date.now() + Number(expiryDays) * DAY_MS).toISOString();
+}
+
+function isExpired(session) {
+  return Boolean(session.expiresAt) && new Date(session.expiresAt).getTime() <= Date.now();
+}
+
 function summarize(session) {
   return {
     slug: session.slug,
     name: session.name,
     description: session.description,
     createdAt: session.createdAt,
+    expiresAt: session.expiresAt,
     participantCount: session.participants.length,
     resourceCount: session.resources.length,
   };
@@ -172,6 +187,7 @@ export async function deleteCreator(creatorId) {
 export async function listAllSessions() {
   const db = await loadDb();
   return Object.values(db.sessions)
+    .filter((s) => !isExpired(s))
     .map((s) => ({ ...summarize(s), ownerUsername: db.creators[s.ownerId]?.username || '—' }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
@@ -184,17 +200,41 @@ export async function deleteSessionAsAdmin(slug) {
   });
 }
 
+// Site-admin only: change (or clear) a session's auto-deletion delay, recomputed from now.
+export async function setSessionExpiry(slug, expiryDays) {
+  return transact((db) => {
+    const session = db.sessions[slug];
+    if (!session) return null;
+    session.expiresAt = expiryDays ? new Date(Date.now() + Number(expiryDays) * DAY_MS).toISOString() : null;
+    return session;
+  });
+}
+
+// Deletes every session whose auto-deletion delay has passed. Safe to call often.
+export async function sweepExpiredSessions() {
+  return transact((db) => {
+    let removed = 0;
+    for (const [slug, session] of Object.entries(db.sessions)) {
+      if (isExpired(session)) {
+        delete db.sessions[slug];
+        removed++;
+      }
+    }
+    return removed;
+  });
+}
+
 // --- Sessions (created and managed by their owning creator) ---
 
 export async function listSessionsForOwner(ownerId) {
   const db = await loadDb();
   return Object.values(db.sessions)
-    .filter((s) => s.ownerId === ownerId)
+    .filter((s) => s.ownerId === ownerId && !isExpired(s))
     .map(summarize)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export async function createSession({ ownerId, name, description, participantNames, resourceNames }) {
+export async function createSession({ ownerId, name, description, participantNames, resourceNames, expiryDays }) {
   return transact((db) => {
     let slug = makeSlug();
     while (db.sessions[slug]) slug = makeSlug();
@@ -227,6 +267,7 @@ export async function createSession({ ownerId, name, description, participantNam
       resources,
       history: [],
       createdAt: new Date().toISOString(),
+      expiresAt: computeExpiresAt(expiryDays),
     };
 
     db.sessions[slug] = session;
@@ -239,6 +280,13 @@ export async function createSession({ ownerId, name, description, participantNam
 export async function getSession(slug) {
   const db = await loadDb();
   return db.sessions[slug] || null;
+}
+
+// Same, but treats an expired-but-not-yet-swept session as absent.
+export async function getLiveSession(slug) {
+  const session = await getSession(slug);
+  if (!session || isExpired(session)) return null;
+  return session;
 }
 
 export async function deleteSessionOwned(slug, ownerId) {
@@ -298,7 +346,7 @@ function findParticipant(session, participantId) {
 export async function takeResource(slug, resourceId, { participantId, justification }) {
   return transact((db) => {
     const session = db.sessions[slug];
-    if (!session) throw new AppError('not_found', 'Session introuvable.');
+    if (!session || isExpired(session)) throw new AppError('not_found', 'Session introuvable.');
     const resource = session.resources.find((r) => r.id === resourceId);
     if (!resource) throw new AppError('not_found', 'Ressource introuvable.');
     const participant = findParticipant(session, participantId);
@@ -332,7 +380,7 @@ export async function takeResource(slug, resourceId, { participantId, justificat
 export async function releaseResource(slug, resourceId, { participantId, message }) {
   return transact((db) => {
     const session = db.sessions[slug];
-    if (!session) throw new AppError('not_found', 'Session introuvable.');
+    if (!session || isExpired(session)) throw new AppError('not_found', 'Session introuvable.');
     const resource = session.resources.find((r) => r.id === resourceId);
     if (!resource) throw new AppError('not_found', 'Ressource introuvable.');
     const participant = findParticipant(session, participantId);

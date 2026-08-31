@@ -13,6 +13,11 @@ Power BI) sans outil de versionning : un "token" partagé fait office de jeton d
   été fait** (comme un message de commit). Tant qu'un token est pris, personne d'autre ne peut le
   prendre, et tout le monde voit qui l'a.
 - Un **historique** (qui / quoi / quand) s'affiche sous chaque session.
+- Chaque session a une **date de suppression automatique** (365 jours par défaut, réglable à la
+  création, 0 = jamais), affichée dans toutes les vues. Un balayage périodique (toutes les 15 min)
+  supprime les sessions expirées côté serveur ; seul·e l'**administrateur·rice du site** peut
+  modifier cette date après coup (voir plus bas) — cela évite d'avoir à nettoyer les sessions des
+  autres à la main.
 
 ## Deux niveaux d'accès
 

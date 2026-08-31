@@ -4,6 +4,7 @@ const slug = window.location.pathname.split('/').filter(Boolean).pop();
 const errorEl = document.getElementById('error');
 const nameEl = document.getElementById('session-name');
 const descEl = document.getElementById('session-description');
+const expiryEl = document.getElementById('session-expiry');
 const whoamiSelect = document.getElementById('whoami-select');
 const resourcesEl = document.getElementById('resources');
 const historyEl = document.getElementById('history');
@@ -174,6 +175,9 @@ async function refresh() {
     clearError();
     nameEl.textContent = session.name;
     descEl.textContent = session.description || '';
+    expiryEl.textContent = session.expiresAt
+      ? `Cette session sera automatiquement supprimée le ${new Date(session.expiresAt).toLocaleDateString('fr-FR', { dateStyle: 'long' })}.`
+      : '';
     renderWhoami(session);
     renderResources(session);
     renderHistory(session);

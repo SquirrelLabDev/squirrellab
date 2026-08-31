@@ -10,9 +10,11 @@ import {
   deleteCreator,
   listAllSessions,
   deleteSessionAsAdmin,
+  setSessionExpiry,
+  sweepExpiredSessions,
   listSessionsForOwner,
   createSession,
-  getSession,
+  getLiveSession,
   deleteSessionOwned,
   addParticipant,
   removeParticipant,
@@ -57,6 +59,19 @@ async function requireCreator(req, res, next) {
 function publicSession(session) {
   const { id, ownerId, ...rest } = session;
   return rest;
+}
+
+const MAX_EXPIRY_DAYS = 3650; // 10 years
+
+// undefined -> caller's default; '' or 0 -> never expires; else a validated day count.
+function parseExpiryDays(value) {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (value === null || value === '') return { ok: true, value: 0 };
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 0 || n > MAX_EXPIRY_DAYS) {
+    return { ok: false };
+  }
+  return { ok: true, value: n };
 }
 
 function handleAppError(res, err) {
@@ -116,9 +131,13 @@ app.get('/api/creator/sessions', requireCreator, async (req, res) => {
 });
 
 app.post('/api/creator/sessions', requireCreator, async (req, res) => {
-  const { name, description, participants, resources } = req.body || {};
+  const { name, description, participants, resources, expiryDays } = req.body || {};
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'invalid_name', message: 'Le nom de la session est requis.' });
+  }
+  const parsedExpiry = parseExpiryDays(expiryDays);
+  if (!parsedExpiry.ok) {
+    return res.status(400).json({ error: 'invalid_expiry', message: `Le délai doit être un nombre de jours entre 0 et ${MAX_EXPIRY_DAYS}.` });
   }
   const session = await createSession({
     ownerId: req.creator.id,
@@ -126,12 +145,13 @@ app.post('/api/creator/sessions', requireCreator, async (req, res) => {
     description,
     participantNames: participants,
     resourceNames: resources,
+    expiryDays: parsedExpiry.value,
   });
   res.status(201).json(publicSession(session));
 });
 
 async function ownedSessionOr404(req, res) {
-  const session = await getSession(req.params.slug);
+  const session = await getLiveSession(req.params.slug);
   if (!session || session.ownerId !== req.creator.id) {
     res.status(404).json({ error: 'not_found' });
     return null;
@@ -209,10 +229,20 @@ app.delete('/api/admin/sessions/:slug', requireAdmin, async (req, res) => {
   res.status(204).end();
 });
 
+app.patch('/api/admin/sessions/:slug/expiry', requireAdmin, async (req, res) => {
+  const parsedExpiry = parseExpiryDays(req.body?.expiryDays ?? null);
+  if (!parsedExpiry.ok) {
+    return res.status(400).json({ error: 'invalid_expiry', message: `Le délai doit être un nombre de jours entre 0 et ${MAX_EXPIRY_DAYS}.` });
+  }
+  const session = await setSessionExpiry(req.params.slug, parsedExpiry.value);
+  if (!session) return res.status(404).json({ error: 'not_found' });
+  res.json(publicSession(session));
+});
+
 // --- Public / participant API (the share link itself is the secret) ---
 
 app.get('/api/sessions/:slug', async (req, res) => {
-  const session = await getSession(req.params.slug);
+  const session = await getLiveSession(req.params.slug);
   if (!session) return res.status(404).json({ error: 'not_found' });
   res.json(publicSession(session));
 });
@@ -258,9 +288,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'internal_error' });
 });
 
+const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+
+function sweep() {
+  sweepExpiredSessions().catch((err) => console.error('Échec du nettoyage des sessions expirées :', err));
+}
+
 app.listen(PORT, () => {
   console.log(`Gestionnaire de tokens en écoute sur http://localhost:${PORT}`);
   if (!ADMIN_PASSWORD) {
     console.warn("ADMIN_PASSWORD n'est pas défini : l'espace d'administration du site est désactivé.");
   }
+  sweep();
+  setInterval(sweep, SWEEP_INTERVAL_MS);
 });

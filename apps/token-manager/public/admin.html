@@ -65,6 +65,18 @@
         <p class="field-hint">
           <span class="s-participants"></span> participant·es · <span class="s-resources"></span> ressource(s)
         </p>
+        <div class="row-between">
+          <p class="field-hint s-expiry" style="margin:0;"></p>
+          <button class="btn-secondary s-edit-expiry">Modifier la date</button>
+        </div>
+        <div class="field s-expiry-form" hidden style="margin-top:0.75rem;">
+          <label>Nouveau délai avant suppression automatique (jours à partir d'aujourd'hui, 0 = jamais)</label>
+          <div class="row">
+            <input type="number" class="s-expiry-input" min="0" max="3650" style="max-width:8rem;" />
+            <button class="btn-primary s-expiry-save">Enregistrer</button>
+            <button class="btn-secondary s-expiry-cancel">Annuler</button>
+          </div>
+        </div>
         <div class="row">
           <input type="text" class="s-link" readonly />
           <a class="btn-secondary s-open" target="_blank" style="text-decoration:none;">Ouvrir →</a>
