@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Administration — Gestionnaire de tokens</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main>
+    <header class="row-between">
+      <div>
+        <h1>Administration</h1>
+        <p class="tagline">Créez une session, ajoutez les participant·es, puis partagez le lien.</p>
+      </div>
+      <button id="logout-btn" class="btn-secondary" hidden>Se déconnecter</button>
+    </header>
+
+    <div id="error" class="error-banner" hidden></div>
+
+    <section id="login-view" class="card">
+      <h2 style="margin-top:0;">Connexion</h2>
+      <div class="field">
+        <label for="password">Mot de passe admin</label>
+        <input type="password" id="password" autocomplete="current-password" />
+      </div>
+      <button id="login-btn" class="btn-primary">Se connecter</button>
+    </section>
+
+    <section id="app-view" hidden>
+      <div class="card">
+        <h2 style="margin-top:0;">Nouvelle session</h2>
+        <div class="field">
+          <label for="new-name">Nom de la session</label>
+          <input type="text" id="new-name" placeholder="Rapport Power BI — Ventes" />
+        </div>
+        <div class="field">
+          <label for="new-description">Description</label>
+          <textarea id="new-description" placeholder="À quoi sert cette session, quel fichier est concerné..."></textarea>
+        </div>
+        <div class="field">
+          <label for="new-participants">Participant·es (un nom par ligne)</label>
+          <textarea id="new-participants" placeholder="Alice&#10;Bob&#10;Chloé"></textarea>
+        </div>
+        <div class="field">
+          <label for="new-resources">Ressources / tokens à gérer (un nom par ligne, optionnel — "Accès principal" par défaut)</label>
+          <textarea id="new-resources" placeholder="Rapport Ventes.pbix"></textarea>
+        </div>
+        <button id="create-btn" class="btn-primary">Créer la session</button>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0;">Sessions existantes</h2>
+        <div id="sessions-list" class="empty-state">Chargement…</div>
+      </div>
+    </section>
+
+    <template id="session-row-template">
+      <div class="card session-row">
+        <div class="row-between">
+          <div>
+            <strong class="s-name"></strong>
+            <div class="field-hint s-desc"></div>
+          </div>
+          <button class="btn-danger s-delete">Supprimer</button>
+        </div>
+        <p class="field-hint">
+          <span class="s-participants"></span> participant·es · <span class="s-resources"></span> ressource(s)
+        </p>
+        <div class="row">
+          <input type="text" class="s-link" readonly />
+          <button class="btn-secondary s-copy">Copier le lien</button>
+          <a class="btn-secondary s-open" target="_blank" style="text-decoration:none;">Ouvrir →</a>
+        </div>
+      </div>
+    </template>
+
+    <footer>
+      <p><a href="/">← Accueil</a></p>
+    </footer>
+  </main>
+
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>

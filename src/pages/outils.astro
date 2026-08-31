@@ -62,6 +62,15 @@ const burgerQuizUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francece
         <a class="btn-tool" href="/projets/boussole-carriere">Faire le test ↗</a>
       </section>
 
+      <section class="tool">
+        <div class="tool-header">
+          <h2>Gestionnaire de tokens</h2>
+          <span class="badge-wip-inline">En développement</span>
+        </div>
+        <p class="desc">Travaillez à plusieurs sur un même fichier (rapport Power BI...) sans outil de versionning : un jeton partagé évite que deux personnes modifient la même chose en même temps.</p>
+        <a class="btn-tool-secondary" href="/projets/gestionnaire-tokens">En savoir plus</a>
+      </section>
+
       <section class="wip">
         <div class="badge-wip">En développement</div>
         <p>D'autres outils arrivent bientôt.</p>
@@ -107,6 +116,15 @@ const burgerQuizUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francece
         letter-spacing: 0.08em;
         color: #7ec88a;
         border: 1px solid #7ec88a;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+      }
+      .badge-wip-inline {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
         border-radius: 999px;
         padding: 0.15rem 0.5rem;
       }

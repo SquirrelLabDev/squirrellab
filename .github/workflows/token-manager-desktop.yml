@@ -1,0 +1,85 @@
+name: Build token-manager-desktop
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/token-manager-desktop/**'
+      - 'apps/token-manager/public/**'
+      - '.github/workflows/token-manager-desktop.yml'
+    tags:
+      - 'token-manager-desktop-v*'
+  pull_request:
+    paths:
+      - 'apps/token-manager-desktop/**'
+      - 'apps/token-manager/public/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: apps/token-manager-desktop
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: token-manager-desktop-windows
+            binary: src-tauri/target/release/token-manager-desktop.exe
+          - os: macos-latest
+            artifact: token-manager-desktop-macos
+            binary: src-tauri/target/release/token-manager-desktop
+          - os: ubuntu-latest
+            artifact: token-manager-desktop-linux
+            binary: src-tauri/target/release/token-manager-desktop
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux webview dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libayatana-appindicator3-dev
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/token-manager-desktop/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build portable executable
+        run: npm run build -- --no-bundle
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: apps/token-manager-desktop/${{ matrix.binary }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/token-manager-desktop-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*

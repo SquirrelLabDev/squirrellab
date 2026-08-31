@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Session — Gestionnaire de tokens</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main>
+    <div id="error" class="error-banner" hidden></div>
+
+    <header>
+      <h1 id="session-name">Chargement…</h1>
+      <p class="tagline" id="session-description"></p>
+    </header>
+
+    <div class="card" id="whoami-card">
+      <div class="field">
+        <label for="whoami-select">Qui êtes-vous ?</label>
+        <select id="whoami-select"></select>
+      </div>
+    </div>
+
+    <section id="resources"></section>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Historique</h2>
+      <div id="history" class="empty-state">Chargement…</div>
+    </div>
+
+    <template id="resource-template">
+      <div class="card resource-card">
+        <div class="row-between">
+          <strong class="r-name"></strong>
+          <span class="badge r-badge"></span>
+        </div>
+        <p class="r-status field-hint"></p>
+        <div class="r-actions"></div>
+      </div>
+    </template>
+
+    <footer>
+      <p><a href="https://squirrellab.fr">← SquirrelLab</a></p>
+    </footer>
+  </main>
+
+  <script type="module" src="/session.js"></script>
+</body>
+</html>
