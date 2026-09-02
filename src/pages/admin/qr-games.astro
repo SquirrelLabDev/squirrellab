@@ -284,7 +284,7 @@ https://source.example`}></textarea>
       <img src="${e.qr}" alt="QR ${e.num}" width="180" height="180" />
       <div class="num">#${e.num}</div>
       <div class="title">${escapeHtml(e.title)}</div>
-      <div class="brand">squirrellab.fr</div>
+      <div class="brand">www.squirrellab.fr</div>
     </div>`
           )
           .join('');
@@ -306,15 +306,15 @@ https://source.example`}></textarea>
     .title { font-size: 0.6rem; color: #555; line-height: 1.3; }
     .brand { font-size: 0.5rem; color: #e07840; font-weight: bold; margin-top: 0.25rem; }
     .footer { text-align: center; font-size: 0.7rem; color: #777; margin-top: 1.25rem; }
-    .footer strong { color: #e07840; }
+    .footer a { color: #e07840; font-weight: bold; text-decoration: none; }
     @media print { body { -webkit-print-color-adjust: exact; } }
   </style>
 </head>
 <body>
   <h1>${escapeHtml(label)} — QR Codes à découper et cacher</h1>
-  <div class="brand-banner">Jeu généré par <strong>SquirrelLab</strong> — squirrellab.fr</div>
+  <div class="brand-banner">Jeu généré par <strong>SquirrelLab</strong> — www.squirrellab.fr</div>
   <div class="grid">${qrCards}</div>
-  <div class="footer">Envie d'organiser le vôtre ? <strong>squirrellab.fr/services</strong></div>
+  <div class="footer">Envie d'organiser le vôtre ? <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a></div>
 </body>
 </html>`;
       }
@@ -351,12 +351,12 @@ https://source.example`}></textarea>
     .text { width: 55%; }
     .url { width: 21%; font-size: 0.65rem; color: #555; word-break: break-all; }
     .footer { text-align: center; font-size: 0.7rem; color: #777; margin-top: 1rem; }
-    .footer strong { color: #e07840; }
+    .footer a { color: #e07840; font-weight: bold; text-decoration: none; }
     @media print { body { -webkit-print-color-adjust: exact; } }
   </style>
 </head>
 <body>
-  <div class="banner">SquirrelLab <span>— squirrellab.fr — cheat sheet organisateur, ne pas diffuser aux participants</span></div>
+  <div class="banner">SquirrelLab <span>— www.squirrellab.fr — cheat sheet organisateur, ne pas diffuser aux participants</span></div>
   <h1>Cheat Sheet — ${escapeHtml(label)} (${list.length} anecdotes)</h1>
   <table>
     <thead>
@@ -369,7 +369,7 @@ https://source.example`}></textarea>
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <div class="footer">Envie d'organiser le vôtre ? <strong>squirrellab.fr/services</strong></div>
+  <div class="footer">Envie d'organiser le vôtre ? <a href="mailto:contact@squirrellab.fr">contact@squirrellab.fr</a></div>
 </body>
 </html>`;
       }
