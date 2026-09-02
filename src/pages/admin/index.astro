@@ -14,6 +14,7 @@
       <header>
         <h1>Admin contenu</h1>
         <p class="tagline">Ajoute des articles, vidéos ou embeds. Chaque publication ouvre une Pull Request sur GitHub — rien n'est en ligne tant que tu ne l'as pas mergée toi-même.</p>
+        <p class="tagline"><a href="/admin/qr-games">→ Générateur de jeux QR</a> (feuilles à imprimer, cheat sheet, Excel de suivi, publication du jeu)</p>
       </header>
 
       <section id="auth-section" class="panel">
@@ -444,7 +445,9 @@
       .topnav a { color: var(--muted); text-decoration: none; }
       .topnav a:hover { color: var(--fg); }
       h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
-      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 2rem; line-height: 1.5; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 0.5rem; line-height: 1.5; }
+      .tagline:last-of-type { margin-bottom: 2rem; }
+      .tagline a { color: var(--accent); }
       .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
       .panel h2 { margin: 0 0 1rem; font-size: 1.2rem; }
       .panel h3 { margin: 1.5rem 0 0.75rem; font-size: 1rem; color: var(--muted); }

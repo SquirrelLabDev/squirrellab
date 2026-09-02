@@ -49,6 +49,22 @@ import anecdotes from '../../data/anecdotes.json';
         </div>
       </section>
 
+      <section class="diy">
+        <h2>Envie de le refaire ?</h2>
+        <p>
+          Les 20 QR codes sont prêts à imprimer et découper. Téléchargez le PDF, cachez-les
+          dans votre salle, et vos participants n'ont plus qu'à scanner.
+        </p>
+        <div class="diy-actions">
+          <a class="btn btn-primary" href="/downloads/qr-codes-anecdotes-microsoft.pdf" download>
+            Télécharger les QR codes (PDF)
+          </a>
+          <a class="btn btn-secondary" href="/services">
+            Organiser votre propre jeu →
+          </a>
+        </div>
+      </section>
+
       <footer>
         <p><a href="/creations">← Retour à SquirrelLab</a></p>
         <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
@@ -116,6 +132,28 @@ import anecdotes from '../../data/anecdotes.json';
       .num { font-size: 0.75rem; color: var(--accent); font-weight: 700; margin-bottom: 0.4rem; }
       .title { margin: 0; font-size: 0.9rem; line-height: 1.4; flex: 1; color: var(--fg); }
       .arrow { margin-top: 0.75rem; color: var(--muted); font-size: 0.85rem; }
+      .diy {
+        margin: 2.5rem 0;
+        padding: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .diy h2 { margin: 0 0 0.75rem; font-size: 1.25rem; }
+      .diy p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
+      .diy-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+      .btn {
+        display: inline-block;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.65rem 1.1rem;
+        border-radius: 8px;
+        transition: opacity 0.15s;
+      }
+      .btn:hover { opacity: 0.85; }
+      .btn-primary { background: var(--accent); color: var(--bg); }
+      .btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border); }
       footer {
         margin-top: 2rem;
         padding-top: 2rem;

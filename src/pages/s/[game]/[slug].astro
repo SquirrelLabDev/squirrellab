@@ -1,0 +1,99 @@
+---
+const gameFiles = import.meta.glob('../../../data/games/*.json', { eager: true });
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const path in gameFiles) {
+    const game = path.match(/([^/]+)\.json$/)[1];
+    const anecdotes = gameFiles[path].default;
+    for (const anecdote of anecdotes) {
+      paths.push({
+        params: { game, slug: anecdote.slug },
+        props: { anecdote, total: anecdotes.length },
+      });
+    }
+  }
+  return paths;
+}
+
+const { anecdote, total } = Astro.props;
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Anecdote #{anecdote.num}</title>
+  </head>
+  <body>
+    <main>
+      <div class="badge">Anecdote n°{anecdote.num} / {total}</div>
+      <h1>{anecdote.title}</h1>
+      <p class="text">{anecdote.text}</p>
+      <a class="source" href={anecdote.source} target="_blank" rel="noopener noreferrer">
+        Vérifier la source →
+      </a>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      main {
+        max-width: 600px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.25rem 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: clamp(1.4rem, 4vw, 2rem);
+        margin: 0 0 1.25rem;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+      }
+      .text {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--fg);
+        margin: 0 0 2rem;
+      }
+      .source {
+        display: inline-block;
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-decoration: none;
+        border-bottom: 1px dashed var(--border);
+        padding-bottom: 0.1rem;
+        transition: color 0.15s;
+      }
+      .source:hover { color: var(--accent); }
+    </style>
+  </body>
+</html>

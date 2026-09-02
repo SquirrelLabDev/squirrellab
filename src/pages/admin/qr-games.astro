@@ -1,0 +1,566 @@
+---
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Générateur de jeux QR — Admin</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav"><a href="/admin">← Admin</a></nav>
+      <header>
+        <h1>Générateur de jeux QR</h1>
+        <p class="tagline">
+          Colle un texte d'anecdotes, génère les QR codes, la feuille à imprimer, le cheat sheet
+          organisateur et le fichier de suivi Excel — puis publie le jeu sur le site.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>1. Contenu du jeu</h2>
+        <div class="field">
+          <label for="client-name">Nom du client / de l'événement</label>
+          <input id="client-name" type="text" placeholder="Ex : Acme Corp — Séminaire 2026" />
+          <p class="help">Sera publié sous <code id="slug-preview">src/data/games/&lt;slug&gt;.json</code> — modifiable ci-dessous si besoin.</p>
+          <input id="game-slug" type="text" placeholder="acme-corp" />
+        </div>
+        <div class="field">
+          <label for="raw-text">Anecdotes (une par bloc, séparées par une ligne vide)</label>
+          <p class="help">
+            Format attendu par bloc : <strong>titre</strong> sur la première ligne, <strong>texte</strong>
+            sur la ou les lignes suivantes, <strong>lien source</strong> (optionnel, doit commencer par
+            http) en dernière ligne.
+          </p>
+          <textarea id="raw-text" rows="10" placeholder={`Le tout premier nom s'écrivait avec un trait d'union
+Lors de sa création en 1975, l'entreprise s'appelait Micro-Soft avant d'abandonner le trait d'union un an plus tard.
+https://news.microsoft.com/en-in/features/the-history-of-microsoft/
+
+Anecdote suivante
+Texte de l'anecdote...
+https://source.example`}></textarea>
+        </div>
+        <button id="parse-btn" class="btn">Analyser le texte</button>
+        <p id="parse-status" class="status"></p>
+      </section>
+
+      <section id="preview-section" class="panel" hidden>
+        <h2>2. Aperçu (<span id="entry-count">0</span> anecdotes)</h2>
+        <div id="entries-table" class="entries-table"></div>
+      </section>
+
+      <section id="generate-section" class="panel" hidden>
+        <h2>3. Livrables à imprimer / partager</h2>
+        <p class="help">Rien n'est publié sur le site par ces boutons — tout est généré et téléchargé localement.</p>
+        <div class="actions-row">
+          <button id="gen-qr-btn" class="btn btn-secondary">Feuille QR à imprimer</button>
+          <button id="gen-cheat-btn" class="btn btn-secondary">Cheat sheet organisateur</button>
+          <button id="gen-xlsx-btn" class="btn btn-secondary">Excel de suivi</button>
+        </div>
+      </section>
+
+      <section id="publish-section" class="panel" hidden>
+        <h2>4. Publier sur le site</h2>
+
+        <div id="auth-block">
+          <p class="help">
+            Même token GitHub que la page <a href="/admin">Admin contenu</a> (fine-grained, scopé au repo
+            <code>SquirrelLabDev/squirrellab</code>, permissions <strong>Contents</strong> et
+            <strong>Pull requests</strong> en lecture/écriture). Utilisé uniquement pour parler à
+            <code>api.github.com</code>, stocké seulement dans ce navigateur.
+          </p>
+          <div class="row">
+            <input id="token-input" type="password" placeholder="github_pat_..." autocomplete="off" />
+            <button id="connect-btn" class="btn">Connecter</button>
+          </div>
+          <label class="checkbox"><input id="remember-check" type="checkbox" /> Se souvenir sur cet appareil</label>
+          <p id="auth-status" class="status"></p>
+        </div>
+
+        <button id="publish-btn" class="btn" disabled>Publier ce jeu (ouvre une Pull Request)</button>
+        <p id="publish-status" class="status"></p>
+      </section>
+
+      <footer>
+        <p><a href="/admin">← Admin</a></p>
+      </footer>
+    </main>
+
+    <script>
+      import QRCode from 'qrcode';
+      import * as XLSX from 'xlsx';
+
+      const OWNER = 'SquirrelLabDev';
+      const REPO = 'squirrellab';
+      const MAIN_BRANCH = 'main';
+      const SITE_URL = 'https://squirrellab.fr';
+
+      const clientNameInput = document.getElementById('client-name');
+      const gameSlugInput = document.getElementById('game-slug');
+      const slugPreview = document.getElementById('slug-preview');
+      const rawTextEl = document.getElementById('raw-text');
+      const parseBtn = document.getElementById('parse-btn');
+      const parseStatusEl = document.getElementById('parse-status');
+      const previewSection = document.getElementById('preview-section');
+      const entryCountEl = document.getElementById('entry-count');
+      const entriesTableEl = document.getElementById('entries-table');
+      const generateSection = document.getElementById('generate-section');
+      const publishSection = document.getElementById('publish-section');
+      const authStatusEl = document.getElementById('auth-status');
+      const publishStatusEl = document.getElementById('publish-status');
+      const publishBtn = document.getElementById('publish-btn');
+
+      let entries = [];
+      let token = '';
+      let slugTouchedManually = false;
+
+      function slugify(str) {
+        return (str || '')
+          .normalize('NFD')
+          .replace(new RegExp('[\\u0300-\\u036f]', 'g'), '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 60);
+      }
+
+      function makeSlug() {
+        return Math.random().toString(36).slice(2, 10);
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+      }
+
+      function utf8ToBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
+
+      function gameSlug() {
+        return gameSlugInput.value.trim();
+      }
+
+      function entryUrl(e) {
+        return `${SITE_URL}/s/${gameSlug()}/${e.slug}`;
+      }
+
+      clientNameInput.addEventListener('input', () => {
+        if (!slugTouchedManually) {
+          gameSlugInput.value = slugify(clientNameInput.value);
+        }
+      });
+      gameSlugInput.addEventListener('input', () => {
+        slugTouchedManually = true;
+        gameSlugInput.value = slugify(gameSlugInput.value);
+        slugPreview.textContent = `src/data/games/${gameSlugInput.value || '<slug>'}.json`;
+      });
+
+      function parseAnecdotes(raw) {
+        const isUrl = (s) => /^https?:\/\//i.test(s);
+        const blocks = raw.trim().split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean);
+        return blocks.map((block, i) => {
+          const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+          let source = '';
+          if (lines.length > 1 && isUrl(lines[lines.length - 1])) {
+            source = lines.pop();
+          }
+          const title = lines.shift() || `Anecdote ${i + 1}`;
+          const text = lines.join(' ');
+          return { num: i + 1, title, text, source, slug: makeSlug() };
+        });
+      }
+
+      function renderEntries() {
+        entryCountEl.textContent = entries.length;
+        entriesTableEl.innerHTML = '';
+        entries.forEach((e, idx) => {
+          const row = document.createElement('div');
+          row.className = 'entry-row';
+
+          const num = document.createElement('div');
+          num.className = 'entry-num';
+          num.textContent = '#' + e.num;
+          row.appendChild(num);
+
+          const fields = document.createElement('div');
+          fields.className = 'entry-fields';
+
+          const titleInput = document.createElement('input');
+          titleInput.value = e.title;
+          titleInput.placeholder = 'Titre';
+          titleInput.addEventListener('input', () => { e.title = titleInput.value; });
+          fields.appendChild(titleInput);
+
+          const textArea = document.createElement('textarea');
+          textArea.rows = 2;
+          textArea.value = e.text;
+          textArea.placeholder = 'Texte';
+          textArea.addEventListener('input', () => { e.text = textArea.value; });
+          fields.appendChild(textArea);
+
+          const sourceInput = document.createElement('input');
+          sourceInput.value = e.source;
+          sourceInput.placeholder = 'https://source (optionnel)';
+          sourceInput.addEventListener('input', () => { e.source = sourceInput.value; });
+          fields.appendChild(sourceInput);
+
+          const slugRow = document.createElement('div');
+          slugRow.className = 'entry-slug';
+          slugRow.innerHTML = `<code>${e.slug}</code>`;
+          fields.appendChild(slugRow);
+
+          row.appendChild(fields);
+
+          const del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'btn btn-danger';
+          del.textContent = 'Supprimer';
+          del.addEventListener('click', () => {
+            entries.splice(idx, 1);
+            entries.forEach((it, i2) => { it.num = i2 + 1; });
+            renderEntries();
+          });
+          row.appendChild(del);
+
+          entriesTableEl.appendChild(row);
+        });
+      }
+
+      parseBtn.addEventListener('click', () => {
+        const raw = rawTextEl.value;
+        if (!raw.trim()) {
+          parseStatusEl.textContent = 'Colle du texte à analyser.';
+          parseStatusEl.className = 'status status-error';
+          return;
+        }
+        entries = parseAnecdotes(raw);
+        if (!gameSlugInput.value.trim()) {
+          gameSlugInput.value = slugify(clientNameInput.value) || 'jeu';
+        }
+        slugPreview.textContent = `src/data/games/${gameSlugInput.value || '<slug>'}.json`;
+        parseStatusEl.textContent = `${entries.length} anecdote(s) trouvée(s).`;
+        parseStatusEl.className = 'status status-success';
+        previewSection.hidden = false;
+        generateSection.hidden = entries.length === 0;
+        publishSection.hidden = entries.length === 0;
+        publishBtn.disabled = !token;
+        renderEntries();
+      });
+
+      // ── Génération QR / cheat sheet / Excel (100% côté navigateur, rien de publié) ──
+
+      function buildQrHtml(label, cards) {
+        const qrCards = cards
+          .map(
+            (e) => `
+    <div class="card">
+      <img src="${e.qr}" alt="QR ${e.num}" width="180" height="180" />
+      <div class="num">#${e.num}</div>
+      <div class="title">${escapeHtml(e.title)}</div>
+    </div>`
+          )
+          .join('');
+        return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>QR Codes — ${escapeHtml(label)}</title>
+  <style>
+    @page { size: A4; margin: 1cm; }
+    body { font-family: Arial, sans-serif; background: #fff; color: #000; margin: 0; padding: 0; }
+    h1 { text-align: center; font-size: 1rem; margin: 0.5rem 0 1rem; color: #444; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+    .card { border: 1px dashed #ccc; border-radius: 8px; padding: 0.5rem; text-align: center; page-break-inside: avoid; }
+    .card img { display: block; margin: 0 auto; width: 130px; height: 130px; }
+    .num { font-size: 1rem; font-weight: bold; margin: 0.3rem 0 0.1rem; }
+    .title { font-size: 0.6rem; color: #555; line-height: 1.3; }
+    @media print { body { -webkit-print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(label)} — QR Codes à découper et cacher</h1>
+  <div class="grid">${qrCards}</div>
+</body>
+</html>`;
+      }
+
+      function buildCheatHtml(label, list) {
+        const rows = list
+          .map(
+            (e) => `
+    <tr>
+      <td class="num">${e.num}</td>
+      <td class="title">${escapeHtml(e.title)}</td>
+      <td class="text">${escapeHtml(e.text)}</td>
+      <td class="url">${escapeHtml(entryUrl(e))}</td>
+    </tr>`
+          )
+          .join('');
+        return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Cheat Sheet — ${escapeHtml(label)}</title>
+  <style>
+    @page { size: A4 landscape; margin: 1cm; }
+    body { font-family: Arial, sans-serif; font-size: 0.75rem; background: #fff; color: #000; margin: 0; }
+    h1 { font-size: 1rem; margin: 0 0 0.5rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1a1a2e; color: #fff; padding: 0.4rem 0.5rem; text-align: left; }
+    td { padding: 0.35rem 0.5rem; border-bottom: 1px solid #ddd; vertical-align: top; }
+    tr:nth-child(even) td { background: #f5f5f5; }
+    .num { width: 2rem; text-align: center; font-weight: bold; }
+    .title { width: 22%; font-weight: bold; }
+    .text { width: 55%; }
+    .url { width: 21%; font-size: 0.65rem; color: #555; word-break: break-all; }
+    @media print { body { -webkit-print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <h1>Cheat Sheet — ${escapeHtml(label)} (${list.length} anecdotes)</h1>
+  <table>
+    <thead>
+      <tr>
+        <th class="num">N°</th>
+        <th class="title">Titre</th>
+        <th class="text">Anecdote</th>
+        <th class="url">URL</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`;
+      }
+
+      function openHtmlInNewTab(html) {
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+
+      function currentLabel() {
+        return clientNameInput.value.trim() || gameSlug() || 'Jeu QR';
+      }
+
+      document.getElementById('gen-qr-btn').addEventListener('click', async () => {
+        const withQr = await Promise.all(
+          entries.map(async (e) => ({
+            ...e,
+            qr: await QRCode.toDataURL(entryUrl(e), {
+              width: 220,
+              margin: 2,
+              color: { dark: '#000000', light: '#ffffff' },
+            }),
+          }))
+        );
+        openHtmlInNewTab(buildQrHtml(currentLabel(), withQr));
+      });
+
+      document.getElementById('gen-cheat-btn').addEventListener('click', () => {
+        openHtmlInNewTab(buildCheatHtml(currentLabel(), entries));
+      });
+
+      document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
+        const rows = [
+          ['N°', 'Anecdote', 'Prénom', 'Nom'],
+          ...entries.map((e) => [e.num, e.title, '', '']),
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 4 }, { wch: 60 }, { wch: 20 }, { wch: 20 }];
+        const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
+        ['A1', 'B1', 'C1', 'D1'].forEach((cell) => { if (ws[cell]) ws[cell].s = headerStyle; });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Suivi QR Codes');
+        XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`);
+      });
+
+      // ── Publication GitHub (branche dédiée + PR, même mécanique que /admin) ──
+
+      async function gh(path, options) {
+        const res = await fetch('https://api.github.com' + path, {
+          ...options,
+          cache: 'no-store',
+          headers: {
+            Authorization: 'Bearer ' + token,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            ...(options && options.headers),
+          },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error((data && data.message) || (res.status + ' ' + res.statusText));
+        }
+        return data;
+      }
+
+      async function publishGame() {
+        const slug = gameSlug();
+        if (!slug) throw new Error('Renseigne un slug de jeu.');
+        const branch = `qr-game-${slug}`;
+        const mainRef = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${MAIN_BRANCH}`);
+
+        let branchExists = true;
+        try {
+          await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${branch}`);
+        } catch (e) {
+          branchExists = false;
+        }
+        if (!branchExists) {
+          await gh(`/repos/${OWNER}/${REPO}/git/refs`, {
+            method: 'POST',
+            body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: mainRef.object.sha }),
+          });
+        }
+
+        const path = `src/data/games/${slug}.json`;
+        const payload = entries.map(({ num, title, text, source, slug: s }) => ({ slug: s, num, title, text, source }));
+        const content = utf8ToBase64(JSON.stringify(payload, null, 2) + '\n');
+
+        let sha;
+        try {
+          const existing = await gh(`/repos/${OWNER}/${REPO}/contents/${path}?ref=${branch}`);
+          sha = existing.sha;
+        } catch (e) {
+          sha = undefined;
+        }
+
+        await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            message: `Nouveau jeu QR : ${slug}`,
+            content,
+            branch,
+            ...(sha ? { sha } : {}),
+          }),
+        });
+
+        const existingPRs = await gh(
+          `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${branch}&base=${MAIN_BRANCH}&state=open`
+        );
+        if (existingPRs.length > 0) return existingPRs[0].html_url;
+
+        const pr = await gh(`/repos/${OWNER}/${REPO}/pulls`, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: `Nouveau jeu QR : ${slug}`,
+            head: branch,
+            base: MAIN_BRANCH,
+            body: `Jeu généré depuis /admin/qr-games (${entries.length} anecdotes). À relire puis merger manuellement.`,
+          }),
+        });
+        return pr.html_url;
+      }
+
+      publishBtn.addEventListener('click', async () => {
+        publishBtn.disabled = true;
+        publishStatusEl.textContent = 'Publication en cours…';
+        publishStatusEl.className = 'status status-loading';
+        try {
+          const prUrl = await publishGame();
+          publishStatusEl.innerHTML = `PR ouverte — <a href="${prUrl}" target="_blank" rel="noopener">relire et merger sur GitHub ↗</a>`;
+          publishStatusEl.className = 'status status-success';
+        } catch (e) {
+          publishStatusEl.textContent = 'Erreur : ' + e.message;
+          publishStatusEl.className = 'status status-error';
+        } finally {
+          publishBtn.disabled = false;
+        }
+      });
+
+      async function connect(candidateToken) {
+        token = candidateToken;
+        authStatusEl.textContent = 'Vérification…';
+        authStatusEl.className = 'status status-loading';
+        try {
+          await gh(`/repos/${OWNER}/${REPO}`);
+          authStatusEl.textContent = 'Connecté.';
+          authStatusEl.className = 'status status-success';
+          publishBtn.disabled = entries.length === 0;
+        } catch (e) {
+          token = '';
+          authStatusEl.textContent = 'Token invalide ou sans accès au repo : ' + e.message;
+          authStatusEl.className = 'status status-error';
+        }
+      }
+
+      document.getElementById('connect-btn').addEventListener('click', () => {
+        const val = document.getElementById('token-input').value.trim();
+        if (!val) return;
+        if (document.getElementById('remember-check').checked) {
+          localStorage.setItem('sl_admin_pat', val);
+        }
+        connect(val);
+      });
+
+      const remembered = localStorage.getItem('sl_admin_pat');
+      if (remembered) {
+        document.getElementById('token-input').value = remembered;
+        document.getElementById('remember-check').checked = true;
+        connect(remembered);
+      }
+    </script>
+
+    <style is:global>
+      :root { color-scheme: dark; --bg: #2a1b14; --bg-card: #3a2620; --fg: #f5e6d5; --muted: #b8a491; --border: #4a332a; --accent: #8b9d7e; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+      main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 2rem; line-height: 1.5; }
+      .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+      .panel h2 { margin: 0 0 1rem; font-size: 1.2rem; }
+      .help { color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin: 0 0 1rem; }
+      .help code { background: var(--bg); padding: 0.1rem 0.35rem; border-radius: 4px; }
+      .help a { color: var(--accent); }
+      .field { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+      .field label { font-size: 0.85rem; color: var(--muted); }
+      .row { display: flex; gap: 0.5rem; }
+      input, textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--fg);
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+      textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; resize: vertical; }
+      .checkbox { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+      .checkbox input { width: auto; }
+      .btn {
+        background: var(--accent); color: #1a1a1a; font-weight: 600;
+        border: none; border-radius: 8px; padding: 0.6rem 1.1rem;
+        cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+      }
+      .btn:hover { opacity: 0.9; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-secondary { background: var(--bg); color: var(--fg); border: 1px solid var(--border); }
+      .btn-danger { background: #c0564f; color: #fff; }
+      .actions-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+      .status { font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2em; }
+      .status-loading { color: var(--muted); }
+      .status-success { color: #7ec88a; }
+      .status-error { color: #e2726b; }
+      .status-success a, .status a { color: var(--accent); }
+      .entries-table { display: flex; flex-direction: column; gap: 0.75rem; }
+      .entry-row { display: flex; gap: 0.75rem; align-items: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
+      .entry-num { font-size: 0.8rem; font-weight: 700; color: var(--accent); min-width: 2rem; padding-top: 0.5rem; }
+      .entry-fields { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+      .entry-fields textarea { font-family: inherit; }
+      .entry-slug { font-size: 0.75rem; color: var(--muted); }
+      .entry-slug code { background: var(--bg-card); padding: 0.1rem 0.4rem; border-radius: 4px; }
+      footer { margin-top: 2rem; text-align: center; font-size: 0.85rem; }
+    </style>
+  </body>
+</html>

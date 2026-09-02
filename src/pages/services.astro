@@ -1,0 +1,139 @@
+---
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Jeu de chasse aux QR codes sur mesure pour vos événements d'entreprise — team building, séminaires, salons." />
+    <title>Jeux de QR codes sur mesure — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/">← Accueil</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge">Service événementiel</div>
+        <h1>Un jeu de QR codes sur mesure pour votre événement</h1>
+        <p class="tagline">
+          Team building, séminaire, salon, journée d'intégration : une chasse au trésor numérique
+          personnalisée à votre entreprise, prête à imprimer en quelques jours.
+        </p>
+      </header>
+
+      <section class="about">
+        <p>
+          Le principe a fait ses preuves aux <strong>Fabrics &amp; Power BI Days 2026</strong> :
+          des QR codes cachés dans la salle, chacun révélant une anecdote sur votre thème
+          (votre entreprise, votre secteur, un sujet fun pour briser la glace). Aucune application
+          à installer — juste un smartphone et l'envie de chercher.
+        </p>
+        <p>
+          Voir l'exemple concret : <a href="/projets/qr-anecdotes-microsoft">le jeu des anecdotes Microsoft</a>.
+        </p>
+      </section>
+
+      <section class="steps">
+        <h2>Comment ça se passe</h2>
+        <ol>
+          <li><strong>Vous me donnez le thème</strong> — votre marque, un événement, une liste d'anecdotes si vous en avez déjà.</li>
+          <li><strong>Je génère le jeu</strong> — pages web cachées, QR codes, feuille à imprimer et cheat sheet organisateur, en quelques heures grâce à l'outil que j'ai développé pour ça.</li>
+          <li><strong>Vous imprimez et cachez</strong> — ou je peux m'en charger si l'événement est sur site.</li>
+        </ol>
+      </section>
+
+      <section class="pricing">
+        <h2>Tarif</h2>
+        <!-- À COMPLÉTER : prix fixe, fourchette ou "sur devis" selon ce que tu veux afficher publiquement. -->
+        <p>Sur devis, selon le nombre d'anecdotes et si vous souhaitez de l'accompagnement sur place.</p>
+        <a class="btn btn-primary" href="mailto:contact@squirrellab.fr?subject=Devis%20jeu%20QR%20codes">
+          Demander un devis →
+        </a>
+      </section>
+
+      <footer>
+        <p><a href="/">← Retour à SquirrelLab</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2.5rem; }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 1rem;
+      }
+      h1 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; line-height: 1.6; }
+      .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1rem; }
+      .about strong { color: var(--accent); }
+      .about a { color: var(--accent); }
+      .steps { margin: 2.5rem 0; }
+      .steps h2, .pricing h2 { font-size: 1.25rem; margin: 0 0 1rem; }
+      .steps ol { padding-left: 1.25rem; line-height: 1.8; }
+      .steps li { margin-bottom: 0.5rem; }
+      .pricing {
+        margin: 2.5rem 0;
+        padding: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .pricing p { line-height: 1.7; margin: 0 0 1.25rem; color: var(--fg); }
+      .btn {
+        display: inline-block;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.65rem 1.1rem;
+        border-radius: 8px;
+        transition: opacity 0.15s;
+      }
+      .btn:hover { opacity: 0.85; }
+      .btn-primary { background: var(--accent); color: var(--bg); }
+      footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
