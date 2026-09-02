@@ -375,15 +375,43 @@ https://source.example`}></textarea>
         openHtmlInNewTab(buildCheatHtml(currentLabel(), entries));
       });
 
+      function colLetter(n) {
+        let s = '';
+        while (n > 0) {
+          const rem = (n - 1) % 26;
+          s = String.fromCharCode(65 + rem) + s;
+          n = Math.floor((n - 1) / 26);
+        }
+        return s;
+      }
+
       document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
-        const rows = [
-          ['N°', 'Anecdote', 'Prénom', 'Nom'],
-          ...entries.map((e) => [e.num, e.title, '', '']),
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        ws['!cols'] = [{ wch: 4 }, { wch: 60 }, { wch: 20 }, { wch: 20 }];
+        // Une ligne par participant (ajoutée au fil de l'événement), une colonne par
+        // anecdote — même orientation que le fichier réellement utilisé en événement
+        // (plus naturel d'ajouter une ligne à chaque arrivée que d'ajouter une colonne).
+        const BLANK_ROWS = 20;
+        const n = entries.length;
+        const firstCol = colLetter(4);
+        const lastCol = colLetter(4 + n - 1);
+
+        const numberRow = ['', '', '', ...entries.map((e) => e.num)];
+        const headerRow = ['Prénom', 'Nom', 'Nb', ...entries.map((e) => e.title)];
+        const dataRows = [];
+        for (let i = 0; i < BLANK_ROWS; i++) {
+          const r = 3 + i;
+          dataRows.push(['', '', { t: 'n', f: `COUNTA(${firstCol}${r}:${lastCol}${r})` }, ...entries.map(() => '')]);
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet([numberRow, headerRow, ...dataRows]);
+        ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 8 }, ...entries.map(() => ({ wch: 22 }))];
+
         const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
-        ['A1', 'B1', 'C1', 'D1'].forEach((cell) => { if (ws[cell]) ws[cell].s = headerStyle; });
+        ['A2', 'B2', 'C2'].forEach((cell) => { if (ws[cell]) ws[cell].s = headerStyle; });
+        for (let i = 0; i < n; i++) {
+          const cellRef = `${colLetter(4 + i)}2`;
+          if (ws[cellRef]) ws[cellRef].s = headerStyle;
+        }
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Suivi QR Codes');
         XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`);
