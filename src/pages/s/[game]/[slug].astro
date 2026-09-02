@@ -30,9 +30,11 @@ const { anecdote, total } = Astro.props;
       <div class="badge">Anecdote n°{anecdote.num} / {total}</div>
       <h1>{anecdote.title}</h1>
       <p class="text">{anecdote.text}</p>
-      <a class="source" href={anecdote.source} target="_blank" rel="noopener noreferrer">
-        Vérifier la source →
-      </a>
+      {anecdote.source && (
+        <a class="source" href={anecdote.source} target="_blank" rel="noopener noreferrer">
+          Vérifier la source →
+        </a>
+      )}
     </main>
 
     <style is:global>
