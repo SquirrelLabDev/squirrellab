@@ -418,53 +418,71 @@ https://source.example`}></textarea>
       const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
 
       function buildIntroSheet(label) {
+        const P = PARTICIPANT_SLOTS;
         const rows = [];
         rows.push(['SquirrelLab']);
         const brandRow = rows.length;
-        rows.push([`Jeu de QR Codes — ${label}`]);
-        const titleRow = rows.length;
+        rows.push([`Bienvenue dans votre jeu de QR codes — ${label} !`]);
+        const welcomeRow = rows.length;
+        rows.push([`Vous êtes prêt(e) à faire vivre une chasse aux anecdotes mémorable à vos participants. Ce fichier vous accompagne pour tout suivre en un clin d'œil, sans prise de tête.`]);
         rows.push(['']);
         rows.push(['Comment utiliser ce fichier ?']);
         const howRow = rows.length;
-        rows.push([`Onglet "${SHEET_ANECDOTE}" : une ligne par anecdote, une colonne par participant — tapez un prénom en haut d'une colonne libre, puis "x" dès que la personne trouve l'anecdote.`]);
-        rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — se met à jour automatiquement, rien à ressaisir.`]);
+        rows.push([`Ajoutez vos participants une seule fois, ci-dessous dans "Participants" — ils apparaissent ensuite automatiquement dans les deux autres onglets, inutile de les ressaisir.`]);
+        rows.push([`Onglet "${SHEET_ANECDOTE}" : une ligne par anecdote, une colonne par participant — notez "x" dès qu'une personne trouve l'anecdote.`]);
+        rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — mise à jour automatique.`]);
+        rows.push([`Un exemple est déjà rempli ("Matthieu") pour vous montrer comment ça fonctionne — remplacez-le par votre premier vrai participant dès que le jeu commence.`]);
         rows.push(['']);
         rows.push(['Participants']);
         const participantsHeaderRow = rows.length;
+        rows.push(['Nombre de participants :', '']);
+        const countRow = rows.length;
         rows.push(['Prénom', 'Nom']);
         const rosterHeaderRow = rows.length;
-        for (let i = 0; i < 25; i++) rows.push(['', '']);
+        const rosterStartRow = rows.length + 1;
+        rows.push(['Matthieu', '']);
+        for (let i = 1; i < P; i++) rows.push(['', '']);
         rows.push(['']);
         rows.push(['© SquirrelLab — Tous droits réservés']);
         const copyrightRow = rows.length;
         rows.push(['squirrellab.fr']);
         const linkRow = rows.length;
-        rows.push([`Envie d'organiser votre propre jeu ? squirrellab.fr/services`]);
-        const servicesRow = rows.length;
+        rows.push([`Envie d'organiser votre propre jeu ? contact@squirrellab.fr`]);
+        const contactRow = rows.length;
 
         const ws = XLSX.utils.aoa_to_sheet(rows);
         ws['!cols'] = [{ wch: 62 }, { wch: 20 }];
         ws[`A${brandRow}`].s = { font: { bold: true, sz: 20, color: { rgb: 'E07840' } } };
         ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
-        ws[`A${titleRow}`].s = { font: { bold: true, sz: 13 } };
+        ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13 } };
         ws[`A${howRow}`].s = { font: { bold: true } };
         ws[`A${participantsHeaderRow}`].s = { font: { bold: true } };
+        ws[`A${countRow}`].s = { font: { bold: true } };
+        ws[`B${countRow}`] = { t: 'n', f: `COUNTA(A${rosterStartRow}:A${rosterStartRow + P - 1})` };
         ws[`A${rosterHeaderRow}`].s = { font: { bold: true } };
         ws[`B${rosterHeaderRow}`].s = { font: { bold: true } };
         ws[`A${copyrightRow}`].s = { font: { bold: true } };
         ws[`A${linkRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
         ws[`A${linkRow}`].s = { font: { color: { rgb: 'E07840' } } };
-        ws[`A${servicesRow}`].l = { Target: 'https://squirrellab.fr/services', Tooltip: 'squirrellab.fr/services' };
-        ws[`A${servicesRow}`].s = { font: { color: { rgb: 'E07840' } } };
-        return ws;
+        ws[`A${contactRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
+        ws[`A${contactRow}`].s = { font: { color: { rgb: 'E07840' } } };
+        return { ws, rosterStartRow };
       }
 
-      function buildAnecdoteSheet(entries) {
+      function buildAnecdoteSheet(entries, rosterStartRow) {
         const n = entries.length;
         const P = PARTICIPANT_SLOTS;
+        const exampleRowIdx = n >= 2 ? 1 : 0; // ligne d'anecdote sur laquelle poser le "x" d'exemple
 
-        const headerRow = ['N°', 'Anecdote / Nom - Prénom ->', ...Array(P).fill('')];
-        const dataRows = entries.map((e) => [e.num, e.title, ...Array(P).fill('')]);
+        const headerRow = [
+          'N°',
+          'Anecdote / Nom - Prénom ->',
+          ...Array(P).fill(0).map((_, j) => {
+            const r = rosterStartRow + j;
+            return { t: 'str', f: `IF('Intro'!A${r}="","",'Intro'!A${r})` };
+          }),
+        ];
+        const dataRows = entries.map((e, i) => [e.num, e.title, i === exampleRowIdx ? 'x' : '', ...Array(P - 1).fill('')]);
         const totalRow = ['Total Trouvé', '', ...Array(P).fill(0).map((_, j) => {
           const col = colLetter(3 + j);
           return { t: 'n', f: `COUNTA(${col}2:${col}${n + 1})` };
@@ -519,8 +537,9 @@ https://source.example`}></textarea>
 
       document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, buildIntroSheet(currentLabel()), 'Intro');
-        XLSX.utils.book_append_sheet(wb, buildAnecdoteSheet(entries), SHEET_ANECDOTE);
+        const { ws: introWs, rosterStartRow } = buildIntroSheet(currentLabel());
+        XLSX.utils.book_append_sheet(wb, introWs, 'Intro');
+        XLSX.utils.book_append_sheet(wb, buildAnecdoteSheet(entries, rosterStartRow), SHEET_ANECDOTE);
         XLSX.utils.book_append_sheet(wb, buildParticipantSheet(entries), SHEET_PARTICIPANT);
         XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`);
       });
