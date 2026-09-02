@@ -231,9 +231,20 @@
         setStatus(publishStatusEl, 'Publication en cours…', 'loading');
         try {
           await ensureContentBranch();
-          const { items, sha } = await readTypeFile(type);
-          const nextItems = mutate(items);
-          await writeTypeFile(type, nextItems, sha, message);
+          // GitHub peut renvoyer un conflit de sha si le fichier a changé entre la
+          // lecture et l'écriture (ex: un onglet resté ouvert ailleurs). On relit l'état
+          // frais et on réessaie plutôt que de faire échouer la publication pour ça.
+          let written = false;
+          for (let attempt = 0; !written; attempt++) {
+            const { items, sha } = await readTypeFile(type);
+            const nextItems = mutate(items);
+            try {
+              await writeTypeFile(type, nextItems, sha, message);
+              written = true;
+            } catch (e) {
+              if (attempt >= 2 || !/does not match/i.test(e.message)) throw e;
+            }
+          }
           const prUrl = await ensurePullRequest();
           setStatus(publishStatusEl, '', '');
           publishStatusEl.innerHTML = `PR à jour — <a href="${prUrl}" target="_blank" rel="noopener">relire et merger sur GitHub ↗</a>`;
