@@ -61,8 +61,8 @@ https://source.example`}></textarea>
         </div>
       </section>
 
-      <section id="publish-section" class="panel" hidden>
-        <h2>4. Publier sur le site</h2>
+      <section id="publish-section" class="panel">
+        <h2>4. Connexion &amp; publication</h2>
 
         <div id="auth-block">
           <p class="help">
@@ -81,6 +81,13 @@ https://source.example`}></textarea>
 
         <button id="publish-btn" class="btn" disabled>Publier ce jeu (ouvre une Pull Request)</button>
         <p id="publish-status" class="status"></p>
+      </section>
+
+      <section id="existing-section" class="panel" hidden>
+        <h2>5. Jeux publiés</h2>
+        <p class="help">Supprimer un jeu ouvre aussi une Pull Request (rien n'est retiré du site tant qu'elle n'est pas mergée) — pratique pour nettoyer un test.</p>
+        <div id="existing-list" class="existing-list"></div>
+        <p id="existing-status" class="status"></p>
       </section>
 
       <footer>
@@ -111,6 +118,9 @@ https://source.example`}></textarea>
       const authStatusEl = document.getElementById('auth-status');
       const publishStatusEl = document.getElementById('publish-status');
       const publishBtn = document.getElementById('publish-btn');
+      const existingSection = document.getElementById('existing-section');
+      const existingListEl = document.getElementById('existing-list');
+      const existingStatusEl = document.getElementById('existing-status');
 
       let entries = [];
       let token = '';
@@ -457,6 +467,98 @@ https://source.example`}></textarea>
         return pr.html_url;
       }
 
+      async function fetchExistingGames() {
+        try {
+          const files = await gh(`/repos/${OWNER}/${REPO}/contents/src/data/games?ref=${MAIN_BRANCH}`);
+          return (Array.isArray(files) ? files : []).filter((f) => f.name.endsWith('.json'));
+        } catch (e) {
+          return [];
+        }
+      }
+
+      async function deleteGame(file) {
+        const slug = file.name.replace(/\.json$/, '');
+        const branch = `qr-game-delete-${slug}`;
+        const mainRef = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${MAIN_BRANCH}`);
+
+        let branchExists = true;
+        try {
+          await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${branch}`);
+        } catch (e) {
+          branchExists = false;
+        }
+        if (!branchExists) {
+          await gh(`/repos/${OWNER}/${REPO}/git/refs`, {
+            method: 'POST',
+            body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: mainRef.object.sha }),
+          });
+        }
+
+        const onBranch = await gh(`/repos/${OWNER}/${REPO}/contents/${file.path}?ref=${branch}`);
+        await gh(`/repos/${OWNER}/${REPO}/contents/${file.path}`, {
+          method: 'DELETE',
+          body: JSON.stringify({
+            message: `Suppression du jeu QR : ${slug}`,
+            sha: onBranch.sha,
+            branch,
+          }),
+        });
+
+        const existingPRs = await gh(
+          `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${branch}&base=${MAIN_BRANCH}&state=open`
+        );
+        if (existingPRs.length > 0) return existingPRs[0].html_url;
+
+        const pr = await gh(`/repos/${OWNER}/${REPO}/pulls`, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: `Suppression jeu QR : ${slug}`,
+            head: branch,
+            base: MAIN_BRANCH,
+            body: `Suppression demandée depuis /admin/qr-games. À relire puis merger manuellement.`,
+          }),
+        });
+        return pr.html_url;
+      }
+
+      async function renderExistingGames() {
+        existingSection.hidden = false;
+        existingListEl.textContent = 'Chargement…';
+        const files = await fetchExistingGames();
+        existingListEl.innerHTML = '';
+        if (files.length === 0) {
+          existingListEl.textContent = 'Aucun jeu publié pour le moment.';
+          return;
+        }
+        for (const file of files) {
+          const row = document.createElement('div');
+          row.className = 'existing-item';
+          const name = document.createElement('span');
+          name.textContent = file.name.replace(/\.json$/, '');
+          row.appendChild(name);
+          const del = document.createElement('button');
+          del.className = 'btn btn-danger';
+          del.textContent = 'Supprimer';
+          del.addEventListener('click', async () => {
+            if (!confirm(`Supprimer le jeu "${name.textContent}" ? Une PR de suppression sera ouverte.`)) return;
+            del.disabled = true;
+            existingStatusEl.textContent = 'Suppression en cours…';
+            existingStatusEl.className = 'status status-loading';
+            try {
+              const prUrl = await deleteGame(file);
+              existingStatusEl.innerHTML = `PR de suppression ouverte — <a href="${prUrl}" target="_blank" rel="noopener">relire et merger sur GitHub ↗</a>`;
+              existingStatusEl.className = 'status status-success';
+            } catch (e) {
+              existingStatusEl.textContent = 'Erreur : ' + e.message;
+              existingStatusEl.className = 'status status-error';
+              del.disabled = false;
+            }
+          });
+          row.appendChild(del);
+          existingListEl.appendChild(row);
+        }
+      }
+
       publishBtn.addEventListener('click', async () => {
         publishBtn.disabled = true;
         publishStatusEl.textContent = 'Publication en cours…';
@@ -482,6 +584,7 @@ https://source.example`}></textarea>
           authStatusEl.textContent = 'Connecté.';
           authStatusEl.className = 'status status-success';
           publishBtn.disabled = entries.length === 0;
+          renderExistingGames();
         } catch (e) {
           token = '';
           authStatusEl.textContent = 'Token invalide ou sans accès au repo : ' + e.message;
@@ -553,6 +656,12 @@ https://source.example`}></textarea>
       .status-success { color: #7ec88a; }
       .status-error { color: #e2726b; }
       .status-success a, .status a { color: var(--accent); }
+      .existing-list { display: flex; flex-direction: column; gap: 0.5rem; }
+      .existing-item {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.5rem 0.75rem; font-size: 0.9rem;
+      }
       .entries-table { display: flex; flex-direction: column; gap: 0.75rem; }
       .entry-row { display: flex; gap: 0.75rem; align-items: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
       .entry-num { font-size: 0.8rem; font-weight: 700; color: var(--accent); min-width: 2rem; padding-top: 0.5rem; }
