@@ -115,6 +115,7 @@
       async function gh(path, options) {
         const res = await fetch('https://api.github.com' + path, {
           ...options,
+          cache: 'no-store',
           headers: {
             Authorization: 'Bearer ' + token,
             Accept: 'application/vnd.github+json',
