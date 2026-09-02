@@ -12,6 +12,9 @@ const resourceTemplate = document.getElementById('resource-template');
 
 const WHOAMI_KEY = `tokenManagerWhoAmI:${slug}`;
 let pollTimer = null;
+// While a take/release form is open, the periodic poll must not touch the DOM —
+// rebuilding the resources list mid-typing was wiping/closing the open textarea.
+let formOpen = false;
 
 function showError(message) {
   errorEl.textContent = message;
@@ -88,6 +91,7 @@ function renderResources(session) {
 }
 
 function showTakeForm(container, resource) {
+  formOpen = true;
   container.innerHTML = '';
   const field = document.createElement('div');
   field.className = 'field';
@@ -106,16 +110,26 @@ function showTakeForm(container, resource) {
         method: 'POST',
         body: JSON.stringify({ participantId: getWhoAmI(), justification: textarea.value }),
       });
+      formOpen = false;
       await refresh();
     } catch (err) {
       showError(err.message);
     }
   });
+  const cancel = document.createElement('button');
+  cancel.className = 'btn-secondary';
+  cancel.textContent = 'Annuler';
+  cancel.addEventListener('click', async () => {
+    formOpen = false;
+    await refresh();
+  });
   container.appendChild(field);
   container.appendChild(submit);
+  container.appendChild(cancel);
 }
 
 function showReleaseForm(container, resource) {
+  formOpen = true;
   container.innerHTML = '';
   const field = document.createElement('div');
   field.className = 'field';
@@ -134,13 +148,22 @@ function showReleaseForm(container, resource) {
         method: 'POST',
         body: JSON.stringify({ participantId: getWhoAmI(), message: textarea.value }),
       });
+      formOpen = false;
       await refresh();
     } catch (err) {
       showError(err.message);
     }
   });
+  const cancel = document.createElement('button');
+  cancel.className = 'btn-secondary';
+  cancel.textContent = 'Annuler';
+  cancel.addEventListener('click', async () => {
+    formOpen = false;
+    await refresh();
+  });
   container.appendChild(field);
   container.appendChild(submit);
+  container.appendChild(cancel);
 }
 
 function renderHistory(session) {
@@ -170,6 +193,7 @@ function renderHistory(session) {
 }
 
 async function refresh() {
+  if (formOpen) return;
   try {
     const session = await apiFetch(`/api/sessions/${slug}`);
     clearError();

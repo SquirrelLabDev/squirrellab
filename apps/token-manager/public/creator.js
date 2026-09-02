@@ -80,6 +80,32 @@ async function refreshSessions() {
           showError(err.message);
         }
       });
+
+      const expiryForm = node.querySelector('.s-expiry-form');
+      const expiryInput = node.querySelector('.s-expiry-input');
+      node.querySelector('.s-edit-expiry').addEventListener('click', () => {
+        expiryInput.value = '';
+        expiryForm.hidden = false;
+      });
+      node.querySelector('.s-expiry-cancel').addEventListener('click', () => {
+        expiryForm.hidden = true;
+      });
+      node.querySelector('.s-expiry-save').addEventListener('click', async () => {
+        if (expiryInput.value === '') {
+          showError('Indiquez un nombre de jours (0 pour ne jamais supprimer).');
+          return;
+        }
+        try {
+          await creatorFetch(`/api/creator/sessions/${session.slug}/expiry`, {
+            method: 'PATCH',
+            body: JSON.stringify({ expiryDays: Number(expiryInput.value) }),
+          });
+          await refreshSessions();
+        } catch (err) {
+          showError(err.message);
+        }
+      });
+
       sessionsList.appendChild(node);
     }
   } catch (err) {
@@ -133,6 +159,15 @@ function showLoggedOut() {
   authView.hidden = false;
   appView.hidden = true;
   logoutBtn.hidden = true;
+}
+
+for (const btn of document.querySelectorAll('.toggle-password')) {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.target);
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.setAttribute('aria-label', showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+  });
 }
 
 document.getElementById('tab-login').addEventListener('click', () => {

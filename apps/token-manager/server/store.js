@@ -109,8 +109,13 @@ export async function createCreator({ username, password }) {
   return transact((db) => {
     const normalized = (username || '').trim();
     if (!normalized) throw new AppError('invalid_username', "Nom d'utilisateur requis.");
-    if (!password || password.length < 8) {
-      throw new AppError('weak_password', 'Le mot de passe doit contenir au moins 8 caractères.');
+    const hasLetter = /[a-zA-Z]/.test(password || '');
+    const hasDigit = /[0-9]/.test(password || '');
+    if (!password || password.length < 10 || !hasLetter || !hasDigit) {
+      throw new AppError(
+        'weak_password',
+        'Le mot de passe doit contenir au moins 10 caractères, avec au moins une lettre et un chiffre.'
+      );
     }
     const taken = Object.values(db.creators).some(
       (c) => c.username.toLowerCase() === normalized.toLowerCase()

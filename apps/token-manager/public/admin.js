@@ -157,6 +157,15 @@ async function tryLogin(password) {
   }
 }
 
+for (const btn of document.querySelectorAll('.toggle-password')) {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.target);
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.setAttribute('aria-label', showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+  });
+}
+
 document.getElementById('login-btn').addEventListener('click', () => {
   const password = document.getElementById('password').value;
   tryLogin(password);
