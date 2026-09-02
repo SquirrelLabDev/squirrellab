@@ -9,6 +9,7 @@ export function getStaticPaths() {
 }
 
 const { anecdote } = Astro.props;
+const sourceUrl = anecdote.source && (/^https?:\/\//i.test(anecdote.source) ? anecdote.source : `https://${anecdote.source}`);
 ---
 
 <html lang="fr">
@@ -23,8 +24,8 @@ const { anecdote } = Astro.props;
       <div class="badge">Anecdote n°{anecdote.num} / 20</div>
       <h1>{anecdote.title}</h1>
       <p class="text">{anecdote.text}</p>
-      {anecdote.source && (
-        <a class="source" href={anecdote.source} target="_blank" rel="noopener noreferrer">
+      {sourceUrl && (
+        <a class="source" href={sourceUrl} target="_blank" rel="noopener noreferrer">
           Vérifier la source →
         </a>
       )}
