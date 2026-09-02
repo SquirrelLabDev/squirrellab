@@ -1,0 +1,383 @@
+---
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin — Matthieu Rancinan</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav"><a href="/">← Accueil</a></nav>
+      <header>
+        <h1>Admin contenu</h1>
+        <p class="tagline">Ajoute des articles, vidéos ou embeds. Chaque publication ouvre une Pull Request sur GitHub — rien n'est en ligne tant que tu ne l'as pas mergée toi-même.</p>
+      </header>
+
+      <section id="auth-section" class="panel">
+        <h2>1. Token GitHub</h2>
+        <p class="help">
+          Crée un <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>
+          scopé au repo <code>SquirrelLabDev/squirrellab</code>, avec les permissions
+          <strong>Contents: Read and write</strong> et <strong>Pull requests: Read and write</strong>.
+          Il n'est utilisé que pour parler à <code>api.github.com</code> et n'est stocké que dans ce navigateur.
+        </p>
+        <div class="row">
+          <input id="token-input" type="password" placeholder="github_pat_..." autocomplete="off" />
+          <button id="connect-btn" class="btn">Connecter</button>
+        </div>
+        <label class="checkbox"><input id="remember-check" type="checkbox" /> Se souvenir sur cet appareil</label>
+        <p id="auth-status" class="status"></p>
+      </section>
+
+      <section id="content-section" class="panel" hidden>
+        <h2>2. Contenu</h2>
+        <div class="tabs" id="tabs"></div>
+
+        <form id="add-form" class="form"></form>
+        <p id="publish-status" class="status"></p>
+
+        <h3>Existant</h3>
+        <div id="existing-list" class="existing-list"></div>
+      </section>
+
+      <footer>
+        <p><a href="/">← Accueil</a></p>
+      </footer>
+    </main>
+
+    <script>
+      const OWNER = 'SquirrelLabDev';
+      const REPO = 'squirrellab';
+      const MAIN_BRANCH = 'main';
+      const CONTENT_BRANCH = 'admin-content';
+
+      const TYPES = {
+        articles: {
+          label: 'Articles',
+          path: 'src/data/articles.json',
+          fields: [
+            { key: 'title', label: 'Titre', kind: 'text' },
+            { key: 'html', label: 'Contenu (HTML)', kind: 'textarea' },
+          ],
+          extra: () => ({ date: new Date().toISOString().slice(0, 10) }),
+        },
+        videos: {
+          label: 'Vidéos',
+          path: 'src/data/videos.json',
+          fields: [
+            { key: 'title', label: 'Titre', kind: 'text' },
+            { key: 'desc', label: 'Description', kind: 'textarea' },
+            { key: 'src', label: 'Chemin du fichier (/xxx.mp4, déjà présent dans public/)', kind: 'text' },
+          ],
+          extra: () => ({}),
+        },
+        embeds: {
+          label: 'Embeds',
+          path: 'src/data/embeds.json',
+          fields: [
+            { key: 'title', label: 'Titre', kind: 'text' },
+            { key: 'html', label: 'Contenu (HTML)', kind: 'textarea' },
+          ],
+          extra: () => ({}),
+        },
+      };
+
+      let token = '';
+      let activeType = 'articles';
+
+      const authStatusEl = document.getElementById('auth-status');
+      const publishStatusEl = document.getElementById('publish-status');
+      const contentSection = document.getElementById('content-section');
+      const tabsEl = document.getElementById('tabs');
+      const formEl = document.getElementById('add-form');
+      const existingListEl = document.getElementById('existing-list');
+
+      function setStatus(el, text, kind) {
+        el.textContent = text;
+        el.className = 'status' + (kind ? ' status-' + kind : '');
+      }
+
+      function utf8ToBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
+
+      function base64ToUtf8(str) {
+        return decodeURIComponent(escape(atob(str.replace(/\s/g, ''))));
+      }
+
+      function makeSlug() {
+        return Math.random().toString(36).slice(2, 10);
+      }
+
+      async function gh(path, options) {
+        const res = await fetch('https://api.github.com' + path, {
+          ...options,
+          headers: {
+            Authorization: 'Bearer ' + token,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            ...(options && options.headers),
+          },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error((data && data.message) || (res.status + ' ' + res.statusText));
+        }
+        return data;
+      }
+
+      async function ensureContentBranch() {
+        try {
+          const ref = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${CONTENT_BRANCH}`);
+          return ref.object.sha;
+        } catch (e) {
+          const mainRef = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${MAIN_BRANCH}`);
+          await gh(`/repos/${OWNER}/${REPO}/git/refs`, {
+            method: 'POST',
+            body: JSON.stringify({ ref: `refs/heads/${CONTENT_BRANCH}`, sha: mainRef.object.sha }),
+          });
+          return mainRef.object.sha;
+        }
+      }
+
+      async function readTypeFile(type) {
+        const cfg = TYPES[type];
+        const data = await gh(`/repos/${OWNER}/${REPO}/contents/${cfg.path}?ref=${CONTENT_BRANCH}`);
+        return { items: JSON.parse(base64ToUtf8(data.content)), sha: data.sha };
+      }
+
+      async function writeTypeFile(type, items, sha, message) {
+        const cfg = TYPES[type];
+        await gh(`/repos/${OWNER}/${REPO}/contents/${cfg.path}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            message,
+            content: utf8ToBase64(JSON.stringify(items, null, 2) + '\n'),
+            sha,
+            branch: CONTENT_BRANCH,
+          }),
+        });
+      }
+
+      async function ensurePullRequest() {
+        const existing = await gh(
+          `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${CONTENT_BRANCH}&base=${MAIN_BRANCH}&state=open`
+        );
+        if (existing.length > 0) return existing[0].html_url;
+        const pr = await gh(`/repos/${OWNER}/${REPO}/pulls`, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: 'Ajouts de contenu (admin)',
+            head: CONTENT_BRANCH,
+            base: MAIN_BRANCH,
+            body: 'Modifications de contenu créées depuis /admin. À relire puis merger manuellement.',
+          }),
+        });
+        return pr.html_url;
+      }
+
+      async function publish(type, mutate, message) {
+        setStatus(publishStatusEl, 'Publication en cours…', 'loading');
+        try {
+          await ensureContentBranch();
+          const { items, sha } = await readTypeFile(type);
+          const nextItems = mutate(items);
+          await writeTypeFile(type, nextItems, sha, message);
+          const prUrl = await ensurePullRequest();
+          setStatus(publishStatusEl, '', '');
+          publishStatusEl.innerHTML = `PR à jour — <a href="${prUrl}" target="_blank" rel="noopener">relire et merger sur GitHub ↗</a>`;
+          publishStatusEl.className = 'status status-success';
+          renderExisting(type);
+        } catch (e) {
+          setStatus(publishStatusEl, 'Erreur : ' + e.message, 'error');
+        }
+      }
+
+      function renderForm(type) {
+        const cfg = TYPES[type];
+        formEl.innerHTML = '';
+        for (const f of cfg.fields) {
+          const wrap = document.createElement('div');
+          wrap.className = 'field';
+          const label = document.createElement('label');
+          label.textContent = f.label;
+          label.htmlFor = 'f-' + f.key;
+          wrap.appendChild(label);
+          const input =
+            f.kind === 'textarea' ? document.createElement('textarea') : document.createElement('input');
+          input.id = 'f-' + f.key;
+          input.name = f.key;
+          if (f.kind === 'textarea') input.rows = 8;
+          wrap.appendChild(input);
+          formEl.appendChild(wrap);
+        }
+        const submit = document.createElement('button');
+        submit.type = 'submit';
+        submit.className = 'btn';
+        submit.textContent = 'Publier';
+        formEl.appendChild(submit);
+      }
+
+      formEl.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const cfg = TYPES[activeType];
+        const entry = { slug: makeSlug() };
+        for (const f of cfg.fields) {
+          entry[f.key] = document.getElementById('f-' + f.key).value.trim();
+        }
+        Object.assign(entry, cfg.extra());
+        publish(activeType, (items) => [...items, entry], `Ajout: ${entry.title || entry.slug}`);
+        formEl.reset();
+      });
+
+      async function renderExisting(type) {
+        existingListEl.textContent = 'Chargement…';
+        try {
+          const { items } = await readTypeFile(type);
+          existingListEl.innerHTML = '';
+          if (items.length === 0) {
+            existingListEl.textContent = 'Rien pour le moment.';
+            return;
+          }
+          for (const item of items) {
+            const row = document.createElement('div');
+            row.className = 'existing-item';
+            const title = document.createElement('span');
+            title.textContent = item.title || item.slug;
+            row.appendChild(title);
+            const del = document.createElement('button');
+            del.className = 'btn btn-danger';
+            del.textContent = 'Supprimer';
+            del.addEventListener('click', () => {
+              if (!confirm(`Supprimer "${item.title || item.slug}" ?`)) return;
+              publish(
+                type,
+                (items) => items.filter((i) => i.slug !== item.slug),
+                `Suppression: ${item.title || item.slug}`
+              );
+            });
+            row.appendChild(del);
+            existingListEl.appendChild(row);
+          }
+        } catch (e) {
+          existingListEl.textContent = 'Erreur : ' + e.message;
+        }
+      }
+
+      function selectType(type) {
+        activeType = type;
+        for (const btn of tabsEl.querySelectorAll('button')) {
+          btn.classList.toggle('active', btn.dataset.type === type);
+        }
+        renderForm(type);
+        renderExisting(type);
+      }
+
+      function initTabs() {
+        tabsEl.innerHTML = '';
+        for (const key of Object.keys(TYPES)) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.type = key;
+          btn.textContent = TYPES[key].label;
+          btn.addEventListener('click', () => selectType(key));
+          tabsEl.appendChild(btn);
+        }
+      }
+
+      async function connect(candidateToken) {
+        token = candidateToken;
+        setStatus(authStatusEl, 'Vérification…', 'loading');
+        try {
+          await gh(`/repos/${OWNER}/${REPO}`);
+          setStatus(authStatusEl, 'Connecté.', 'success');
+          contentSection.hidden = false;
+          initTabs();
+          selectType(activeType);
+        } catch (e) {
+          token = '';
+          setStatus(authStatusEl, 'Token invalide ou sans accès au repo : ' + e.message, 'error');
+        }
+      }
+
+      document.getElementById('connect-btn').addEventListener('click', () => {
+        const val = document.getElementById('token-input').value.trim();
+        if (!val) return;
+        if (document.getElementById('remember-check').checked) {
+          localStorage.setItem('sl_admin_pat', val);
+        }
+        connect(val);
+      });
+
+      const remembered = localStorage.getItem('sl_admin_pat');
+      if (remembered) {
+        document.getElementById('token-input').value = remembered;
+        document.getElementById('remember-check').checked = true;
+        connect(remembered);
+      }
+    </script>
+
+    <style is:global>
+      :root { color-scheme: dark; --bg: #2a1b14; --bg-card: #3a2620; --fg: #f5e6d5; --muted: #b8a491; --border: #4a332a; --accent: #8b9d7e; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+      main { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 2rem; line-height: 1.5; }
+      .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+      .panel h2 { margin: 0 0 1rem; font-size: 1.2rem; }
+      .panel h3 { margin: 1.5rem 0 0.75rem; font-size: 1rem; color: var(--muted); }
+      .help { color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin: 0 0 1rem; }
+      .help code { background: var(--bg); padding: 0.1rem 0.35rem; border-radius: 4px; }
+      .help a { color: var(--accent); }
+      .row { display: flex; gap: 0.5rem; }
+      input, textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--fg);
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+      textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; resize: vertical; }
+      .checkbox { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+      .checkbox input { width: auto; }
+      .btn {
+        background: var(--accent); color: #1a1a1a; font-weight: 600;
+        border: none; border-radius: 8px; padding: 0.6rem 1.1rem;
+        cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+      }
+      .btn:hover { opacity: 0.9; }
+      .btn-danger { background: #c0564f; color: #fff; margin-left: 0.75rem; }
+      .status { font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2em; }
+      .status-loading { color: var(--muted); }
+      .status-success { color: #7ec88a; }
+      .status-error { color: #e2726b; }
+      .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+      .tabs button {
+        background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+        border-radius: 999px; padding: 0.4rem 0.9rem; font-size: 0.85rem; cursor: pointer;
+      }
+      .tabs button.active { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+      .form { display: flex; flex-direction: column; gap: 1rem; }
+      .field { display: flex; flex-direction: column; gap: 0.35rem; }
+      .field label { font-size: 0.85rem; color: var(--muted); }
+      .existing-list { display: flex; flex-direction: column; gap: 0.5rem; }
+      .existing-item {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 0.5rem 0.75rem; font-size: 0.9rem;
+      }
+      footer { margin-top: 2rem; text-align: center; font-size: 0.85rem; }
+    </style>
+  </body>
+</html>

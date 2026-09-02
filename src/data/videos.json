@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "piege-pivot-power-query",
+    "title": "Le piège du pivot dans Power Query",
+    "desc": "Une erreur rencontrée lors d'un pivot dans Power Query — subtile et facile à reproduire sans s'en rendre compte. Une vidéo de 10 minutes, simple et rapide, pour comprendre le piège et l'éviter.",
+    "note": "PS : toute ressemblance avec des personnages réels serait fortuite (Arnaud Gastelblum 😉)",
+    "src": "/power-query-pivot-secrets.mp4"
+  }
+]
