@@ -1,7 +1,6 @@
 ---
-const gameFiles = import.meta.glob('../../../data/games/*.json', { eager: true });
-
 export function getStaticPaths() {
+  const gameFiles = import.meta.glob('../../../data/games/*.json', { eager: true });
   const paths = [];
   for (const path in gameFiles) {
     const game = path.match(/([^/]+)\.json$/)[1];
