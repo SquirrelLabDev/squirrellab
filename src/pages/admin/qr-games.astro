@@ -419,7 +419,7 @@ https://source.example`}></textarea>
 
       function buildIntroSheet(label) {
         const P = PARTICIPANT_SLOTS;
-        const bannerStyle = { font: { bold: true, sz: 20 }, fill: { fgColor: { rgb: 'E07840' } } };
+        const bannerStyle = { font: { bold: true, sz: 20, color: { rgb: 'E07840' } } };
         const sectionStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
 
         const rows = [];
@@ -466,7 +466,7 @@ https://source.example`}></textarea>
           ws[bRef].s = style;
         };
 
-        band(brandRow, bannerStyle);
+        ws[`A${brandRow}`].s = bannerStyle;
         ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
         ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13, color: { rgb: 'E07840' } } };
         band(howRow, sectionStyle);
