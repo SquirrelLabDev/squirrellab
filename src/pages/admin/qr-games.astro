@@ -419,6 +419,9 @@ https://source.example`}></textarea>
 
       function buildIntroSheet(label) {
         const P = PARTICIPANT_SLOTS;
+        const bannerStyle = { font: { bold: true, sz: 20 }, fill: { fgColor: { rgb: 'E07840' } } };
+        const sectionStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
+
         const rows = [];
         rows.push(['SquirrelLab']);
         const brandRow = rows.length;
@@ -433,6 +436,11 @@ https://source.example`}></textarea>
         rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — mise à jour automatique.`]);
         rows.push([`Un exemple est déjà rempli ("Matthieu") pour vous montrer comment ça fonctionne — remplacez-le par votre premier vrai participant dès que le jeu commence.`]);
         rows.push(['']);
+        rows.push(['Envie d\'organiser un jeu comme celui-ci pour votre entreprise ?']);
+        const ctaHeaderRow = rows.length;
+        rows.push(['contact@squirrellab.fr — www.squirrellab.fr']);
+        const ctaRow = rows.length;
+        rows.push(['']);
         rows.push(['Participants']);
         const participantsHeaderRow = rows.length;
         rows.push(['Nombre de participants :', '']);
@@ -445,18 +453,27 @@ https://source.example`}></textarea>
         rows.push(['']);
         rows.push(['© SquirrelLab — Tous droits réservés']);
         const copyrightRow = rows.length;
-        rows.push(['squirrellab.fr']);
+        rows.push(['www.squirrellab.fr']);
         const linkRow = rows.length;
-        rows.push([`Envie d'organiser votre propre jeu ? contact@squirrellab.fr`]);
-        const contactRow = rows.length;
 
         const ws = XLSX.utils.aoa_to_sheet(rows);
         ws['!cols'] = [{ wch: 62 }, { wch: 20 }];
-        ws[`A${brandRow}`].s = { font: { bold: true, sz: 20, color: { rgb: 'E07840' } } };
+
+        const band = (rowNum, style) => {
+          const bRef = `B${rowNum}`;
+          if (!ws[bRef]) ws[bRef] = { t: 's', v: '' };
+          ws[`A${rowNum}`].s = style;
+          ws[bRef].s = style;
+        };
+
+        band(brandRow, bannerStyle);
         ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
-        ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13 } };
-        ws[`A${howRow}`].s = { font: { bold: true } };
-        ws[`A${participantsHeaderRow}`].s = { font: { bold: true } };
+        ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13, color: { rgb: 'E07840' } } };
+        band(howRow, sectionStyle);
+        band(ctaHeaderRow, sectionStyle);
+        ws[`A${ctaRow}`].s = { font: { bold: true, color: { rgb: 'E07840' } } };
+        ws[`A${ctaRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
+        band(participantsHeaderRow, sectionStyle);
         ws[`A${countRow}`].s = { font: { bold: true } };
         ws[`B${countRow}`] = { t: 'n', f: `COUNTA(A${rosterStartRow}:A${rosterStartRow + P - 1})` };
         ws[`A${rosterHeaderRow}`].s = { font: { bold: true } };
@@ -464,8 +481,6 @@ https://source.example`}></textarea>
         ws[`A${copyrightRow}`].s = { font: { bold: true } };
         ws[`A${linkRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
         ws[`A${linkRow}`].s = { font: { color: { rgb: 'E07840' } } };
-        ws[`A${contactRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
-        ws[`A${contactRow}`].s = { font: { color: { rgb: 'E07840' } } };
         return { ws, rosterStartRow };
       }
 
