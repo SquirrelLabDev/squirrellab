@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Administration du site — Gestionnaire de tokens</title>
   <link rel="stylesheet" href="/styles.css" />
@@ -23,7 +24,10 @@
       <h2 style="margin-top:0;">Connexion</h2>
       <div class="field">
         <label for="password">Mot de passe admin</label>
-        <input type="password" id="password" autocomplete="current-password" />
+        <div class="row">
+          <input type="password" id="password" autocomplete="current-password" style="flex:1;" />
+          <button type="button" class="btn-secondary toggle-password" data-target="password" aria-label="Afficher le mot de passe">👁</button>
+        </div>
       </div>
       <button id="login-btn" class="btn-primary">Se connecter</button>
     </section>

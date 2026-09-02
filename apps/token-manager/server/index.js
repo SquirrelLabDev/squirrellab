@@ -196,6 +196,16 @@ app.post('/api/creator/sessions/:slug/resources', requireCreator, async (req, re
   res.status(201).json(publicSession(session));
 });
 
+app.patch('/api/creator/sessions/:slug/expiry', requireCreator, async (req, res) => {
+  if (!(await ownedSessionOr404(req, res))) return;
+  const parsedExpiry = parseExpiryDays(req.body?.expiryDays ?? null);
+  if (!parsedExpiry.ok) {
+    return res.status(400).json({ error: 'invalid_expiry', message: `Le délai doit être un nombre de jours entre 0 et ${MAX_EXPIRY_DAYS}.` });
+  }
+  const session = await setSessionExpiry(req.params.slug, parsedExpiry.value);
+  res.json(publicSession(session));
+});
+
 // --- Site-admin oversight API (sees/deletes everything, creates nothing) ---
 
 app.post('/api/admin/login', (req, res) => {
