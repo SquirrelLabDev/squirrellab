@@ -436,11 +436,6 @@ https://source.example`}></textarea>
         rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — mise à jour automatique.`]);
         rows.push([`Un exemple est déjà rempli ("Matthieu") pour vous montrer comment ça fonctionne — remplacez-le par votre premier vrai participant dès que le jeu commence.`]);
         rows.push(['']);
-        rows.push(['Envie d\'organiser un jeu comme celui-ci pour votre entreprise ?']);
-        const ctaHeaderRow = rows.length;
-        rows.push(['contact@squirrellab.fr — www.squirrellab.fr']);
-        const ctaRow = rows.length;
-        rows.push(['']);
         rows.push(['Participants']);
         const participantsHeaderRow = rows.length;
         rows.push(['Nombre de participants :', '']);
@@ -455,6 +450,8 @@ https://source.example`}></textarea>
         const copyrightRow = rows.length;
         rows.push(['www.squirrellab.fr']);
         const linkRow = rows.length;
+        rows.push([`Envie d'organiser un jeu comme celui-ci pour votre entreprise ? contact@squirrellab.fr`]);
+        const ctaRow = rows.length;
 
         const ws = XLSX.utils.aoa_to_sheet(rows);
         ws['!cols'] = [{ wch: 62 }, { wch: 20 }];
@@ -470,17 +467,19 @@ https://source.example`}></textarea>
         ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
         ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13, color: { rgb: 'E07840' } } };
         band(howRow, sectionStyle);
-        band(ctaHeaderRow, sectionStyle);
-        ws[`A${ctaRow}`].s = { font: { bold: true, color: { rgb: 'E07840' } } };
-        ws[`A${ctaRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
         band(participantsHeaderRow, sectionStyle);
         ws[`A${countRow}`].s = { font: { bold: true } };
-        ws[`B${countRow}`] = { t: 'n', f: `COUNTA(A${rosterStartRow}:A${rosterStartRow + P - 1})` };
+        // SUMPRODUCT plutôt que COUNTA : les emplacements non utilisés du roster sont
+        // remplis avec une chaîne vide (pas des cellules réellement blanches), et COUNTA
+        // les compterait quand même.
+        ws[`B${countRow}`] = { t: 'n', f: `SUMPRODUCT(--(A${rosterStartRow}:A${rosterStartRow + P - 1}<>""))` };
         ws[`A${rosterHeaderRow}`].s = { font: { bold: true } };
         ws[`B${rosterHeaderRow}`].s = { font: { bold: true } };
         ws[`A${copyrightRow}`].s = { font: { bold: true } };
         ws[`A${linkRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
         ws[`A${linkRow}`].s = { font: { color: { rgb: 'E07840' } } };
+        ws[`A${ctaRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
+        ws[`A${ctaRow}`].s = { font: { color: { rgb: 'E07840' } } };
         return { ws, rosterStartRow };
       }
 
@@ -498,9 +497,12 @@ https://source.example`}></textarea>
           }),
         ];
         const dataRows = entries.map((e, i) => [e.num, e.title, i === exampleRowIdx ? 'x' : '', ...Array(P - 1).fill('')]);
+        // SUMPRODUCT plutôt que COUNTA : les cellules non cochées sont remplies avec une
+        // chaîne vide (pas des cellules réellement blanches), et COUNTA les compterait
+        // quand même.
         const totalRow = ['Total Trouvé', '', ...Array(P).fill(0).map((_, j) => {
           const col = colLetter(3 + j);
-          return { t: 'n', f: `COUNTA(${col}2:${col}${n + 1})` };
+          return { t: 'n', f: `SUMPRODUCT(--(${col}2:${col}${n + 1}<>""))` };
         })];
 
         const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows, totalRow]);
@@ -559,7 +561,7 @@ https://source.example`}></textarea>
         XLSX.utils.book_append_sheet(wb, introWs, 'Intro');
         XLSX.utils.book_append_sheet(wb, buildAnecdoteSheet(entries, rosterStartRow), SHEET_ANECDOTE);
         XLSX.utils.book_append_sheet(wb, buildParticipantSheet(entries), SHEET_PARTICIPANT);
-        XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`);
+        XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`, { cellStyles: true });
       });
 
       // ── Publication GitHub (branche dédiée + PR, même mécanique que /admin) ──
