@@ -129,6 +129,13 @@
         return data;
       }
 
+      // Mémorise, pour la session en cours, qu'une PR ouverte existe déjà — évite de
+      // reredemander la liste des PR à GitHub juste après en avoir créé une : cet
+      // endpoint peut mettre une seconde à s'actualiser, et un faux "aucune PR ouverte"
+      // juste après création faisait réinitialiser la branche sous les pieds de la PR
+      // toute fraîche (qui se retrouvait vide et auto-fermée par GitHub).
+      let hasKnownOpenPR = false;
+
       async function hasOpenContentPR() {
         const existing = await gh(
           `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${CONTENT_BRANCH}&base=${MAIN_BRANCH}&state=open`
@@ -149,12 +156,17 @@
             method: 'POST',
             body: JSON.stringify({ ref: `refs/heads/${CONTENT_BRANCH}`, sha: mainRef.object.sha }),
           });
+          hasKnownOpenPR = false;
           return;
         }
-        // Pas de PR ouverte pour cette branche : soit elle a déjà été mergée, soit fermée
-        // sans merge (abandon). Dans les deux cas on la réaligne sur main pour repartir
-        // d'une base propre — sinon des modifs abandonnées restent invisiblement en attente.
-        if (!(await hasOpenContentPR())) {
+        if (hasKnownOpenPR) return;
+        // Pas de PR ouverte connue pour cette branche : soit elle a déjà été mergée, soit
+        // fermée sans merge (abandon). Dans les deux cas on la réaligne sur main pour
+        // repartir d'une base propre — sinon des modifs abandonnées restent invisiblement
+        // en attente. On ne refait ce vrai check GitHub qu'une fois par session/rechargement.
+        if (await hasOpenContentPR()) {
+          hasKnownOpenPR = true;
+        } else {
           await gh(`/repos/${OWNER}/${REPO}/git/refs/heads/${CONTENT_BRANCH}`, {
             method: 'PATCH',
             body: JSON.stringify({ sha: mainRef.object.sha, force: true }),
@@ -185,7 +197,10 @@
         const existing = await gh(
           `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${CONTENT_BRANCH}&base=${MAIN_BRANCH}&state=open`
         );
-        if (existing.length > 0) return existing[0].html_url;
+        if (existing.length > 0) {
+          hasKnownOpenPR = true;
+          return existing[0].html_url;
+        }
         const pr = await gh(`/repos/${OWNER}/${REPO}/pulls`, {
           method: 'POST',
           body: JSON.stringify({
@@ -195,6 +210,7 @@
             body: 'Modifications de contenu créées depuis /admin. À relire puis merger manuellement.',
           }),
         });
+        hasKnownOpenPR = true;
         return pr.html_url;
       }
 
