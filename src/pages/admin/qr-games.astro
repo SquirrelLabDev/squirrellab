@@ -125,6 +125,13 @@ https://source.example`}></textarea>
       let entries = [];
       let token = '';
       let slugTouchedManually = false;
+      let editingExistingGame = false;
+
+      function updatePublishBtnLabel() {
+        publishBtn.textContent = editingExistingGame
+          ? 'Valider les modifications (ouvre une Pull Request)'
+          : 'Publier ce jeu (ouvre une Pull Request)';
+      }
 
       function slugify(str) {
         return (str || '')
@@ -252,6 +259,8 @@ https://source.example`}></textarea>
           return;
         }
         entries = parseAnecdotes(raw);
+        editingExistingGame = false;
+        updatePublishBtnLabel();
         if (!gameSlugInput.value.trim()) {
           gameSlugInput.value = slugify(clientNameInput.value) || 'jeu';
         }
@@ -275,6 +284,7 @@ https://source.example`}></textarea>
       <img src="${e.qr}" alt="QR ${e.num}" width="180" height="180" />
       <div class="num">#${e.num}</div>
       <div class="title">${escapeHtml(e.title)}</div>
+      <div class="brand">squirrellab.fr</div>
     </div>`
           )
           .join('');
@@ -286,18 +296,25 @@ https://source.example`}></textarea>
   <style>
     @page { size: A4; margin: 1cm; }
     body { font-family: Arial, sans-serif; background: #fff; color: #000; margin: 0; padding: 0; }
-    h1 { text-align: center; font-size: 1rem; margin: 0.5rem 0 1rem; color: #444; }
+    h1 { text-align: center; font-size: 1rem; margin: 0.5rem 0 0.15rem; color: #444; }
+    .brand-banner { text-align: center; font-size: 0.7rem; margin: 0 0 1rem; }
+    .brand-banner strong { color: #e07840; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
     .card { border: 1px dashed #ccc; border-radius: 8px; padding: 0.5rem; text-align: center; page-break-inside: avoid; }
     .card img { display: block; margin: 0 auto; width: 130px; height: 130px; }
     .num { font-size: 1rem; font-weight: bold; margin: 0.3rem 0 0.1rem; }
     .title { font-size: 0.6rem; color: #555; line-height: 1.3; }
+    .brand { font-size: 0.5rem; color: #e07840; font-weight: bold; margin-top: 0.25rem; }
+    .footer { text-align: center; font-size: 0.7rem; color: #777; margin-top: 1.25rem; }
+    .footer strong { color: #e07840; }
     @media print { body { -webkit-print-color-adjust: exact; } }
   </style>
 </head>
 <body>
   <h1>${escapeHtml(label)} — QR Codes à découper et cacher</h1>
+  <div class="brand-banner">Jeu généré par <strong>SquirrelLab</strong> — squirrellab.fr</div>
   <div class="grid">${qrCards}</div>
+  <div class="footer">Envie d'organiser le vôtre ? <strong>squirrellab.fr/services</strong></div>
 </body>
 </html>`;
       }
@@ -322,6 +339,8 @@ https://source.example`}></textarea>
   <style>
     @page { size: A4 landscape; margin: 1cm; }
     body { font-family: Arial, sans-serif; font-size: 0.75rem; background: #fff; color: #000; margin: 0; }
+    .banner { background: #e07840; color: #fff; padding: 0.5rem 0.75rem; margin: 0 0 0.75rem; font-weight: bold; }
+    .banner span { font-weight: normal; opacity: 0.9; }
     h1 { font-size: 1rem; margin: 0 0 0.5rem; }
     table { width: 100%; border-collapse: collapse; }
     th { background: #1a1a2e; color: #fff; padding: 0.4rem 0.5rem; text-align: left; }
@@ -331,10 +350,13 @@ https://source.example`}></textarea>
     .title { width: 22%; font-weight: bold; }
     .text { width: 55%; }
     .url { width: 21%; font-size: 0.65rem; color: #555; word-break: break-all; }
+    .footer { text-align: center; font-size: 0.7rem; color: #777; margin-top: 1rem; }
+    .footer strong { color: #e07840; }
     @media print { body { -webkit-print-color-adjust: exact; } }
   </style>
 </head>
 <body>
+  <div class="banner">SquirrelLab <span>— squirrellab.fr — cheat sheet organisateur, ne pas diffuser aux participants</span></div>
   <h1>Cheat Sheet — ${escapeHtml(label)} (${list.length} anecdotes)</h1>
   <table>
     <thead>
@@ -347,6 +369,7 @@ https://source.example`}></textarea>
     </thead>
     <tbody>${rows}</tbody>
   </table>
+  <div class="footer">Envie d'organiser le vôtre ? <strong>squirrellab.fr/services</strong></div>
 </body>
 </html>`;
       }
@@ -389,35 +412,116 @@ https://source.example`}></textarea>
         return s;
       }
 
-      document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
-        // Une ligne par participant (ajoutée au fil de l'événement), une colonne par
-        // anecdote — même orientation que le fichier réellement utilisé en événement
-        // (plus naturel d'ajouter une ligne à chaque arrivée que d'ajouter une colonne).
-        const BLANK_ROWS = 20;
+      const PARTICIPANT_SLOTS = 20;
+      const SHEET_ANECDOTE = 'Suivi par anecdote';
+      const SHEET_PARTICIPANT = 'Suivi par participant';
+      const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
+
+      function buildIntroSheet(label) {
+        const rows = [];
+        rows.push(['SquirrelLab']);
+        const brandRow = rows.length;
+        rows.push([`Jeu de QR Codes — ${label}`]);
+        const titleRow = rows.length;
+        rows.push(['']);
+        rows.push(['Comment utiliser ce fichier ?']);
+        const howRow = rows.length;
+        rows.push([`Onglet "${SHEET_ANECDOTE}" : une ligne par anecdote, une colonne par participant — tapez un prénom en haut d'une colonne libre, puis "x" dès que la personne trouve l'anecdote.`]);
+        rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — se met à jour automatiquement, rien à ressaisir.`]);
+        rows.push(['']);
+        rows.push(['Participants']);
+        const participantsHeaderRow = rows.length;
+        rows.push(['Prénom', 'Nom']);
+        const rosterHeaderRow = rows.length;
+        for (let i = 0; i < 25; i++) rows.push(['', '']);
+        rows.push(['']);
+        rows.push(['© SquirrelLab — Tous droits réservés']);
+        const copyrightRow = rows.length;
+        rows.push(['squirrellab.fr']);
+        const linkRow = rows.length;
+        rows.push([`Envie d'organiser votre propre jeu ? squirrellab.fr/services`]);
+        const servicesRow = rows.length;
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 62 }, { wch: 20 }];
+        ws[`A${brandRow}`].s = { font: { bold: true, sz: 20, color: { rgb: 'E07840' } } };
+        ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
+        ws[`A${titleRow}`].s = { font: { bold: true, sz: 13 } };
+        ws[`A${howRow}`].s = { font: { bold: true } };
+        ws[`A${participantsHeaderRow}`].s = { font: { bold: true } };
+        ws[`A${rosterHeaderRow}`].s = { font: { bold: true } };
+        ws[`B${rosterHeaderRow}`].s = { font: { bold: true } };
+        ws[`A${copyrightRow}`].s = { font: { bold: true } };
+        ws[`A${linkRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
+        ws[`A${linkRow}`].s = { font: { color: { rgb: 'E07840' } } };
+        ws[`A${servicesRow}`].l = { Target: 'https://squirrellab.fr/services', Tooltip: 'squirrellab.fr/services' };
+        ws[`A${servicesRow}`].s = { font: { color: { rgb: 'E07840' } } };
+        return ws;
+      }
+
+      function buildAnecdoteSheet(entries) {
         const n = entries.length;
-        const firstCol = colLetter(4);
-        const lastCol = colLetter(4 + n - 1);
+        const P = PARTICIPANT_SLOTS;
 
-        const numberRow = ['', '', '', ...entries.map((e) => e.num)];
-        const headerRow = ['Prénom', 'Nom', 'Nb', ...entries.map((e) => e.title)];
+        const headerRow = ['N°', 'Anecdote / Nom - Prénom ->', ...Array(P).fill('')];
+        const dataRows = entries.map((e) => [e.num, e.title, ...Array(P).fill('')]);
+        const totalRow = ['Total Trouvé', '', ...Array(P).fill(0).map((_, j) => {
+          const col = colLetter(3 + j);
+          return { t: 'n', f: `COUNTA(${col}2:${col}${n + 1})` };
+        })];
+
+        const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows, totalRow]);
+        ws['!cols'] = [{ wch: 5 }, { wch: 50 }, ...Array(P).fill({ wch: 14 })];
+        for (let c = 1; c <= 2 + P; c++) {
+          const ref = `${colLetter(c)}1`;
+          if (ws[ref]) ws[ref].s = headerStyle;
+        }
+        const totalRowIdx = n + 2;
+        if (ws[`A${totalRowIdx}`]) ws[`A${totalRowIdx}`].s = { font: { bold: true } };
+        return ws;
+      }
+
+      function buildParticipantSheet(entries) {
+        const n = entries.length;
+        const P = PARTICIPANT_SLOTS;
+        const lastAnecdoteCol = colLetter(2 + n);
+
+        const headerRow = [
+          'Prénom',
+          'Nb',
+          ...entries.map((e, i) => ({
+            t: 'str',
+            f: `IF('${SHEET_ANECDOTE}'!B${i + 2}="","",'${SHEET_ANECDOTE}'!B${i + 2})`,
+          })),
+        ];
         const dataRows = [];
-        for (let i = 0; i < BLANK_ROWS; i++) {
-          const r = 3 + i;
-          dataRows.push(['', '', { t: 'n', f: `COUNTA(${firstCol}${r}:${lastCol}${r})` }, ...entries.map(() => '')]);
+        for (let j = 0; j < P; j++) {
+          const srcCol = colLetter(3 + j);
+          const row = [
+            { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCol}1="","",'${SHEET_ANECDOTE}'!${srcCol}1)` },
+            { t: 'n', f: `COUNTA(C${j + 2}:${lastAnecdoteCol}${j + 2})` },
+            ...entries.map((e, i) => {
+              const srcCell = `${srcCol}${i + 2}`;
+              return { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCell}="","",'${SHEET_ANECDOTE}'!${srcCell})` };
+            }),
+          ];
+          dataRows.push(row);
         }
 
-        const ws = XLSX.utils.aoa_to_sheet([numberRow, headerRow, ...dataRows]);
-        ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 8 }, ...entries.map(() => ({ wch: 22 }))];
-
-        const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
-        ['A2', 'B2', 'C2'].forEach((cell) => { if (ws[cell]) ws[cell].s = headerStyle; });
-        for (let i = 0; i < n; i++) {
-          const cellRef = `${colLetter(4 + i)}2`;
-          if (ws[cellRef]) ws[cellRef].s = headerStyle;
+        const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+        ws['!cols'] = [{ wch: 18 }, { wch: 6 }, ...entries.map(() => ({ wch: 24 }))];
+        for (let c = 1; c <= 2 + n; c++) {
+          const ref = `${colLetter(c)}1`;
+          if (ws[ref]) ws[ref].s = headerStyle;
         }
+        return ws;
+      }
 
+      document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Suivi QR Codes');
+        XLSX.utils.book_append_sheet(wb, buildIntroSheet(currentLabel()), 'Intro');
+        XLSX.utils.book_append_sheet(wb, buildAnecdoteSheet(entries), SHEET_ANECDOTE);
+        XLSX.utils.book_append_sheet(wb, buildParticipantSheet(entries), SHEET_PARTICIPANT);
         XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`);
       });
 
@@ -557,12 +661,14 @@ https://source.example`}></textarea>
         const data = await gh(`/repos/${OWNER}/${REPO}/contents/${file.path}?ref=${MAIN_BRANCH}`);
         const items = JSON.parse(base64ToUtf8(data.content));
         entries = items.map((it) => ({ ...it }));
+        editingExistingGame = true;
+        updatePublishBtnLabel();
         const slug = file.name.replace(/\.json$/, '');
         gameSlugInput.value = slug;
         slugTouchedManually = true;
         if (!clientNameInput.value.trim()) clientNameInput.value = slug;
         slugPreview.textContent = `src/data/games/${slug}.json`;
-        parseStatusEl.textContent = `${entries.length} anecdote(s) chargée(s) pour édition — republier écrasera le jeu existant.`;
+        parseStatusEl.textContent = `${entries.length} anecdote(s) chargée(s) pour édition — valider écrasera le jeu existant.`;
         parseStatusEl.className = 'status status-success';
         previewSection.hidden = false;
         generateSection.hidden = false;
