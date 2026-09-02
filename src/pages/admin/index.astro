@@ -74,12 +74,12 @@
           ],
           extra: () => ({}),
         },
-        embeds: {
-          label: 'Embeds',
-          path: 'src/data/embeds.json',
+        dashboards: {
+          label: 'Dashboards',
+          path: 'src/data/dashboards.json',
           fields: [
             { key: 'title', label: 'Titre', kind: 'text' },
-            { key: 'html', label: 'Contenu (HTML)', kind: 'textarea' },
+            { key: 'html', label: 'Contenu (HTML — iframe Power BI, widget, etc.)', kind: 'textarea' },
           ],
           extra: () => ({}),
         },
@@ -129,17 +129,36 @@
         return data;
       }
 
+      async function hasOpenContentPR() {
+        const existing = await gh(
+          `/repos/${OWNER}/${REPO}/pulls?head=${OWNER}:${CONTENT_BRANCH}&base=${MAIN_BRANCH}&state=open`
+        );
+        return existing.length > 0;
+      }
+
       async function ensureContentBranch() {
+        const mainRef = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${MAIN_BRANCH}`);
+        let branchExists = true;
         try {
-          const ref = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${CONTENT_BRANCH}`);
-          return ref.object.sha;
+          await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${CONTENT_BRANCH}`);
         } catch (e) {
-          const mainRef = await gh(`/repos/${OWNER}/${REPO}/git/ref/heads/${MAIN_BRANCH}`);
+          branchExists = false;
+        }
+        if (!branchExists) {
           await gh(`/repos/${OWNER}/${REPO}/git/refs`, {
             method: 'POST',
             body: JSON.stringify({ ref: `refs/heads/${CONTENT_BRANCH}`, sha: mainRef.object.sha }),
           });
-          return mainRef.object.sha;
+          return;
+        }
+        // Pas de PR ouverte pour cette branche : soit elle a déjà été mergée, soit fermée
+        // sans merge (abandon). Dans les deux cas on la réaligne sur main pour repartir
+        // d'une base propre — sinon des modifs abandonnées restent invisiblement en attente.
+        if (!(await hasOpenContentPR())) {
+          await gh(`/repos/${OWNER}/${REPO}/git/refs/heads/${CONTENT_BRANCH}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ sha: mainRef.object.sha, force: true }),
+          });
         }
       }
 
@@ -179,7 +198,20 @@
         return pr.html_url;
       }
 
+      let busy = false;
+
+      function setFormDisabled(disabled) {
+        for (const el of formEl.querySelectorAll('button, input, textarea')) el.disabled = disabled;
+        for (const el of existingListEl.querySelectorAll('button')) el.disabled = disabled;
+      }
+
       async function publish(type, mutate, message) {
+        if (busy) {
+          setStatus(publishStatusEl, 'Une publication est déjà en cours, attends qu\'elle se termine.', 'error');
+          return;
+        }
+        busy = true;
+        setFormDisabled(true);
         setStatus(publishStatusEl, 'Publication en cours…', 'loading');
         try {
           await ensureContentBranch();
@@ -190,13 +222,19 @@
           setStatus(publishStatusEl, '', '');
           publishStatusEl.innerHTML = `PR à jour — <a href="${prUrl}" target="_blank" rel="noopener">relire et merger sur GitHub ↗</a>`;
           publishStatusEl.className = 'status status-success';
-          renderExisting(type);
+          await renderExisting(type);
         } catch (e) {
           setStatus(publishStatusEl, 'Erreur : ' + e.message, 'error');
+        } finally {
+          busy = false;
+          setFormDisabled(false);
         }
       }
 
+      let editingSlug = null;
+
       function renderForm(type) {
+        editingSlug = null;
         const cfg = TYPES[type];
         formEl.innerHTML = '';
         for (const f of cfg.fields) {
@@ -214,28 +252,69 @@
           wrap.appendChild(input);
           formEl.appendChild(wrap);
         }
+        const actions = document.createElement('div');
+        actions.className = 'form-actions';
         const submit = document.createElement('button');
         submit.type = 'submit';
+        submit.id = 'submit-btn';
         submit.className = 'btn';
         submit.textContent = 'Publier';
-        formEl.appendChild(submit);
+        actions.appendChild(submit);
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.id = 'cancel-edit-btn';
+        cancel.className = 'btn btn-secondary';
+        cancel.textContent = 'Annuler';
+        cancel.hidden = true;
+        cancel.addEventListener('click', () => exitEditMode(type));
+        actions.appendChild(cancel);
+        formEl.appendChild(actions);
+      }
+
+      function enterEditMode(type, item) {
+        editingSlug = item.slug;
+        for (const f of TYPES[type].fields) {
+          document.getElementById('f-' + f.key).value = item[f.key] || '';
+        }
+        document.getElementById('submit-btn').textContent = 'Enregistrer les modifications';
+        document.getElementById('cancel-edit-btn').hidden = false;
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function exitEditMode(type) {
+        editingSlug = null;
+        formEl.reset();
+        document.getElementById('submit-btn').textContent = 'Publier';
+        document.getElementById('cancel-edit-btn').hidden = true;
       }
 
       formEl.addEventListener('submit', (ev) => {
         ev.preventDefault();
         const cfg = TYPES[activeType];
-        const entry = { slug: makeSlug() };
+        const values = {};
         for (const f of cfg.fields) {
-          entry[f.key] = document.getElementById('f-' + f.key).value.trim();
+          values[f.key] = document.getElementById('f-' + f.key).value.trim();
         }
-        Object.assign(entry, cfg.extra());
-        publish(activeType, (items) => [...items, entry], `Ajout: ${entry.title || entry.slug}`);
-        formEl.reset();
+        if (editingSlug) {
+          const slugToEdit = editingSlug;
+          publish(
+            activeType,
+            (items) => items.map((i) => (i.slug === slugToEdit ? { ...i, ...values } : i)),
+            `Modification: ${values.title || slugToEdit}`
+          );
+          exitEditMode(activeType);
+        } else {
+          const entry = { slug: makeSlug(), ...values };
+          Object.assign(entry, cfg.extra());
+          publish(activeType, (items) => [...items, entry], `Ajout: ${entry.title || entry.slug}`);
+          formEl.reset();
+        }
       });
 
       async function renderExisting(type) {
         existingListEl.textContent = 'Chargement…';
         try {
+          await ensureContentBranch();
           const { items } = await readTypeFile(type);
           existingListEl.innerHTML = '';
           if (items.length === 0) {
@@ -248,6 +327,12 @@
             const title = document.createElement('span');
             title.textContent = item.title || item.slug;
             row.appendChild(title);
+            const actions = document.createElement('div');
+            const edit = document.createElement('button');
+            edit.className = 'btn btn-secondary';
+            edit.textContent = 'Éditer';
+            edit.addEventListener('click', () => enterEditMode(type, item));
+            actions.appendChild(edit);
             const del = document.createElement('button');
             del.className = 'btn btn-danger';
             del.textContent = 'Supprimer';
@@ -259,7 +344,8 @@
                 `Suppression: ${item.title || item.slug}`
               );
             });
-            row.appendChild(del);
+            actions.appendChild(del);
+            row.appendChild(actions);
             existingListEl.appendChild(row);
           }
         } catch (e) {
@@ -358,6 +444,8 @@
       }
       .btn:hover { opacity: 0.9; }
       .btn-danger { background: #c0564f; color: #fff; margin-left: 0.75rem; }
+      .btn-secondary { background: var(--bg); color: var(--fg); border: 1px solid var(--border); }
+      .form-actions { display: flex; gap: 0.75rem; }
       .status { font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2em; }
       .status-loading { color: var(--muted); }
       .status-success { color: #7ec88a; }

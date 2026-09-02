@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "cv-interactif",
+    "title": "CV interactif",
+    "html": "<p class=\"desc\">Mon parcours professionnel sous forme de dashboard navigable : expériences, compétences, projets.</p>\n<div class=\"embed-wrapper\">\n  <iframe class=\"embed\" title=\"CV\" src=\"https://app.powerbi.com/view?r=eyJrIjoiZDNkYjVjMWUtZmE2ZC00MWI3LWE3OWEtQTQ4YjYxMGMwZWJkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9\" loading=\"lazy\" allowfullscreen></iframe>\n  <p class=\"embed-note\"><a href=\"https://app.powerbi.com/view?r=eyJrIjoiZDNkYjVjMWUtZmE2ZC00MWI3LWE3OWEtQTQ4YjYxMGMwZWJkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9\" target=\"_blank\" rel=\"noopener\">Ouvrir en plein écran ↗</a></p>\n</div>"
+  },
+  {
+    "slug": "escape-game-data",
+    "title": "Escape game data",
+    "html": "<p class=\"desc\">Une expérience ludique en Power BI — résolution d'énigmes via des visualisations interactives.</p>\n<div class=\"embed-wrapper\">\n  <iframe class=\"embed\" title=\"ReportFinal\" src=\"https://app.powerbi.com/view?r=eyJrIjoiODg5NTMwZjItY2MxMS00N2U2LTk4ZTEtYTZlOTYxNjc3ZjAxIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9\" loading=\"lazy\" allowfullscreen></iframe>\n  <p class=\"embed-note\"><a href=\"https://app.powerbi.com/view?r=eyJrIjoiODg5NTMwZjItY2MxMS00N2U2LTk4ZTEtYTZlOTYxNjc3ZjAxIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9\" target=\"_blank\" rel=\"noopener\">Ouvrir en plein écran ↗</a></p>\n</div>"
+  },
+  {
+    "slug": "formation-power-bi",
+    "title": "Rapport Formation Power BI",
+    "html": "<p class=\"desc\">Un rapport Power BI dédié à la formation — découvrez les fonctionnalités clés à travers un exemple concret.</p>\n<div class=\"embed-wrapper\">\n  <iframe class=\"embed\" title=\"FormationPowerBI\" src=\"https://app.powerbi.com/view?r=eyJrIjoiYWJlZTU5NjItOWQ2Yy00NmViLWFmZTctYjBjY2Y4YmI0YjdmIiwidCI6Ijg5MmIzNDQ2LWQ1ZjAtNDg5ZS1hNjhkLTYwNWMxNjEzYWVhZCIsImMiOjh9&embedImagePlaceholder=true\" loading=\"lazy\" allowfullscreen></iframe>\n  <p class=\"embed-note\">\n    <a href=\"https://app.powerbi.com/view?r=eyJrIjoiYWJlZTU5NjItOWQ2Yy00NmViLWFmZTctYjBjY2Y4YmI0YjdmIiwidCI6Ijg5MmIzNDQ2LWQ1ZjAtNDg5ZS1hNjhkLTYwNWMxNjEzYWVhZCIsImMiOjh9&embedImagePlaceholder=true\" target=\"_blank\" rel=\"noopener\">Ouvrir en plein écran ↗</a>\n    <a href=\"https://www.youtube.com/live/5WZMZ82XnD0?si=HmzqbBR1uiIT9fSR\" target=\"_blank\" rel=\"noopener\" class=\"yt-link\">Vidéo de présentation (YouTube) ↗</a>\n  </p>\n</div>"
+  }
+]

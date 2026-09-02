@@ -1,25 +1,5 @@
 ---
-const dashboards = [
-  {
-    title: 'CV interactif',
-    desc: 'Mon parcours professionnel sous forme de dashboard navigable : expériences, compétences, projets.',
-    src: 'https://app.powerbi.com/view?r=eyJrIjoiZDNkYjVjMWUtZmE2ZC00MWI3LWE3OWEtQTQ4YjYxMGMwZWJkIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
-    iframeTitle: 'CV',
-  },
-  {
-    title: 'Escape game data',
-    desc: "Une expérience ludique en Power BI — résolution d'énigmes via des visualisations interactives.",
-    src: 'https://app.powerbi.com/view?r=eyJrIjoiODg5NTMwZjItY2MxMS00N2U2LTk4ZTEtYTZlOTYxNjc3ZjAxIiwidCI6Ijk1MWQxZWNhLTk2MGYtNDUwMS05MGY4LThkN2RhYjM0NjBkNiIsImMiOjh9',
-    iframeTitle: 'ReportFinal',
-  },
-  {
-    title: 'Rapport Formation Power BI',
-    desc: "Un rapport Power BI dédié à la formation — découvrez les fonctionnalités clés à travers un exemple concret.",
-    src: 'https://app.powerbi.com/view?r=eyJrIjoiYWJlZTU5NjItOWQ2Yy00NmViLWFmZTctYjBjY2Y4YmI0YjdmIiwidCI6Ijg5MmIzNDQ2LWQ1ZjAtNDg5ZS1hNjhkLTYwNWMxNjEzYWVhZCIsImMiOjh9&embedImagePlaceholder=true',
-    iframeTitle: 'FormationPowerBI',
-    youtube: 'https://www.youtube.com/live/5WZMZ82XnD0?si=HmzqbBR1uiIT9fSR',
-  },
-];
+import dashboards from '../../data/dashboards.json';
 
 const worldChallengeReports = [
   {
@@ -136,22 +116,7 @@ const eceReports = [
       {dashboards.map((d) => (
         <section class="dashboard">
           <h2>{d.title}</h2>
-          <p class="desc">{d.desc}</p>
-          <div class="embed-wrapper">
-            <iframe
-              class="embed"
-              title={d.iframeTitle}
-              src={d.src}
-              loading="lazy"
-              allowfullscreen
-            ></iframe>
-            <p class="embed-note">
-              <a href={d.src} target="_blank" rel="noopener">Ouvrir en plein écran ↗</a>
-              {d.youtube && (
-                <a href={d.youtube} target="_blank" rel="noopener" class="yt-link">Vidéo de présentation (YouTube) ↗</a>
-              )}
-            </p>
-          </div>
+          <Fragment set:html={d.html} />
         </section>
       ))}
 
