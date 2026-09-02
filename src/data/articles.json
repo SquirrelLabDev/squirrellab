@@ -10,11 +10,5 @@
     "title": "test Ajout d'un nouvel article",
     "html": "<p>Test</p>",
     "date": "2026-09-02"
-  },
-  {
-    "slug": "u7e5i654",
-    "title": "test 2",
-    "html": "<p> test </p>",
-    "date": "2026-09-02"
   }
 ]
