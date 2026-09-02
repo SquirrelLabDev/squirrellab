@@ -532,7 +532,10 @@ https://source.example`}></textarea>
           const srcCol = colLetter(3 + j);
           const row = [
             { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCol}1="","",'${SHEET_ANECDOTE}'!${srcCol}1)` },
-            { t: 'n', f: `COUNTA(C${j + 2}:${lastAnecdoteCol}${j + 2})` },
+            // COUNTA et COUNTIF(...,"<>") comptent aussi les cellules dont la formule IF
+            // renvoie "" (elles contiennent bien une formule) ; SUMPRODUCT compare la
+            // valeur réelle et ignore correctement ces "vides".
+            { t: 'n', f: `SUMPRODUCT(--(C${j + 2}:${lastAnecdoteCol}${j + 2}<>""))` },
             ...entries.map((e, i) => {
               const srcCell = `${srcCol}${i + 2}`;
               return { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCell}="","",'${SHEET_ANECDOTE}'!${srcCell})` };
