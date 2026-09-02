@@ -150,6 +150,10 @@ https://source.example`}></textarea>
         return btoa(unescape(encodeURIComponent(str)));
       }
 
+      function base64ToUtf8(str) {
+        return decodeURIComponent(escape(atob(str.replace(/\s/g, ''))));
+      }
+
       function gameSlug() {
         return gameSlugInput.value.trim();
       }
@@ -549,6 +553,25 @@ https://source.example`}></textarea>
         return pr.html_url;
       }
 
+      async function loadGameForEdit(file) {
+        const data = await gh(`/repos/${OWNER}/${REPO}/contents/${file.path}?ref=${MAIN_BRANCH}`);
+        const items = JSON.parse(base64ToUtf8(data.content));
+        entries = items.map((it) => ({ ...it }));
+        const slug = file.name.replace(/\.json$/, '');
+        gameSlugInput.value = slug;
+        slugTouchedManually = true;
+        if (!clientNameInput.value.trim()) clientNameInput.value = slug;
+        slugPreview.textContent = `src/data/games/${slug}.json`;
+        parseStatusEl.textContent = `${entries.length} anecdote(s) chargée(s) pour édition — republier écrasera le jeu existant.`;
+        parseStatusEl.className = 'status status-success';
+        previewSection.hidden = false;
+        generateSection.hidden = false;
+        publishSection.hidden = false;
+        publishBtn.disabled = !token;
+        renderEntries();
+        previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
       async function renderExistingGames() {
         existingSection.hidden = false;
         existingListEl.textContent = 'Chargement…';
@@ -564,7 +587,32 @@ https://source.example`}></textarea>
           const name = document.createElement('span');
           name.textContent = file.name.replace(/\.json$/, '');
           row.appendChild(name);
+
+          const actions = document.createElement('div');
+          actions.className = 'existing-actions';
+
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'btn btn-secondary';
+          edit.textContent = 'Éditer';
+          edit.addEventListener('click', async () => {
+            edit.disabled = true;
+            existingStatusEl.textContent = 'Chargement…';
+            existingStatusEl.className = 'status status-loading';
+            try {
+              await loadGameForEdit(file);
+              existingStatusEl.textContent = '';
+            } catch (e) {
+              existingStatusEl.textContent = 'Erreur : ' + e.message;
+              existingStatusEl.className = 'status status-error';
+            } finally {
+              edit.disabled = false;
+            }
+          });
+          actions.appendChild(edit);
+
           const del = document.createElement('button');
+          del.type = 'button';
           del.className = 'btn btn-danger';
           del.textContent = 'Supprimer';
           del.addEventListener('click', async () => {
@@ -582,7 +630,9 @@ https://source.example`}></textarea>
               del.disabled = false;
             }
           });
-          row.appendChild(del);
+          actions.appendChild(del);
+
+          row.appendChild(actions);
           existingListEl.appendChild(row);
         }
       }
@@ -690,6 +740,7 @@ https://source.example`}></textarea>
         background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
         padding: 0.5rem 0.75rem; font-size: 0.9rem;
       }
+      .existing-actions { display: flex; gap: 0.5rem; }
       .entries-table { display: flex; flex-direction: column; gap: 0.75rem; }
       .entry-row { display: flex; gap: 0.75rem; align-items: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
       .entry-num { font-size: 0.8rem; font-weight: 700; color: var(--accent); min-width: 2rem; padding-top: 0.5rem; }
