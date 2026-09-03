@@ -422,13 +422,13 @@ https://source.example`}></textarea>
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ACCENT_ARGB } };
       }
 
-      function buildIntroSheet(wb, label, entries) {
+      function buildIntroSheet(wb, label, entries, finishRowIdx, rankRowIdx) {
         const P = PARTICIPANT_SLOTS;
         const n = entries.length;
         const rankColLetter = colLetter(4 + n);
         const lastDataRow = P + 1;
         const ws = wb.addWorksheet('Intro');
-        ws.columns = [{ width: 62 }, { width: 20 }];
+        ws.columns = [{ width: 62 }, { width: 20 }, { width: 14 }, { width: 10 }];
 
         let r = 1;
         const brand = ws.getCell(r, 1);
@@ -485,14 +485,27 @@ https://source.example`}></textarea>
         const rosterHeaderRow = r;
         ws.getCell(r, 1).value = 'Prénom';
         ws.getCell(r, 2).value = 'Nom';
-        ws.getCell(r, 1).font = { bold: true };
-        ws.getCell(r, 2).font = { bold: true };
+        ws.getCell(r, 3).value = 'Heure de fin';
+        ws.getCell(r, 4).value = 'Rang';
+        for (let c = 1; c <= 4; c++) ws.getCell(r, c).font = { bold: true };
         r++;
 
         const rosterStartRow = r;
         ws.getCell(r, 1).value = 'Matthieu';
-        r++;
-        for (let i = 1; i < P; i++) r++;
+        for (let j = 0; j < P; j++) {
+          const row = rosterStartRow + j;
+          const srcCol = colLetter(3 + j);
+          // Miroirs de "Suivi par anecdote" : même colonne participant que le reste du
+          // classeur, pour que le roster de l'Intro serve aussi de classement complet.
+          ws.getCell(row, 3).value = {
+            formula: `IF('${SHEET_ANECDOTE}'!${srcCol}${finishRowIdx}="","",'${SHEET_ANECDOTE}'!${srcCol}${finishRowIdx})`,
+          };
+          ws.getCell(row, 3).numFmt = 'hh:mm';
+          ws.getCell(row, 4).value = {
+            formula: `IF('${SHEET_ANECDOTE}'!${srcCol}${rankRowIdx}="","",'${SHEET_ANECDOTE}'!${srcCol}${rankRowIdx})`,
+          };
+        }
+        r += P;
         r++; // ligne vide
 
         ws.getCell(r, 1).value = '© SquirrelLab — Tous droits réservés';
@@ -525,7 +538,7 @@ https://source.example`}></textarea>
         return { rosterStartRow };
       }
 
-      function buildAnecdoteSheet(wb, entries, rosterStartRow) {
+      function buildAnecdoteSheet(wb, entries, rosterStartRow, finishRowIdx, rankRowIdx) {
         const n = entries.length;
         const P = PARTICIPANT_SLOTS;
         const exampleRowIdx = n >= 2 ? 1 : 0; // ligne d'anecdote sur laquelle poser le "x" d'exemple
@@ -556,7 +569,6 @@ https://source.example`}></textarea>
 
         // Saisie manuelle : l'organisateur note l'heure ici (une colonne par participant,
         // comme le reste de cet onglet) dès qu'une personne annonce avoir tout trouvé.
-        const finishRowIdx = totalRowIdx + 1;
         ws.getCell(finishRowIdx, 2).value = 'Heure de fin';
         ws.getCell(finishRowIdx, 2).font = { bold: true };
         for (let j = 0; j < P; j++) {
@@ -565,7 +577,6 @@ https://source.example`}></textarea>
 
         // RANK compare chaque participant aux autres sur cette même ligne (les heures
         // sont en colonnes ici, pas en lignes).
-        const rankRowIdx = finishRowIdx + 1;
         ws.getCell(rankRowIdx, 2).value = 'Classement';
         ws.getCell(rankRowIdx, 2).font = { bold: true };
         for (let j = 0; j < P; j++) {
@@ -579,7 +590,7 @@ https://source.example`}></textarea>
         ws.getColumn(2).width = 50;
         for (let j = 0; j < P; j++) ws.getColumn(3 + j).width = 14;
         for (let c = 1; c <= 2 + P; c++) applyHeaderStyle(ws.getCell(1, c));
-        return { ws, finishRowIdx, rankRowIdx };
+        return ws;
       }
 
       function buildParticipantSheet(wb, entries, finishRowIdx, rankRowIdx) {
@@ -635,8 +646,13 @@ https://source.example`}></textarea>
 
       document.getElementById('gen-xlsx-btn').addEventListener('click', async () => {
         const wb = new ExcelJS.Workbook();
-        const { rosterStartRow } = buildIntroSheet(wb, currentLabel(), entries);
-        const { finishRowIdx, rankRowIdx } = buildAnecdoteSheet(wb, entries, rosterStartRow);
+        // "Heure de fin" / "Classement" vivent toujours à entries.length + 3 / + 4 sur
+        // "Suivi par anecdote" (juste sous Total Trouvé) — calculé une fois ici pour que
+        // l'Intro puisse s'y référencer sans attendre que cet onglet soit construit.
+        const finishRowIdx = entries.length + 3;
+        const rankRowIdx = entries.length + 4;
+        const { rosterStartRow } = buildIntroSheet(wb, currentLabel(), entries, finishRowIdx, rankRowIdx);
+        buildAnecdoteSheet(wb, entries, rosterStartRow, finishRowIdx, rankRowIdx);
         buildParticipantSheet(wb, entries, finishRowIdx, rankRowIdx);
 
         const buffer = await wb.xlsx.writeBuffer();
