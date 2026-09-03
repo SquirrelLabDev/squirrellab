@@ -97,7 +97,7 @@ https://source.example`}></textarea>
 
     <script>
       import QRCode from 'qrcode';
-      import * as XLSX from 'xlsx';
+      import ExcelJS from 'exceljs';
 
       const OWNER = 'SquirrelLabDev';
       const REPO = 'squirrellab';
@@ -415,153 +415,181 @@ https://source.example`}></textarea>
       const PARTICIPANT_SLOTS = 20;
       const SHEET_ANECDOTE = 'Suivi par anecdote';
       const SHEET_PARTICIPANT = 'Suivi par participant';
-      const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
+      const ACCENT_ARGB = 'FFE07840';
 
-      function buildIntroSheet(label) {
-        const P = PARTICIPANT_SLOTS;
-        const bannerStyle = { font: { bold: true, sz: 20, color: { rgb: 'E07840' } } };
-        const sectionStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'E07840' } } };
-
-        const rows = [];
-        rows.push(['SquirrelLab']);
-        const brandRow = rows.length;
-        rows.push([`Bienvenue dans votre jeu de QR codes — ${label} !`]);
-        const welcomeRow = rows.length;
-        rows.push([`Vous êtes prêt(e) à faire vivre une chasse aux anecdotes mémorable à vos participants. Ce fichier vous accompagne pour tout suivre en un clin d'œil, sans prise de tête.`]);
-        rows.push(['']);
-        rows.push(['Comment utiliser ce fichier ?']);
-        const howRow = rows.length;
-        rows.push([`Ajoutez vos participants une seule fois, ci-dessous dans "Participants" — ils apparaissent ensuite automatiquement dans les deux autres onglets, inutile de les ressaisir.`]);
-        rows.push([`Onglet "${SHEET_ANECDOTE}" : une ligne par anecdote, une colonne par participant — notez "x" dès qu'une personne trouve l'anecdote.`]);
-        rows.push([`Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — mise à jour automatique.`]);
-        rows.push([`Un exemple est déjà rempli ("Matthieu") pour vous montrer comment ça fonctionne — remplacez-le par votre premier vrai participant dès que le jeu commence.`]);
-        rows.push(['']);
-        rows.push(['Participants']);
-        const participantsHeaderRow = rows.length;
-        rows.push(['Nombre de participants :', '']);
-        const countRow = rows.length;
-        rows.push(['Prénom', 'Nom']);
-        const rosterHeaderRow = rows.length;
-        const rosterStartRow = rows.length + 1;
-        rows.push(['Matthieu', '']);
-        for (let i = 1; i < P; i++) rows.push(['', '']);
-        rows.push(['']);
-        rows.push(['© SquirrelLab — Tous droits réservés']);
-        const copyrightRow = rows.length;
-        rows.push(['www.squirrellab.fr']);
-        const linkRow = rows.length;
-        rows.push([`Envie d'organiser un jeu comme celui-ci pour votre entreprise ? contact@squirrellab.fr`]);
-        const ctaRow = rows.length;
-
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        ws['!cols'] = [{ wch: 62 }, { wch: 20 }];
-
-        const band = (rowNum, style) => {
-          const bRef = `B${rowNum}`;
-          if (!ws[bRef]) ws[bRef] = { t: 's', v: '' };
-          ws[`A${rowNum}`].s = style;
-          ws[bRef].s = style;
-        };
-
-        ws[`A${brandRow}`].s = bannerStyle;
-        ws[`A${brandRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
-        ws[`A${welcomeRow}`].s = { font: { bold: true, sz: 13, color: { rgb: 'E07840' } } };
-        band(howRow, sectionStyle);
-        band(participantsHeaderRow, sectionStyle);
-        ws[`A${countRow}`].s = { font: { bold: true } };
-        // SUMPRODUCT plutôt que COUNTA : les emplacements non utilisés du roster sont
-        // remplis avec une chaîne vide (pas des cellules réellement blanches), et COUNTA
-        // les compterait quand même.
-        ws[`B${countRow}`] = { t: 'n', f: `SUMPRODUCT(--(A${rosterStartRow}:A${rosterStartRow + P - 1}<>""))` };
-        ws[`A${rosterHeaderRow}`].s = { font: { bold: true } };
-        ws[`B${rosterHeaderRow}`].s = { font: { bold: true } };
-        ws[`A${copyrightRow}`].s = { font: { bold: true } };
-        ws[`A${linkRow}`].l = { Target: 'https://squirrellab.fr', Tooltip: 'squirrellab.fr' };
-        ws[`A${linkRow}`].s = { font: { color: { rgb: 'E07840' } } };
-        ws[`A${ctaRow}`].l = { Target: 'mailto:contact@squirrellab.fr' };
-        ws[`A${ctaRow}`].s = { font: { color: { rgb: 'E07840' } } };
-        return { ws, rosterStartRow };
+      function applyHeaderStyle(cell) {
+        cell.font = { bold: true };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ACCENT_ARGB } };
       }
 
-      function buildAnecdoteSheet(entries, rosterStartRow) {
+      function buildIntroSheet(wb, label) {
+        const P = PARTICIPANT_SLOTS;
+        const ws = wb.addWorksheet('Intro');
+        ws.columns = [{ width: 62 }, { width: 20 }];
+
+        let r = 1;
+        const brand = ws.getCell(r, 1);
+        brand.value = { text: 'SquirrelLab', hyperlink: 'https://squirrellab.fr', tooltip: 'squirrellab.fr' };
+        brand.font = { bold: true, size: 20, color: { argb: ACCENT_ARGB } };
+        r++;
+
+        const welcome = ws.getCell(r, 1);
+        welcome.value = `Bienvenue dans votre jeu de QR codes — ${label} !`;
+        welcome.font = { bold: true, size: 13, color: { argb: ACCENT_ARGB } };
+        r++;
+
+        ws.getCell(r, 1).value = `Vous êtes prêt(e) à faire vivre une chasse aux anecdotes mémorable à vos participants. Ce fichier vous accompagne pour tout suivre en un clin d'œil, sans prise de tête.`;
+        r++;
+        r++; // ligne vide
+
+        const howRow = r;
+        ws.getCell(r, 1).value = 'Comment utiliser ce fichier ?';
+        r++;
+        ws.getCell(r, 1).value = `Ajoutez vos participants une seule fois, ci-dessous dans "Participants" — ils apparaissent ensuite automatiquement dans les deux autres onglets, inutile de les ressaisir.`;
+        r++;
+        ws.getCell(r, 1).value = `Onglet "${SHEET_ANECDOTE}" : une ligne par anecdote, une colonne par participant — notez "x" dès qu'une personne trouve l'anecdote.`;
+        r++;
+        ws.getCell(r, 1).value = `Onglet "${SHEET_PARTICIPANT}" : la même donnée, avec une ligne par participant — mise à jour automatique.`;
+        r++;
+        ws.getCell(r, 1).value = `Un exemple est déjà rempli ("Matthieu") pour vous montrer comment ça fonctionne — remplacez-le par votre premier vrai participant dès que le jeu commence.`;
+        r++;
+        r++; // ligne vide
+
+        const participantsHeaderRow = r;
+        ws.getCell(r, 1).value = 'Participants';
+        r++;
+
+        const countRow = r;
+        ws.getCell(r, 1).value = 'Nombre de participants :';
+        ws.getCell(r, 1).font = { bold: true };
+        r++;
+
+        const rosterHeaderRow = r;
+        ws.getCell(r, 1).value = 'Prénom';
+        ws.getCell(r, 2).value = 'Nom';
+        ws.getCell(r, 1).font = { bold: true };
+        ws.getCell(r, 2).font = { bold: true };
+        r++;
+
+        const rosterStartRow = r;
+        ws.getCell(r, 1).value = 'Matthieu';
+        r++;
+        for (let i = 1; i < P; i++) r++;
+        r++; // ligne vide
+
+        ws.getCell(r, 1).value = '© SquirrelLab — Tous droits réservés';
+        ws.getCell(r, 1).font = { bold: true };
+        r++;
+
+        const linkCell = ws.getCell(r, 1);
+        linkCell.value = { text: 'www.squirrellab.fr', hyperlink: 'https://squirrellab.fr', tooltip: 'squirrellab.fr' };
+        linkCell.font = { color: { argb: ACCENT_ARGB } };
+        r++;
+
+        const ctaCell = ws.getCell(r, 1);
+        ctaCell.value = {
+          text: `Envie d'organiser un jeu comme celui-ci pour votre entreprise ? contact@squirrellab.fr`,
+          hyperlink: 'mailto:contact@squirrellab.fr',
+        };
+        ctaCell.font = { color: { argb: ACCENT_ARGB } };
+
+        for (const row of [howRow, participantsHeaderRow]) {
+          applyHeaderStyle(ws.getCell(row, 1));
+          applyHeaderStyle(ws.getCell(row, 2));
+        }
+
+        // SUMPRODUCT plutôt que COUNTA/COUNTIF : les emplacements non utilisés du roster
+        // restent des cellules vides mais d'autres formules du classeur utilisent le même
+        // motif — SUMPRODUCT compare la valeur réelle et reste correct dans tous les cas.
+        const rosterEndRow = rosterStartRow + P - 1;
+        ws.getCell(countRow, 2).value = { formula: `SUMPRODUCT(--(A${rosterStartRow}:A${rosterEndRow}<>""))` };
+
+        return { rosterStartRow };
+      }
+
+      function buildAnecdoteSheet(wb, entries, rosterStartRow) {
         const n = entries.length;
         const P = PARTICIPANT_SLOTS;
         const exampleRowIdx = n >= 2 ? 1 : 0; // ligne d'anecdote sur laquelle poser le "x" d'exemple
+        const ws = wb.addWorksheet(SHEET_ANECDOTE);
 
-        const headerRow = [
-          'N°',
-          'Anecdote / Nom - Prénom ->',
-          ...Array(P).fill(0).map((_, j) => {
-            const r = rosterStartRow + j;
-            return { t: 'str', f: `IF('Intro'!A${r}="","",'Intro'!A${r})` };
-          }),
-        ];
-        const dataRows = entries.map((e, i) => [e.num, e.title, i === exampleRowIdx ? 'x' : '', ...Array(P - 1).fill('')]);
-        // SUMPRODUCT plutôt que COUNTA : les cellules non cochées sont remplies avec une
-        // chaîne vide (pas des cellules réellement blanches), et COUNTA les compterait
-        // quand même.
-        const totalRow = ['Total Trouvé', '', ...Array(P).fill(0).map((_, j) => {
-          const col = colLetter(3 + j);
-          return { t: 'n', f: `SUMPRODUCT(--(${col}2:${col}${n + 1}<>""))` };
-        })];
-
-        const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows, totalRow]);
-        ws['!cols'] = [{ wch: 5 }, { wch: 50 }, ...Array(P).fill({ wch: 14 })];
-        for (let c = 1; c <= 2 + P; c++) {
-          const ref = `${colLetter(c)}1`;
-          if (ws[ref]) ws[ref].s = headerStyle;
+        ws.getCell(1, 1).value = 'N°';
+        ws.getCell(1, 2).value = 'Anecdote / Nom - Prénom ->';
+        for (let j = 0; j < P; j++) {
+          const r = rosterStartRow + j;
+          ws.getCell(1, 3 + j).value = { formula: `IF('Intro'!A${r}="","",'Intro'!A${r})` };
         }
+        entries.forEach((e, i) => {
+          ws.getCell(i + 2, 1).value = e.num;
+          ws.getCell(i + 2, 2).value = e.title;
+          if (i === exampleRowIdx) ws.getCell(i + 2, 3).value = 'x';
+        });
+
         const totalRowIdx = n + 2;
-        if (ws[`A${totalRowIdx}`]) ws[`A${totalRowIdx}`].s = { font: { bold: true } };
+        ws.getCell(totalRowIdx, 1).value = 'Total Trouvé';
+        ws.getCell(totalRowIdx, 1).font = { bold: true };
+        for (let j = 0; j < P; j++) {
+          const col = colLetter(3 + j);
+          ws.getCell(totalRowIdx, 3 + j).value = { formula: `SUMPRODUCT(--(${col}2:${col}${n + 1}<>""))` };
+        }
+
+        ws.getColumn(1).width = 5;
+        ws.getColumn(2).width = 50;
+        for (let j = 0; j < P; j++) ws.getColumn(3 + j).width = 14;
+        for (let c = 1; c <= 2 + P; c++) applyHeaderStyle(ws.getCell(1, c));
         return ws;
       }
 
-      function buildParticipantSheet(entries) {
+      function buildParticipantSheet(wb, entries) {
         const n = entries.length;
         const P = PARTICIPANT_SLOTS;
         const lastAnecdoteCol = colLetter(2 + n);
+        const ws = wb.addWorksheet(SHEET_PARTICIPANT);
 
-        const headerRow = [
-          'Prénom',
-          'Nb',
-          ...entries.map((e, i) => ({
-            t: 'str',
-            f: `IF('${SHEET_ANECDOTE}'!B${i + 2}="","",'${SHEET_ANECDOTE}'!B${i + 2})`,
-          })),
-        ];
-        const dataRows = [];
+        ws.getCell(1, 1).value = 'Prénom';
+        ws.getCell(1, 2).value = 'Nb';
+        entries.forEach((e, i) => {
+          const srcRow = i + 2;
+          ws.getCell(1, 3 + i).value = { formula: `IF('${SHEET_ANECDOTE}'!B${srcRow}="","",'${SHEET_ANECDOTE}'!B${srcRow})` };
+        });
         for (let j = 0; j < P; j++) {
+          const row = j + 2;
           const srcCol = colLetter(3 + j);
-          const row = [
-            { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCol}1="","",'${SHEET_ANECDOTE}'!${srcCol}1)` },
-            // COUNTA et COUNTIF(...,"<>") comptent aussi les cellules dont la formule IF
-            // renvoie "" (elles contiennent bien une formule) ; SUMPRODUCT compare la
-            // valeur réelle et ignore correctement ces "vides".
-            { t: 'n', f: `SUMPRODUCT(--(C${j + 2}:${lastAnecdoteCol}${j + 2}<>""))` },
-            ...entries.map((e, i) => {
-              const srcCell = `${srcCol}${i + 2}`;
-              return { t: 'str', f: `IF('${SHEET_ANECDOTE}'!${srcCell}="","",'${SHEET_ANECDOTE}'!${srcCell})` };
-            }),
-          ];
-          dataRows.push(row);
+          ws.getCell(row, 1).value = { formula: `IF('${SHEET_ANECDOTE}'!${srcCol}1="","",'${SHEET_ANECDOTE}'!${srcCol}1)` };
+          // Même raison que Total Trouvé : les cellules de la ligne sont toujours des
+          // formules (même quand elles renvoient ""), donc COUNTA/COUNTIF les compteraient
+          // à tort — SUMPRODUCT compare la vraie valeur.
+          ws.getCell(row, 2).value = { formula: `SUMPRODUCT(--(C${row}:${lastAnecdoteCol}${row}<>""))` };
+          entries.forEach((e, i) => {
+            const srcRow = i + 2;
+            const srcCell = `${srcCol}${srcRow}`;
+            ws.getCell(row, 3 + i).value = { formula: `IF('${SHEET_ANECDOTE}'!${srcCell}="","",'${SHEET_ANECDOTE}'!${srcCell})` };
+          });
         }
 
-        const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
-        ws['!cols'] = [{ wch: 18 }, { wch: 6 }, ...entries.map(() => ({ wch: 24 }))];
-        for (let c = 1; c <= 2 + n; c++) {
-          const ref = `${colLetter(c)}1`;
-          if (ws[ref]) ws[ref].s = headerStyle;
-        }
+        ws.getColumn(1).width = 18;
+        ws.getColumn(2).width = 6;
+        for (let i = 0; i < n; i++) ws.getColumn(3 + i).width = 24;
+        for (let c = 1; c <= 2 + n; c++) applyHeaderStyle(ws.getCell(1, c));
         return ws;
       }
 
-      document.getElementById('gen-xlsx-btn').addEventListener('click', () => {
-        const wb = XLSX.utils.book_new();
-        const { ws: introWs, rosterStartRow } = buildIntroSheet(currentLabel());
-        XLSX.utils.book_append_sheet(wb, introWs, 'Intro');
-        XLSX.utils.book_append_sheet(wb, buildAnecdoteSheet(entries, rosterStartRow), SHEET_ANECDOTE);
-        XLSX.utils.book_append_sheet(wb, buildParticipantSheet(entries), SHEET_PARTICIPANT);
-        XLSX.writeFile(wb, `suivi-${gameSlug() || 'jeu'}.xlsx`, { cellStyles: true });
+      document.getElementById('gen-xlsx-btn').addEventListener('click', async () => {
+        const wb = new ExcelJS.Workbook();
+        const { rosterStartRow } = buildIntroSheet(wb, currentLabel());
+        buildAnecdoteSheet(wb, entries, rosterStartRow);
+        buildParticipantSheet(wb, entries);
+
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `suivi-${gameSlug() || 'jeu'}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
 
       // ── Publication GitHub (branche dédiée + PR, même mécanique que /admin) ──
