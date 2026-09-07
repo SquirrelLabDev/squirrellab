@@ -56,11 +56,14 @@ function renderResources(session) {
   for (const resource of session.resources) {
     const node = resourceTemplate.content.cloneNode(true);
     node.querySelector('.r-name').textContent = resource.name;
+    const icon = node.querySelector('.r-icon');
     const badge = node.querySelector('.r-badge');
     const status = node.querySelector('.r-status');
     const actions = node.querySelector('.r-actions');
 
     if (resource.status === 'available') {
+      icon.src = '/token-dispo.webp';
+      icon.alt = 'Token disponible';
       badge.textContent = 'Disponible';
       badge.classList.add('badge-available');
       status.textContent = '';
@@ -73,6 +76,8 @@ function renderResources(session) {
       takeBtn.addEventListener('click', () => showTakeForm(actions, resource));
       actions.appendChild(takeBtn);
     } else {
+      icon.src = '/token-vide.webp';
+      icon.alt = 'Token utilisé';
       badge.textContent = 'Pris';
       badge.classList.add('badge-taken');
       status.textContent = `Par ${resource.holder.name} — ${resource.justification}`;

@@ -1,9 +1,10 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
 
-const DB_PATH = process.env.TOKEN_MANAGER_DB || new URL('../data/db.json', import.meta.url).pathname;
+const DB_PATH = process.env.TOKEN_MANAGER_DB || fileURLToPath(new URL('../data/db.json', import.meta.url));
 
 const emptyDb = () => ({ creators: {}, tokens: {}, sessions: {} });
 

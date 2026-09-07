@@ -28,6 +28,15 @@ a { color: var(--accent); }
 h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 0.35rem; letter-spacing: -0.01em; }
 .tagline, .desc { color: var(--muted); line-height: 1.5; }
 
+.banner {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -79,6 +88,10 @@ button {
 }
 .badge-available { color: var(--ok); border-color: var(--ok); }
 .badge-taken { color: var(--danger); border-color: var(--danger); }
+
+.resource-card { display: flex; flex-direction: column; align-items: center; }
+.r-icon { display: block; width: 100%; max-width: 260px; height: auto; border-radius: 10px; margin-bottom: 1rem; }
+.resource-body { width: 100%; }
 
 .error-banner {
   background: rgba(224, 103, 74, 0.12);
