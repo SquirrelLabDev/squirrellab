@@ -16,9 +16,9 @@ const sections = [
     desc: 'Outils interactifs en ligne.',
     links: [
       { href: '/projets/speechtimer', label: 'SpeechTimer' },
-      { href: '/projets/burger-quiz', label: 'Burger Quiz' },
       { href: '/projets/boussole-carriere', label: 'Boussole Carrière' },
       { href: '/projets/gestionnaire-tokens', label: 'Gestionnaire de tokens' },
+      { href: '/projets/burger-quiz', label: 'Burger Quiz' },
     ],
   },
   {
@@ -54,8 +54,13 @@ const sections = [
   <body>
     <main>
       <header class="hero">
-        <img class="logo" src="/logo.png" alt="Logo" width="120" height="120" />
-        <h1>SquirrelLab</h1>
+        <div class="hero-top">
+          <h1>SquirrelLab</h1>
+          <div class="squiggy-wrap">
+            <img class="squiggy" src="/mascotte/squiggy_01_accueil_salut_transparent.png" alt="Squiggy, la mascotte de SquirrelLab, qui fait un signe de la main" width="130" height="134" />
+            <div class="speech-bubble">Salut, moi c'est Squiggy&nbsp;! Bienvenue sur SquirrelLab&nbsp;!</div>
+          </div>
+        </div>
         <p class="tagline">Partage de tâtonnements, créations et découvertes numériques.</p>
       </header>
 
@@ -109,13 +114,66 @@ const sections = [
         padding: 4rem 1.5rem 2rem;
       }
       .hero { text-align: center; margin-bottom: 4rem; }
-      .logo { display: block; margin: 0 auto 1rem; width: 160px; height: auto; }
+      .hero-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      .squiggy-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+      }
+      .squiggy {
+        display: block;
+        width: 90px;
+        height: auto;
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
+      }
+      .speech-bubble {
+        position: relative;
+        background: var(--fg);
+        border-radius: 14px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--bg);
+        text-align: left;
+        max-width: 220px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      .speech-bubble::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 100%;
+        transform: translateY(-50%);
+        border: 8px solid transparent;
+        border-right-color: var(--fg);
+      }
       h1 {
         font-size: clamp(2.5rem, 6vw, 4rem);
-        margin: 0 0 0.5rem;
+        margin: 0;
         letter-spacing: -0.02em;
       }
       .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      @media (max-width: 640px) {
+        .hero-top { flex-direction: column; }
+        .squiggy-wrap { flex-direction: column; }
+        .speech-bubble { text-align: center; }
+        .speech-bubble::before {
+          top: auto;
+          left: 50%;
+          right: auto;
+          bottom: 100%;
+          transform: translateX(-50%);
+          border-right-color: transparent;
+          border-bottom-color: var(--fg);
+        }
+      }
       .nav-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
