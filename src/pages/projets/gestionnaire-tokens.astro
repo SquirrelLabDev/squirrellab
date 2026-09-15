@@ -108,15 +108,14 @@ const features = [
             </p>
           </article>
           <article class="feature">
-            <h3>💻 Version portable</h3>
+            <h3>💻 Version portable (hors ligne)</h3>
             <p>
-              Un exécutable unique à double-cliquer, sans installation — mais <strong>ce n'est
-              qu'une fenêtre</strong> qui affiche le même outil : elle ne stocke aucune donnée
-              elle-même. Au premier lancement, elle demande l'adresse du serveur en ligne à
-              utiliser, et ne retient ce choix (ainsi que votre connexion) que <strong>sur le
-              poste où elle tourne</strong>. Deux collègues qui lancent chacun·e l'exécutable et
-              se connectent au même serveur voient bien les mêmes sessions — mais rien n'est
-              partagé entre les postes eux-mêmes.
+              Un exécutable unique à double-cliquer, sans installation, et <strong>sans serveur du
+              tout</strong> : l'état de la session (qui a le token, historique) est un fichier que
+              vous enregistrez sur un dossier partagé avec l'équipe (OneDrive, lecteur réseau...),
+              à côté du fichier à protéger. Chaque collègue ouvre ce même fichier avec son propre
+              exécutable — c'est la synchronisation du dossier partagé qui fait le lien entre les
+              postes, pas un service en ligne.
             </p>
             <p class="downloads">
               <a class="btn-tool" href={desktopDownloadBase + 'SquirrellabToken.exe'}>Télécharger pour Windows ↓</a>

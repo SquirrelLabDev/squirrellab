@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <title>Gestionnaire de tokens — hors ligne</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .launcher { text-align: center; padding: 2rem 1rem; }
+    .launcher img.banner { max-width: 420px; }
+    .launcher-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+    .file-path { font-size: 0.78rem; color: var(--muted); word-break: break-all; margin-top: 0.5rem; }
+    .top-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="error" class="error-banner" hidden></div>
+
+    <!-- Écran de lancement : choisir ou créer un fichier de session -->
+    <section id="launcher-view" class="launcher" hidden>
+      <img class="banner" src="/token-banner.webp" alt="Gestionnaire de tokens" />
+      <h1>Gestionnaire de tokens — hors ligne</h1>
+      <p class="tagline">
+        Pas de serveur : l'état (qui a le jeton, historique) vit dans un fichier que vous posez
+        sur un dossier partagé (OneDrive, lecteur réseau...), à côté du fichier à protéger.
+        Chaque collègue ouvre ce même fichier avec cet exécutable.
+      </p>
+      <div class="launcher-actions">
+        <button id="open-btn" class="btn-primary">Ouvrir un fichier de session existant</button>
+        <button id="create-btn" class="btn-secondary">Créer une nouvelle session</button>
+      </div>
+    </section>
+
+    <!-- Formulaire de création -->
+    <section id="create-view" class="card" hidden>
+      <h2 style="margin-top:0;">Nouvelle session</h2>
+      <div class="field">
+        <label for="new-name">Nom de la session</label>
+        <input type="text" id="new-name" placeholder="Rapport Ventes.pbix" />
+      </div>
+      <div class="field">
+        <label for="new-description">Description (optionnel)</label>
+        <textarea id="new-description" placeholder="À quoi sert cette session, quel fichier est concerné..."></textarea>
+      </div>
+      <div class="field">
+        <label for="new-participants">Participant·es (un nom par ligne)</label>
+        <textarea id="new-participants" placeholder="Alice&#10;Bob&#10;Chloé"></textarea>
+      </div>
+      <div class="field">
+        <label for="new-resources">Ressources / tokens à gérer (un nom par ligne, optionnel — "Accès principal" par défaut)</label>
+        <textarea id="new-resources" placeholder="Rapport Ventes.pbix"></textarea>
+      </div>
+      <p class="field-hint">
+        L'étape suivante vous demande où enregistrer le fichier — choisissez le dossier partagé
+        avec vos collègues (OneDrive, lecteur réseau...).
+      </p>
+      <div class="row">
+        <button id="create-confirm-btn" class="btn-primary">Choisir l'emplacement et créer</button>
+        <button id="create-cancel-btn" class="btn-secondary">Annuler</button>
+      </div>
+    </section>
+
+    <!-- Vue session (fichier ouvert) -->
+    <section id="session-view" hidden>
+      <div class="top-actions">
+        <div>
+          <h1 id="session-name" style="margin-bottom:0.2rem;">Chargement…</h1>
+          <p class="tagline" id="session-description" style="margin:0;"></p>
+          <p class="file-path" id="session-path"></p>
+        </div>
+        <button id="switch-file-btn" class="btn-secondary">Changer de fichier</button>
+      </div>
+
+      <div class="card" id="whoami-card">
+        <div class="field">
+          <label for="whoami-select">Qui êtes-vous ?</label>
+          <select id="whoami-select"></select>
+        </div>
+        <div class="row" id="add-participant-row" style="margin-top:0.75rem;">
+          <input type="text" id="add-participant-input" placeholder="Ajouter un·e participant·e" style="flex:1;" />
+          <button id="add-participant-btn" class="btn-secondary">Ajouter</button>
+        </div>
+      </div>
+
+      <section id="resources"></section>
+
+      <div class="card">
+        <div class="row" id="add-resource-row">
+          <input type="text" id="add-resource-input" placeholder="Nom de la nouvelle ressource / token" style="flex:1;" />
+          <button id="add-resource-btn" class="btn-secondary">Ajouter une ressource</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0;">Historique</h2>
+        <div id="history" class="empty-state">Chargement…</div>
+      </div>
+
+      <template id="resource-template">
+        <div class="card resource-card">
+          <img class="r-icon" alt="" />
+          <div class="resource-body">
+            <div class="row-between">
+              <strong class="r-name"></strong>
+              <span class="badge r-badge"></span>
+            </div>
+            <p class="r-status field-hint"></p>
+            <div class="r-actions"></div>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <footer>
+      <p>Gestionnaire de tokens — SquirrelLab · version hors ligne</p>
+    </footer>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

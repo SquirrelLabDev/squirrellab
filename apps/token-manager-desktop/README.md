@@ -1,17 +1,22 @@
-# Gestionnaire de tokens — version portable
+# Gestionnaire de tokens — version portable (hors ligne)
 
-Version bureau, portable, du [Gestionnaire de tokens](../token-manager) : un exécutable unique,
-sans installation (dans l'esprit d'un outil comme ZoomIt), qui affiche exactement la même
-interface que le site (`../token-manager/public`, réutilisée telle quelle via `frontendDist`
-dans `src-tauri/tauri.conf.json`).
+Version bureau, portable, **entièrement hors ligne** du concept du
+[Gestionnaire de tokens](../token-manager) : un exécutable unique, sans installation (dans
+l'esprit d'un outil comme ZoomIt), avec son propre frontend (`src/`, indépendant de
+`../token-manager/public`).
 
-L'application ne contient **pas** de serveur ni de données propres : c'est une simple fenêtre qui
-affiche le site. Au premier lancement, elle demande l'adresse du serveur du Gestionnaire de tokens
-(celui déployé en ligne, ou une instance interne) et la retient **localement, sur ce poste
-uniquement** (adresse du serveur, session admin/créateur·rice, identité de participant·e — rien
-n'est synchronisé entre postes). Deux personnes qui lancent chacune cet exécutable et se
-connectent au même serveur voient bien les mêmes sessions (les données vivent sur le serveur, pas
-dans l'exécutable), mais chaque poste garde sa propre configuration locale.
+**Pas de serveur, pas de comptes.** L'état d'une session (participant·es, ressources/tokens,
+qui a pris quoi et pourquoi, historique) est un simple fichier JSON que vous choisissez où
+enregistrer — typiquement un dossier partagé avec l'équipe (OneDrive, lecteur réseau...), à côté
+du fichier à protéger. Chaque collègue ouvre ce même fichier avec son propre exécutable : c'est la
+synchronisation du dossier partagé (OneDrive, etc.) qui fait office de "serveur", pas l'application
+elle-même. Chaque action (prendre/reposer un token) relit le fichier juste avant d'écrire pour
+limiter le risque d'écrasement en cas d'actions simultanées — ça reste un compromis simple, pas un
+vrai verrou distribué : deux personnes qui cliquent à la même seconde peuvent, en théorie, se
+marcher dessus.
+
+Seul le dernier fichier ouvert et l'identité choisie par participant·e sont retenus **localement,
+sur ce poste uniquement** (dans le `localStorage` de la fenêtre).
 
 ## Compiler
 
@@ -45,7 +50,7 @@ le binaire brut — c'est lui la version "portable".)
 npm run dev
 ```
 
-Lance l'app avec rechargement à chaud, pointée sur le frontend de `../token-manager/public`.
+Lance l'app avec rechargement à chaud, pointée sur le frontend local `src/`.
 
 ## CI
 

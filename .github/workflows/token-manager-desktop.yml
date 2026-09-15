@@ -5,14 +5,12 @@ on:
     branches: [main]
     paths:
       - 'apps/token-manager-desktop/**'
-      - 'apps/token-manager/public/**'
       - '.github/workflows/token-manager-desktop.yml'
     tags:
       - 'token-manager-desktop-v*'
   pull_request:
     paths:
       - 'apps/token-manager-desktop/**'
-      - 'apps/token-manager/public/**'
   workflow_dispatch:
 
 defaults:

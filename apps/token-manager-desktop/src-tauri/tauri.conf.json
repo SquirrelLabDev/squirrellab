@@ -4,12 +4,13 @@
   "version": "0.1.0",
   "identifier": "fr.squirrellab.token-manager-desktop",
   "build": {
-    "frontendDist": "../../token-manager/public"
+    "frontendDist": "../src"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Gestionnaire de tokens",
+        "title": "Gestionnaire de tokens — hors ligne",
         "width": 1100,
         "height": 850,
         "minWidth": 480,
