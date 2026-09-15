@@ -27,13 +27,16 @@ jobs:
         include:
           - os: windows-latest
             artifact: token-manager-desktop-windows
-            binary: src-tauri/target/release/token-manager-desktop.exe
+            binary: src-tauri/target/release/SquirrellabToken.exe
+            release_name: SquirrellabToken.exe
           - os: macos-latest
             artifact: token-manager-desktop-macos
-            binary: src-tauri/target/release/token-manager-desktop
+            binary: src-tauri/target/release/SquirrellabToken
+            release_name: SquirrellabToken-macos
           - os: ubuntu-latest
             artifact: token-manager-desktop-linux
-            binary: src-tauri/target/release/token-manager-desktop
+            binary: src-tauri/target/release/SquirrellabToken
+            release_name: SquirrellabToken-linux
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -61,11 +64,17 @@ jobs:
       - name: Build portable executable
         run: npm run build -- --no-bundle
 
+      - name: Stage release binary
+        shell: bash
+        run: |
+          mkdir -p release
+          cp "${{ matrix.binary }}" "release/${{ matrix.release_name }}"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: apps/token-manager-desktop/${{ matrix.binary }}
+          path: apps/token-manager-desktop/release/${{ matrix.release_name }}
 
   release:
     if: startsWith(github.ref, 'refs/tags/token-manager-desktop-v')

@@ -27,10 +27,14 @@ npm run build
 
 Le binaire portable se trouve ensuite dans `src-tauri/target/release/` :
 
-- Windows : `token-manager-desktop.exe` — copiez-le où vous voulez, double-cliquez, aucune
+- Windows : `SquirrellabToken.exe` — copiez-le où vous voulez, double-cliquez, aucune
   installation requise.
-- macOS : `token-manager-desktop`.
-- Linux : `token-manager-desktop`.
+- macOS : `SquirrellabToken`.
+- Linux : `SquirrellabToken`.
+
+Sur les releases GitHub (tag `token-manager-desktop-v*`), les binaires macOS et Linux sont
+renommés `SquirrellabToken-macos` / `SquirrellabToken-linux` pour éviter un conflit de nom
+d'asset — un simple `chmod +x` suffit ensuite pour les rendre exécutables.
 
 (`tauri.conf.json` a `bundle.targets` vide : on ne génère pas d'installeur MSI/NSIS/DMG, juste
 le binaire brut — c'est lui la version "portable".)

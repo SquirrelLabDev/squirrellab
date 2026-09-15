@@ -14,5 +14,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 [[bin]]
-name = "token-manager-desktop"
+name = "SquirrellabToken"
 path = "src/main.rs"
