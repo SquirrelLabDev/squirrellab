@@ -1,5 +1,6 @@
 ---
 const tokenManagerUrl = 'https://token-manager-squirrellab-erd5cqb6dnhwhdfe.francecentral-01.azurewebsites.net';
+const desktopDownloadBase = 'https://github.com/SquirrelLabDev/squirrellab/releases/latest/download/';
 const features = [
   {
     title: 'Un token, un droit d\'écriture',
@@ -117,6 +118,14 @@ const features = [
               se connectent au même serveur voient bien les mêmes sessions — mais rien n'est
               partagé entre les postes eux-mêmes.
             </p>
+            <p class="downloads">
+              <a class="btn-tool" href={desktopDownloadBase + 'SquirrellabToken.exe'}>Télécharger pour Windows ↓</a>
+            </p>
+            <p class="downloads-alt">
+              Aussi disponible pour <a href={desktopDownloadBase + 'SquirrellabToken-macos'}>macOS</a> et
+              <a href={desktopDownloadBase + 'SquirrellabToken-linux'}>Linux</a> (binaire brut : un
+              <code>chmod +x</code> est nécessaire avant de le lancer).
+            </p>
           </article>
         </div>
       </section>
@@ -125,7 +134,7 @@ const features = [
         <h2>État du projet</h2>
         <ul>
           <li>Application web (comptes créateur·rice, sessions partagées, supervision admin du site) <strong>en ligne</strong>.</li>
-          <li>Version portable (exécutable unique, sans installation) en cours de finalisation.</li>
+          <li>Version portable (exécutable unique, sans installation) <strong>disponible</strong> — Windows, macOS, Linux.</li>
           <li>Code source : dossier <code>apps/token-manager</code> du dépôt du site.</li>
         </ul>
       </section>
@@ -188,13 +197,17 @@ const features = [
         text-decoration: none; font-size: 0.9rem;
       }
       .btn-tool:hover { opacity: 0.9; }
+      .downloads { margin: 1rem 0 0.5rem; }
+      .downloads-alt { margin: 0; font-size: 0.8rem; color: var(--muted); }
+      .downloads-alt a { color: var(--muted); text-decoration: underline; }
+      .downloads-alt a:hover { color: var(--fg); }
 
       .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
 
       .features h2 { font-size: 1.25rem; margin: 2rem 0 1rem; }
       .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 1rem;
         margin-bottom: 1.5rem;
       }
