@@ -73,6 +73,19 @@ const appUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francecentral-0
         </div>
       </section>
 
+      <section class="downloads">
+        <h2>Téléchargements</h2>
+        <p class="desc">Le diaporama utilisé pendant la partie, et un template vierge pour créer vos propres questions.</p>
+        <div class="downloads-actions">
+          <a class="btn-download" href="/downloads/burger-quiz-diaporama.pptx" download>
+            📥 Diaporama (.pptx)
+          </a>
+          <a class="btn-download" href="/downloads/burger-quiz-template.pptx" download>
+            📥 Template vierge (.pptx)
+          </a>
+        </div>
+      </section>
+
       <section class="credits">
         <p>Application inspirée de la réalisation de <a href="https://github.com/BenjaminPoutriquet35800/app-burger-quiz" target="_blank" rel="noopener">Benjamin Poutriquet</a>.</p>
       </section>
@@ -136,6 +149,18 @@ const appUrl = 'https://burger-quiz-squirrellab-b2dpf8c6e5grdbhb.francecentral-0
         text-decoration: none; margin-bottom: 1.5rem; font-size: 0.95rem;
       }
       .btn-launch:hover { opacity: 0.9; }
+      .downloads {
+        background: var(--bg-card); border-radius: 12px;
+        padding: 1.5rem; margin-bottom: 2rem;
+      }
+      .downloads .desc { color: var(--muted); margin: 0.25rem 0 1.25rem; font-size: 0.95rem; }
+      .downloads-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+      .btn-download {
+        display: inline-block; background: transparent; color: var(--fg);
+        border: 1px solid var(--accent); font-weight: 600; padding: 0.6rem 1.25rem;
+        border-radius: 8px; text-decoration: none; font-size: 0.9rem;
+      }
+      .btn-download:hover { background: var(--accent); color: #1a1a1a; }
       .roles { display: flex; flex-direction: column; gap: 0.6rem; }
       .role { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: var(--muted); }
       .role-badge {
