@@ -1,0 +1,619 @@
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content={Astro.generator} />
+  <meta name="description" content="Simulateur de rentabilité électrique vs thermique — en combien d'années le surcoût à l'achat d'une voiture électrique est-il amorti face à un modèle essence/diesel ?">
+  <title>Électrique vs Thermique — Simulateur de rentabilité — SquirrelLab</title>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --essence:#d97706;
+      --elec:#0ea5e9;
+      --bg:#f7f8fa;
+      --card:#ffffff;
+      --border:#e2e5ea;
+      --text:#1f2430;
+      --muted:#6b7280;
+      --yellow:#fff7cc;
+    }
+    *{box-sizing:border-box;}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      margin:0;
+      padding:24px;
+    }
+    .wrap{max-width:1100px;margin:0 auto;}
+    .topnav{margin-bottom:1.25rem;font-size:0.9rem;}
+    .topnav a{color:var(--muted);text-decoration:none;}
+    .topnav a:hover{color:var(--text);}
+    h1{font-size:22px;margin-bottom:4px;}
+    p.sub{color:var(--muted);margin-top:0;margin-bottom:24px;font-size:14px;}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:20px 24px;
+      margin-bottom:20px;
+    }
+    .card h2{font-size:16px;margin:0 0 16px 0;}
+    .grid-shared{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:8px;
+    }
+    .grid-two{
+      display:grid;grid-template-columns:1fr 1fr;gap:24px;
+    }
+    @media (max-width:700px){ .grid-two{grid-template-columns:1fr;} }
+    .col-essence{border-left:4px solid var(--essence);padding-left:16px;}
+    .col-elec{border-left:4px solid var(--elec);padding-left:16px;}
+    .field{margin-bottom:12px;}
+    .field label{
+      display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;
+    }
+    .field input{
+      width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;
+      background:var(--yellow);font-size:14px;
+    }
+    .field input:focus{outline:2px solid #94a3b8;}
+    .field .hint{font-size:11px;color:var(--muted);margin-top:2px;}
+    .badge{
+      display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;
+      background:#eef2f7;color:var(--muted);margin-left:6px;
+    }
+    .result-banner{
+      display:flex;gap:24px;flex-wrap:wrap;align-items:center;
+      background:#eef6ff;border:1px solid #cfe6ff;border-radius:10px;padding:16px 20px;margin-bottom:20px;
+    }
+    .result-banner .big{font-size:26px;font-weight:700;color:#0369a1;}
+    .result-banner .lbl{font-size:12.5px;color:var(--muted);}
+    .legend-row{display:flex;gap:20px;font-size:13px;margin-bottom:10px;}
+    .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+    canvas{max-height:420px;}
+    details summary{
+      cursor:pointer;font-weight:600;font-size:15px;padding:6px 0;
+    }
+    table.detail{
+      width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px;
+    }
+    table.detail th, table.detail td{
+      border:1px solid var(--border);padding:4px 5px;text-align:center;
+    }
+    table.detail th{background:#f1f3f6;font-weight:600;}
+    table.detail input{
+      width:70px;padding:3px 4px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--yellow);text-align:center;
+    }
+    table.detail td.readonly{background:#fafafa;color:var(--muted);}
+    .table-scroll{overflow-x:auto;}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .btn{
+      background:#1f2430;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:13px;cursor:pointer;
+    }
+    .btn.secondary{background:#fff;color:#1f2430;border:1px solid var(--border);}
+    .switch-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:14px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="/outils">← Outils</a>
+  </nav>
+
+  <h1>🚗⚡ Électrique vs Thermique — Simulateur de rentabilité</h1>
+  <p class="sub">Renseignez vos paramètres pour comparer le coût cumulé d'un véhicule électrique et d'un véhicule thermique, et voir en combien d'années l'achat électrique devient rentable.</p>
+
+  <!-- Paramètres communs -->
+  <div class="card">
+    <h2>Paramètres communs</h2>
+    <div class="grid-shared">
+      <div class="field">
+        <label>Kilométrage par an (km/an)</label>
+        <input type="number" id="kmParAn" value="12000" step="500">
+      </div>
+      <div class="field">
+        <label>Nombre d'années à projeter</label>
+        <input type="number" id="nbAnnees" value="15" min="1" max="30">
+      </div>
+    </div>
+  </div>
+
+  <!-- Paramètres véhicules -->
+  <div class="card">
+    <h2>Paramètres véhicules</h2>
+    <div class="grid-two">
+      <div class="col-essence">
+        <h3 style="color:var(--essence);margin:0 0 10px 0;font-size:15px;">🔧 Thermique (essence/diesel)</h3>
+        <div class="field">
+          <label>Prix d'achat du véhicule (€)</label>
+          <input type="number" id="achatEssence" value="12000" step="100">
+        </div>
+        <div class="field">
+          <label>Prix du litre (€/L)</label>
+          <input type="number" id="prixLitre" value="2.25" step="0.01">
+        </div>
+        <div class="field">
+          <label>Consommation moyenne (L/100km)</label>
+          <input type="number" id="consoL100" value="6" step="0.1">
+        </div>
+        <div class="field">
+          <label>Entretien par an (€) <span class="badge">à partir de l'année 5</span></label>
+          <input type="number" id="entretienEssence" value="300" step="10">
+        </div>
+        <div class="field">
+          <label>Inflation annuelle du prix du carburant</label>
+          <input type="number" id="inflationEssence" value="3" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
+        </div>
+      </div>
+      <div class="col-elec">
+        <h3 style="color:var(--elec);margin:0 0 10px 0;font-size:15px;">⚡ Électrique</h3>
+        <div class="field">
+          <label>Prix d'achat du véhicule (€)</label>
+          <input type="number" id="achatElec" value="25000" step="100">
+        </div>
+        <div class="field">
+          <label>Prix du kWh (€/kWh)</label>
+          <input type="number" id="prixKwh" value="0.05" step="0.001">
+        </div>
+        <div class="field">
+          <label>Autonomie de référence</label>
+          <input type="number" id="kwhRef" value="400" step="10" style="width:48%;display:inline-block;margin-right:4%;">
+          <input type="number" id="kmRef" value="1400" step="10" style="width:48%;display:inline-block;">
+          <div class="hint">kWh consommés → km parcourus (ex: 400 kWh = 1400 km)</div>
+        </div>
+        <div class="field">
+          <label>Entretien par an (€) <span class="badge">à partir de l'année 5</span></label>
+          <input type="number" id="entretienElec" value="100" step="10">
+        </div>
+        <div class="field">
+          <label>Inflation annuelle du prix de l'électricité</label>
+          <input type="number" id="inflationElec" value="2" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paramètres CO2 -->
+  <div class="card">
+    <h2>Paramètres CO2</h2>
+    <div class="grid-two">
+      <div class="col-essence">
+        <div class="field">
+          <label>CO2 à l'usage (g/km) <span class="badge">combustion du carburant</span></label>
+          <input type="number" id="co2KmEssence" value="120" step="1">
+        </div>
+        <div class="field">
+          <label>CO2 de production du véhicule (kg)</label>
+          <input type="number" id="co2ProdEssence" value="6000" step="100">
+        </div>
+      </div>
+      <div class="col-elec">
+        <div class="field">
+          <label>CO2 à l'usage (g/km) <span class="badge">0 = pas d'émission au roulage</span></label>
+          <input type="number" id="co2KmElec" value="0" step="1">
+        </div>
+        <div class="field">
+          <label>CO2 de production du véhicule (kg) <span class="badge">batterie incluse</span></label>
+          <input type="number" id="co2ProdElec" value="10000" step="100">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résultat -->
+  <div class="result-banner">
+    <div>
+      <div class="big" id="breakevenText">—</div>
+      <div class="lbl">Année à partir de laquelle l'électrique devient plus rentable</div>
+    </div>
+    <div>
+      <div class="big" id="deltaFinal" style="color:#334155;">—</div>
+      <div class="lbl" id="deltaFinalLbl">Économie cumulée sur l'ensemble de la période</div>
+    </div>
+  </div>
+
+  <!-- Graphique -->
+  <div class="card">
+    <div class="switch-row">
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="useDetailToggle">
+        Affiner avec le tableau détaillé par année (ci-dessous) plutôt que la projection simple
+      </label>
+    </div>
+    <div class="legend-row">
+      <span><span class="legend-dot" style="background:var(--essence);"></span>Thermique — coût cumulé</span>
+      <span><span class="legend-dot" style="background:var(--elec);"></span>Électrique — coût cumulé</span>
+    </div>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <!-- Résultat CO2 -->
+  <div class="result-banner">
+    <div>
+      <div class="big" id="breakevenCo2Text">—</div>
+      <div class="lbl">Année à partir de laquelle l'électrique devient plus vertueux (CO2)</div>
+    </div>
+    <div>
+      <div class="big" id="deltaCo2Final" style="color:#334155;">—</div>
+      <div class="lbl" id="deltaCo2FinalLbl">CO2 économisé sur l'ensemble de la période (kg)</div>
+    </div>
+  </div>
+
+  <!-- Graphique CO2 -->
+  <div class="card">
+    <div class="legend-row">
+      <span><span class="legend-dot" style="background:var(--essence);"></span>Thermique — CO2 cumulé</span>
+      <span><span class="legend-dot" style="background:var(--elec);"></span>Électrique — CO2 cumulé</span>
+    </div>
+    <canvas id="chartCo2"></canvas>
+  </div>
+
+  <!-- Tableau détaillé -->
+  <div class="card">
+    <details id="detailDetails">
+      <summary>📊 Tableau détaillé par année (optionnel, pour affiner)</summary>
+      <div class="toolbar" style="margin-top:14px;">
+        <span class="hint" style="color:var(--muted);font-size:13px;">
+          Cases jaunes modifiables : km/an, conso ou prix élec, entretien (par année). Les autres colonnes sont calculées.
+        </span>
+        <button class="btn secondary" id="regenBtn">↻ Régénérer les valeurs par défaut</button>
+      </div>
+
+      <h3 style="color:var(--essence);font-size:14px;margin-top:20px;">Thermique</h3>
+      <div class="table-scroll">
+        <table class="detail" id="tableEssence"></table>
+      </div>
+
+      <h3 style="color:var(--elec);font-size:14px;margin-top:24px;">Électrique</h3>
+      <div class="table-scroll">
+        <table class="detail" id="tableElec"></table>
+      </div>
+    </details>
+  </div>
+
+  <p class="hint" style="color:var(--muted);">
+    Modèle : les frais d'entretien annuels forfaitaires (bloc "Paramètres véhicules") ne s'appliquent qu'à partir de l'année 5
+    (les premières années sont supposées couvertes par la garantie constructeur).
+    Le tableau détaillé permet de renseigner un entretien différent chaque année (pneus, révisions, etc.) et un kilométrage
+    ou un prix de l'énergie qui varie dans le temps. Le CO2 suit toujours la projection simple (production du véhicule + émissions à l'usage),
+    indépendamment du tableau détaillé.
+  </p>
+
+</div>
+
+<script is:inline>
+const $ = id => document.getElementById(id);
+
+let chart;
+let chartCo2;
+let detailEssence = null; // array of {km, prixLitre, conso, entretien}
+let detailElec = null;    // array of {km, prixKwh, kmPerKwh, entretien}
+
+function getInputs(){
+  return {
+    kmParAn: parseFloat($('kmParAn').value) || 0,
+    nbAnnees: Math.max(1, parseInt($('nbAnnees').value) || 1),
+    achatEssence: parseFloat($('achatEssence').value) || 0,
+    prixLitre: parseFloat($('prixLitre').value) || 0,
+    consoL100: parseFloat($('consoL100').value) || 0,
+    entretienEssence: parseFloat($('entretienEssence').value) || 0,
+    inflationEssence: (parseFloat($('inflationEssence').value) || 0) / 100,
+    achatElec: parseFloat($('achatElec').value) || 0,
+    prixKwh: parseFloat($('prixKwh').value) || 0,
+    kwhRef: parseFloat($('kwhRef').value) || 1,
+    kmRef: parseFloat($('kmRef').value) || 0,
+    entretienElec: parseFloat($('entretienElec').value) || 0,
+    inflationElec: (parseFloat($('inflationElec').value) || 0) / 100,
+    co2KmEssence: parseFloat($('co2KmEssence').value) || 0,
+    co2ProdEssence: parseFloat($('co2ProdEssence').value) || 0,
+    co2KmElec: parseFloat($('co2KmElec').value) || 0,
+    co2ProdElec: parseFloat($('co2ProdElec').value) || 0,
+  };
+}
+
+// ---- Projection simple (reproduit le bloc du haut du fichier Excel) ----
+function computeSimple(inputs){
+  const consoKmEssence = inputs.consoL100 / 100;          // L/km
+  const prixKmEssence = consoKmEssence * inputs.prixLitre; // €/km
+  const coutAnnuelEssence = prixKmEssence * inputs.kmParAn;
+
+  const kmPerKwh = inputs.kmRef / inputs.kwhRef;           // km/kWh
+  const prixKmElec = inputs.prixKwh / kmPerKwh;             // €/km
+  const coutAnnuelElec = prixKmElec * inputs.kmParAn;
+
+  const essence = [];
+  const elec = [];
+  let cumEssence = inputs.achatEssence;
+  let cumElec = inputs.achatElec;
+
+  for(let year = 1; year <= inputs.nbAnnees; year++){
+    cumEssence += coutAnnuelEssence + (year >= 5 ? inputs.entretienEssence : 0);
+    cumElec += coutAnnuelElec + (year >= 5 ? inputs.entretienElec : 0);
+    essence.push(cumEssence);
+    elec.push(cumElec);
+  }
+  return { essence, elec };
+}
+
+// ---- CO2 : production du véhicule + émissions à l'usage (g/km -> kg), projection simple uniquement ----
+function computeCO2(inputs){
+  const co2AnnuelEssence = (inputs.co2KmEssence / 1000) * inputs.kmParAn; // kg/an
+  const co2AnnuelElec = (inputs.co2KmElec / 1000) * inputs.kmParAn;       // kg/an
+
+  const essence = [];
+  const elec = [];
+  let cumEssence = inputs.co2ProdEssence;
+  let cumElec = inputs.co2ProdElec;
+
+  for(let year = 1; year <= inputs.nbAnnees; year++){
+    cumEssence += co2AnnuelEssence;
+    cumElec += co2AnnuelElec;
+    essence.push(cumEssence);
+    elec.push(cumElec);
+  }
+  return { essence, elec };
+}
+
+// ---- Génération des valeurs par défaut du tableau détaillé ----
+function buildDefaultDetail(inputs){
+  const kmPerKwhBase = inputs.kmRef / inputs.kwhRef;
+  const essRows = [];
+  const elecRows = [];
+  let prixLitre = inputs.prixLitre;
+  let prixKwh = inputs.prixKwh;
+
+  for(let year = 1; year <= inputs.nbAnnees; year++){
+    if(year > 1){
+      prixLitre = prixLitre * (1 + inputs.inflationEssence);
+      prixKwh = prixKwh * (1 + inputs.inflationElec);
+    }
+    essRows.push({
+      km: inputs.kmParAn,
+      prixLitre: Math.round(prixLitre * 10000) / 10000,
+      conso: inputs.consoL100,
+      entretien: year === 1 ? inputs.achatEssence : (year >= 5 ? inputs.entretienEssence : 0)
+    });
+    elecRows.push({
+      km: inputs.kmParAn,
+      prixKwh: Math.round(prixKwh * 100000) / 100000,
+      kmPerKwh: Math.round(kmPerKwhBase * 100) / 100,
+      entretien: year === 1 ? inputs.achatElec : (year >= 5 ? inputs.entretienElec : 0)
+    });
+  }
+  return { essRows, elecRows };
+}
+
+function renderDetailTables(){
+  const inputs = getInputs();
+  if(!detailEssence || detailEssence.length !== inputs.nbAnnees){
+    const built = buildDefaultDetail(inputs);
+    detailEssence = built.essRows;
+    detailElec = built.elecRows;
+  }
+
+  // Table Essence
+  let h = '<tr><th>Année</th><th>km/an</th><th>Prix du L (€)</th><th>Conso (L/100km)</th><th>Entretien (€)</th><th>Coût année (€)</th><th>Cumul (€)</th></tr>';
+  let cum = 0;
+  const essCosts = [];
+  detailEssence.forEach((row, i) => {
+    const cost = (row.conso/100) * row.prixLitre * row.km + row.entretien;
+    cum += cost;
+    essCosts.push(cum);
+    h += `<tr>
+      <td class="readonly">${i+1}</td>
+      <td><input type="number" data-table="ess" data-row="${i}" data-field="km" value="${row.km}"></td>
+      <td><input type="number" step="0.001" data-table="ess" data-row="${i}" data-field="prixLitre" value="${row.prixLitre}"></td>
+      <td><input type="number" step="0.1" data-table="ess" data-row="${i}" data-field="conso" value="${row.conso}"></td>
+      <td><input type="number" data-table="ess" data-row="${i}" data-field="entretien" value="${row.entretien}"></td>
+      <td class="readonly">${cost.toFixed(2)}</td>
+      <td class="readonly">${cum.toFixed(2)}</td>
+    </tr>`;
+  });
+  $('tableEssence').innerHTML = h;
+
+  // Table Electrique
+  h = '<tr><th>Année</th><th>km/an</th><th>Prix du kWh (€)</th><th>km/kWh</th><th>Entretien (€)</th><th>Coût année (€)</th><th>Cumul (€)</th></tr>';
+  cum = 0;
+  const elecCosts = [];
+  detailElec.forEach((row, i) => {
+    const prixKm = row.prixKwh / row.kmPerKwh;
+    const cost = prixKm * row.km + row.entretien;
+    cum += cost;
+    elecCosts.push(cum);
+    h += `<tr>
+      <td class="readonly">${i+1}</td>
+      <td><input type="number" data-table="elec" data-row="${i}" data-field="km" value="${row.km}"></td>
+      <td><input type="number" step="0.0001" data-table="elec" data-row="${i}" data-field="prixKwh" value="${row.prixKwh}"></td>
+      <td><input type="number" step="0.1" data-table="elec" data-row="${i}" data-field="kmPerKwh" value="${row.kmPerKwh}"></td>
+      <td><input type="number" data-table="elec" data-row="${i}" data-field="entretien" value="${row.entretien}"></td>
+      <td class="readonly">${cost.toFixed(2)}</td>
+      <td class="readonly">${cum.toFixed(2)}</td>
+    </tr>`;
+  });
+  $('tableElec').innerHTML = h;
+
+  attachTableListeners();
+  return { essCosts, elecCosts };
+}
+
+function attachTableListeners(){
+  document.querySelectorAll('table.detail input').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const t = e.target;
+      const table = t.dataset.table === 'ess' ? detailEssence : detailElec;
+      const row = parseInt(t.dataset.row);
+      const field = t.dataset.field;
+      table[row][field] = parseFloat(t.value) || 0;
+      refresh(false); // recompute without rebuilding table inputs (preserve edits)
+    });
+  });
+}
+
+function computeFromDetail(){
+  let cum = 0;
+  const essence = detailEssence.map(row => {
+    const cost = (row.conso/100) * row.prixLitre * row.km + row.entretien;
+    cum += cost;
+    return cum;
+  });
+  cum = 0;
+  const elec = detailElec.map(row => {
+    const prixKm = row.prixKwh / row.kmPerKwh;
+    const cost = prixKm * row.km + row.entretien;
+    cum += cost;
+    return cum;
+  });
+  return { essence, elec };
+}
+
+function findBreakeven(essence, elec){
+  for(let i=0; i<essence.length; i++){
+    if(elec[i] <= essence[i]) return i+1;
+  }
+  return null;
+}
+
+function refresh(rebuildTables){
+  const inputs = getInputs();
+  const useDetail = $('useDetailToggle').checked;
+
+  if(rebuildTables !== false){
+    detailEssence = null;
+    detailElec = null;
+  }
+
+  renderDetailTables();
+
+  const data = useDetail ? computeFromDetail() : computeSimple(inputs);
+
+  const years = Array.from({length: inputs.nbAnnees}, (_, i) => i+1);
+  const breakYear = findBreakeven(data.essence, data.elec);
+  $('breakevenText').textContent = breakYear ? `${breakYear} an${breakYear>1?'s':''}` : 'Non atteint';
+
+  const finalDelta = data.essence[data.essence.length-1] - data.elec[data.elec.length-1];
+  $('deltaFinal').textContent = (finalDelta >= 0 ? '+' : '') + finalDelta.toFixed(0) + ' €';
+  $('deltaFinal').style.color = finalDelta >= 0 ? '#0f9d58' : '#d93025';
+  $('deltaFinalLbl').textContent = `Économie cumulée à l'année ${inputs.nbAnnees} (fin de la projection)`;
+
+  drawChart(years, data.essence, data.elec, breakYear);
+
+  const co2Data = computeCO2(inputs);
+  const breakYearCo2 = findBreakeven(co2Data.essence, co2Data.elec);
+  $('breakevenCo2Text').textContent = breakYearCo2 ? `${breakYearCo2} an${breakYearCo2>1?'s':''}` : 'Non atteint';
+
+  const finalCo2Delta = co2Data.essence[co2Data.essence.length-1] - co2Data.elec[co2Data.elec.length-1];
+  $('deltaCo2Final').textContent = (finalCo2Delta >= 0 ? '+' : '') + finalCo2Delta.toFixed(0) + ' kg';
+  $('deltaCo2Final').style.color = finalCo2Delta >= 0 ? '#0f9d58' : '#d93025';
+  $('deltaCo2FinalLbl').textContent = `CO2 économisé à l'année ${inputs.nbAnnees} (fin de la projection)`;
+
+  drawChartCo2(years, co2Data.essence, co2Data.elec);
+}
+
+function drawChart(years, essence, elec, breakYear){
+  const ctx = document.getElementById('chart').getContext('2d');
+  if(chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: 'Thermique — coût cumulé (€)',
+          data: essence,
+          borderColor: '#d97706',
+          backgroundColor: 'rgba(217,119,6,0.08)',
+          fill: false,
+          tension: 0.15,
+          pointRadius: 2
+        },
+        {
+          label: 'Électrique — coût cumulé (€)',
+          data: elec,
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14,165,233,0.08)',
+          fill: false,
+          tension: 0.15,
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} €`
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Années' } },
+        y: { title: { display: true, text: 'Coût cumulé (€)' } }
+      }
+    }
+  });
+}
+
+function drawChartCo2(years, essence, elec){
+  const ctx = document.getElementById('chartCo2').getContext('2d');
+  if(chartCo2) chartCo2.destroy();
+  chartCo2 = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: 'Thermique — CO2 cumulé (kg)',
+          data: essence,
+          borderColor: '#d97706',
+          backgroundColor: 'rgba(217,119,6,0.08)',
+          fill: false,
+          tension: 0.15,
+          pointRadius: 2
+        },
+        {
+          label: 'Électrique — CO2 cumulé (kg)',
+          data: elec,
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14,165,233,0.08)',
+          fill: false,
+          tension: 0.15,
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} kg`
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Années' } },
+        y: { title: { display: true, text: 'CO2 cumulé (kg)' } }
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.card input[type="number"]').forEach(inp => {
+  if(inp.closest('table')) return;
+  inp.addEventListener('change', () => refresh(true));
+});
+$('useDetailToggle').addEventListener('change', () => refresh(false));
+$('regenBtn').addEventListener('click', () => refresh(true));
+
+refresh(true);
+</script>
+</body>
+</html>
