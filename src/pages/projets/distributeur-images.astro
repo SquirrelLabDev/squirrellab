@@ -1,0 +1,180 @@
+---
+const desktopDownloadBase = 'https://github.com/SquirrelLabDev/squirrellab/releases/latest/download/';
+const features = [
+  {
+    title: 'Catégories via sous-dossiers',
+    desc: 'Le dossier choisi devient la base d\'images : chaque sous-dossier est une catégorie filtrable, les images à la racine forment "Sans catégorie".',
+  },
+  {
+    title: 'Anti-répétition',
+    desc: 'Une image déjà tirée n\'est pas reproposée tant que tout le lot filtré n\'est pas passé — le cycle se réinitialise ensuite tout seul.',
+  },
+  {
+    title: 'Plein écran + clavier',
+    desc: 'Un mode plein écran épuré pour la présentation, avec ← → pour revoir les images déjà tirées, Espace/Entrée pour en tirer une nouvelle, Échap pour sortir.',
+  },
+  {
+    title: '100% hors ligne',
+    desc: 'Aucune connexion réseau, aucun compte : le dossier reste sur votre machine, rien n\'est envoyé nulle part.',
+  },
+];
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Distributeur d'images — tirage au sort hors ligne dans un dossier d'images, par catégories." />
+    <title>Distributeur d'images — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge badge-live-status">Bureau · Windows</div>
+        <h1>Distributeur d'images</h1>
+        <p class="tagline">Tire une image au hasard dans un dossier, par catégories — hors ligne, sans installation.</p>
+        <p class="downloads">
+          <a class="btn-tool" href={desktopDownloadBase + 'SquirrellabImages.exe'}>Télécharger pour Windows ↓</a>
+        </p>
+        <p class="downloads-alt">
+          Aussi disponible pour <a href={desktopDownloadBase + 'SquirrellabImages-macos'}>macOS</a> et
+          <a href={desktopDownloadBase + 'SquirrellabImages-linux'}>Linux</a> (binaire brut : un
+          <code>chmod +x</code> est nécessaire avant de le lancer).
+        </p>
+        <p class="smartscreen-note">
+          Le binaire n'est pas encore signé numériquement : Windows SmartScreen affichera un
+          avertissement « éditeur inconnu » au premier lancement — cliquez sur
+          « Informations complémentaires » puis « Exécuter quand même ».
+        </p>
+      </header>
+
+      <section class="about">
+        <p>
+          Pas de web, pas de cloud, pas de compte : un exécutable unique à double-cliquer.
+          Choisissez un dossier d'images, cochez les catégories à inclure, et tirez au sort —
+          pratique pour un tirage au sort équitable, une animation d'équipe ou une présentation
+          en boucle sans jamais montrer deux fois la même image trop tôt.
+        </p>
+      </section>
+
+      <section class="features">
+        <h2>Fonctionnalités</h2>
+        <div class="features-grid">
+          {features.map((f) => (
+            <article class="feature">
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="status">
+        <h2>État du projet</h2>
+        <ul>
+          <li>Version portable (exécutable unique, sans installation) <strong>disponible</strong> — Windows, macOS, Linux.</li>
+          <li>Pas de signature de code pour l'instant (avertissement SmartScreen au premier lancement sous Windows).</li>
+          <li>Code source : dossier <code>apps/image-picker-desktop</code> du dépôt du site.</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Retour aux outils</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+
+      .hero { margin-bottom: 2rem; }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+      .badge-live-status { color: #7ec88a; border-color: #7ec88a; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1rem; margin: 0 0 1rem; }
+      .btn-tool {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.55rem 1.25rem; border-radius: 8px;
+        text-decoration: none; font-size: 0.9rem;
+      }
+      .btn-tool:hover { opacity: 0.9; }
+      .downloads { margin: 1rem 0 0.5rem; }
+      .downloads-alt { margin: 0 0 1rem; font-size: 0.8rem; color: var(--muted); }
+      .downloads-alt a { color: var(--muted); text-decoration: underline; }
+      .downloads-alt a:hover { color: var(--fg); }
+      .smartscreen-note { margin: 0; font-size: 0.8rem; color: var(--muted); max-width: 520px; line-height: 1.5; }
+
+      .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
+
+      .features h2 { font-size: 1.25rem; margin: 2rem 0 1rem; }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .feature h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+      section h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+      ul { line-height: 1.8; padding-left: 1.2rem; }
+      code { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.9em; }
+      a { color: var(--accent); }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

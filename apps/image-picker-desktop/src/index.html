@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Distributeur d'images</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Distributeur d'images</h1>
+        <p class="tagline">Choisis un dossier d'images, filtre par catégorie, puis tire au sort — hors ligne, rien n'est envoyé nulle part.</p>
+      </header>
+
+      <section class="panel">
+        <h2>1. Dossier de base</h2>
+        <p class="help">Les sous-dossiers immédiats deviennent des catégories filtrables. Les images directement à la racine forment la catégorie « Sans catégorie ».</p>
+        <div class="row">
+          <span id="folder-path" class="folder-path">Aucun dossier sélectionné.</span>
+          <button id="choose-folder-btn" class="btn">Choisir un dossier</button>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section id="categories-section" class="panel" hidden>
+        <h2>2. Catégories</h2>
+        <div id="categories-list" class="categories-list"></div>
+        <button id="toggle-all-btn" class="btn btn-secondary">Tout cocher / décocher</button>
+      </section>
+
+      <section id="draw-section" class="panel" hidden>
+        <h2>3. Tirage au sort</h2>
+        <div class="actions-row">
+          <button id="draw-btn" class="btn" disabled>Tirer une image</button>
+          <button id="reset-btn" class="btn btn-secondary">Réinitialiser le tirage</button>
+          <button id="fullscreen-btn" class="btn btn-secondary">Plein écran</button>
+        </div>
+        <p class="help">En plein écran : ← → pour naviguer, Espace/Entrée pour tirer une nouvelle image, Échap pour quitter.</p>
+        <p id="cycle-status" class="status"></p>
+        <div class="image-frame">
+          <img id="image-display" alt="Image tirée au sort" hidden />
+          <button id="exit-fullscreen-btn" hidden>✕</button>
+        </div>
+        <p id="image-name" class="image-name"></p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
