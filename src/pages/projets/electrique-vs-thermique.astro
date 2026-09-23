@@ -5,7 +5,7 @@
   <link rel="apple-touch-icon" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content={Astro.generator} />
-  <meta name="description" content="Simulateur de rentabilité électrique vs thermique — en combien d'années le surcoût à l'achat d'une voiture électrique est-il amorti face à un modèle essence/diesel ?">
+  <meta name="description" content="Simulateur de rentabilité entre deux véhicules d'énergies différentes (électrique, essence, diesel, bioéthanol...) — en combien d'années l'un devient plus avantageux que l'autre ?">
   <title>Électrique vs Thermique — Simulateur de rentabilité — SquirrelLab</title>
   <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
@@ -54,11 +54,11 @@
     .field label{
       display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;
     }
-    .field input{
+    .field input, .field select{
       width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;
       background:var(--yellow);font-size:14px;
     }
-    .field input:focus{outline:2px solid #94a3b8;}
+    .field input:focus, .field select:focus{outline:2px solid #94a3b8;}
     .field .hint{font-size:11px;color:var(--muted);margin-top:2px;}
     .badge{
       display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;
@@ -104,7 +104,7 @@
   </nav>
 
   <h1>🚗⚡ Électrique vs Thermique — Simulateur de rentabilité</h1>
-  <p class="sub">Renseignez vos paramètres pour comparer le coût cumulé d'un véhicule électrique et d'un véhicule thermique, et voir en combien d'années l'achat électrique devient rentable.</p>
+  <p class="sub">Comparez le coût cumulé (et le CO2) de deux véhicules, quelles que soient leurs énergies — électrique, essence, diesel, bioéthanol... — et voyez en combien d'années l'un devient plus avantageux que l'autre.</p>
 
   <!-- Paramètres communs -->
   <div class="card">
@@ -126,51 +126,89 @@
     <h2>Paramètres véhicules</h2>
     <div class="grid-two">
       <div class="col-essence">
-        <h3 style="color:var(--essence);margin:0 0 10px 0;font-size:15px;">🔧 Thermique (essence/diesel)</h3>
         <div class="field">
-          <label>Prix d'achat du véhicule (€)</label>
-          <input type="number" id="achatEssence" value="12000" step="100">
+          <label>Nom de l'énergie</label>
+          <input type="text" id="nomA" value="Thermique" maxlength="24">
         </div>
         <div class="field">
+          <label>Type d'énergie</label>
+          <select id="typeA">
+            <option value="liquide" selected>Carburant liquide (€/L)</option>
+            <option value="electrique">Électrique (€/kWh)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prix d'achat du véhicule (€)</label>
+          <input type="number" id="achatA" value="12000" step="100">
+        </div>
+        <div class="field type-liquide" data-side="A">
           <label>Prix du litre (€/L)</label>
-          <input type="number" id="prixLitre" value="2.25" step="0.01">
+          <input type="number" id="prixLitreA" value="2.25" step="0.01">
         </div>
-        <div class="field">
+        <div class="field type-liquide" data-side="A">
           <label>Consommation moyenne (L/100km)</label>
-          <input type="number" id="consoL100" value="6" step="0.1">
+          <input type="number" id="consoL100A" value="6" step="0.1">
         </div>
-        <div class="field">
-          <label>Entretien par an (€) <span class="badge">à partir de l'année 5</span></label>
-          <input type="number" id="entretienEssence" value="300" step="10">
-        </div>
-        <div class="field">
-          <label>Inflation annuelle du prix du carburant</label>
-          <input type="number" id="inflationEssence" value="3" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
-        </div>
-      </div>
-      <div class="col-elec">
-        <h3 style="color:var(--elec);margin:0 0 10px 0;font-size:15px;">⚡ Électrique</h3>
-        <div class="field">
-          <label>Prix d'achat du véhicule (€)</label>
-          <input type="number" id="achatElec" value="25000" step="100">
-        </div>
-        <div class="field">
+        <div class="field type-electrique" data-side="A" style="display:none;">
           <label>Prix du kWh (€/kWh)</label>
-          <input type="number" id="prixKwh" value="0.05" step="0.001">
+          <input type="number" id="prixKwhA" value="0.05" step="0.001">
         </div>
-        <div class="field">
+        <div class="field type-electrique" data-side="A" style="display:none;">
           <label>Autonomie de référence</label>
-          <input type="number" id="kwhRef" value="400" step="10" style="width:48%;display:inline-block;margin-right:4%;">
-          <input type="number" id="kmRef" value="1400" step="10" style="width:48%;display:inline-block;">
+          <input type="number" id="kwhRefA" value="400" step="10" style="width:48%;display:inline-block;margin-right:4%;">
+          <input type="number" id="kmRefA" value="1400" step="10" style="width:48%;display:inline-block;">
           <div class="hint">kWh consommés → km parcourus (ex: 400 kWh = 1400 km)</div>
         </div>
         <div class="field">
           <label>Entretien par an (€) <span class="badge">à partir de l'année 5</span></label>
-          <input type="number" id="entretienElec" value="100" step="10">
+          <input type="number" id="entretienA" value="300" step="10">
         </div>
         <div class="field">
-          <label>Inflation annuelle du prix de l'électricité</label>
-          <input type="number" id="inflationElec" value="2" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
+          <label>Inflation annuelle du prix de l'énergie</label>
+          <input type="number" id="inflationA" value="3" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
+        </div>
+      </div>
+      <div class="col-elec">
+        <div class="field">
+          <label>Nom de l'énergie</label>
+          <input type="text" id="nomB" value="Électrique" maxlength="24">
+        </div>
+        <div class="field">
+          <label>Type d'énergie</label>
+          <select id="typeB">
+            <option value="liquide">Carburant liquide (€/L)</option>
+            <option value="electrique" selected>Électrique (€/kWh)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prix d'achat du véhicule (€)</label>
+          <input type="number" id="achatB" value="25000" step="100">
+        </div>
+        <div class="field type-liquide" data-side="B" style="display:none;">
+          <label>Prix du litre (€/L)</label>
+          <input type="number" id="prixLitreB" value="1.10" step="0.01">
+        </div>
+        <div class="field type-liquide" data-side="B" style="display:none;">
+          <label>Consommation moyenne (L/100km)</label>
+          <input type="number" id="consoL100B" value="7.5" step="0.1">
+        </div>
+        <div class="field type-electrique" data-side="B">
+          <label>Prix du kWh (€/kWh)</label>
+          <input type="number" id="prixKwhB" value="0.05" step="0.001">
+        </div>
+        <div class="field type-electrique" data-side="B">
+          <label>Autonomie de référence</label>
+          <input type="number" id="kwhRefB" value="400" step="10" style="width:48%;display:inline-block;margin-right:4%;">
+          <input type="number" id="kmRefB" value="1400" step="10" style="width:48%;display:inline-block;">
+          <div class="hint">kWh consommés → km parcourus (ex: 400 kWh = 1400 km)</div>
+        </div>
+        <div class="field">
+          <label>Entretien par an (€) <span class="badge">à partir de l'année 5</span></label>
+          <input type="number" id="entretienB" value="100" step="10">
+        </div>
+        <div class="field">
+          <label>Inflation annuelle du prix de l'énergie</label>
+          <input type="number" id="inflationB" value="2" step="0.1"> <span class="hint">en %, utilisée dans le tableau détaillé</span>
         </div>
       </div>
     </div>
@@ -179,25 +217,26 @@
   <!-- Paramètres CO2 -->
   <div class="card">
     <h2>Paramètres CO2</h2>
+    <p class="hint" style="margin:-8px 0 14px 0;">Valeurs applicables quelle que soit l'énergie choisie ci-dessus (combustion, production d'électricité, etc.).</p>
     <div class="grid-two">
       <div class="col-essence">
         <div class="field">
-          <label>CO2 à l'usage (g/km) <span class="badge">combustion du carburant</span></label>
-          <input type="number" id="co2KmEssence" value="120" step="1">
+          <label>CO2 à l'usage (g/km)</label>
+          <input type="number" id="co2KmA" value="120" step="1">
         </div>
         <div class="field">
           <label>CO2 de production du véhicule (kg)</label>
-          <input type="number" id="co2ProdEssence" value="6000" step="100">
+          <input type="number" id="co2ProdA" value="6000" step="100">
         </div>
       </div>
       <div class="col-elec">
         <div class="field">
-          <label>CO2 à l'usage (g/km) <span class="badge">0 = pas d'émission au roulage</span></label>
-          <input type="number" id="co2KmElec" value="0" step="1">
+          <label>CO2 à l'usage (g/km)</label>
+          <input type="number" id="co2KmB" value="0" step="1">
         </div>
         <div class="field">
-          <label>CO2 de production du véhicule (kg) <span class="badge">batterie incluse</span></label>
-          <input type="number" id="co2ProdElec" value="10000" step="100">
+          <label>CO2 de production du véhicule (kg)</label>
+          <input type="number" id="co2ProdB" value="10000" step="100">
         </div>
       </div>
     </div>
@@ -207,7 +246,7 @@
   <div class="result-banner">
     <div>
       <div class="big" id="breakevenText">—</div>
-      <div class="lbl">Année à partir de laquelle l'électrique devient plus rentable</div>
+      <div class="lbl" id="breakevenLbl">Année à partir de laquelle l'électrique devient plus rentable</div>
     </div>
     <div>
       <div class="big" id="deltaFinal" style="color:#334155;">—</div>
@@ -224,8 +263,8 @@
       </label>
     </div>
     <div class="legend-row">
-      <span><span class="legend-dot" style="background:var(--essence);"></span>Thermique — coût cumulé</span>
-      <span><span class="legend-dot" style="background:var(--elec);"></span>Électrique — coût cumulé</span>
+      <span><span class="legend-dot" style="background:var(--essence);"></span><span id="legendCostA">Thermique — coût cumulé</span></span>
+      <span><span class="legend-dot" style="background:var(--elec);"></span><span id="legendCostB">Électrique — coût cumulé</span></span>
     </div>
     <canvas id="chart"></canvas>
   </div>
@@ -234,7 +273,7 @@
   <div class="result-banner">
     <div>
       <div class="big" id="breakevenCo2Text">—</div>
-      <div class="lbl">Année à partir de laquelle l'électrique devient plus vertueux (CO2)</div>
+      <div class="lbl" id="breakevenCo2Lbl">Année à partir de laquelle l'électrique devient plus vertueux (CO2)</div>
     </div>
     <div>
       <div class="big" id="deltaCo2Final" style="color:#334155;">—</div>
@@ -245,8 +284,8 @@
   <!-- Graphique CO2 -->
   <div class="card">
     <div class="legend-row">
-      <span><span class="legend-dot" style="background:var(--essence);"></span>Thermique — CO2 cumulé</span>
-      <span><span class="legend-dot" style="background:var(--elec);"></span>Électrique — CO2 cumulé</span>
+      <span><span class="legend-dot" style="background:var(--essence);"></span><span id="legendCo2A">Thermique — CO2 cumulé</span></span>
+      <span><span class="legend-dot" style="background:var(--elec);"></span><span id="legendCo2B">Électrique — CO2 cumulé</span></span>
     </div>
     <canvas id="chartCo2"></canvas>
   </div>
@@ -257,19 +296,19 @@
       <summary>📊 Tableau détaillé par année (optionnel, pour affiner)</summary>
       <div class="toolbar" style="margin-top:14px;">
         <span class="hint" style="color:var(--muted);font-size:13px;">
-          Cases jaunes modifiables : km/an, conso ou prix élec, entretien (par année). Les autres colonnes sont calculées.
+          Cases jaunes modifiables : km/an, prix unitaire, consommation, entretien (par année). Les autres colonnes sont calculées.
         </span>
         <button class="btn secondary" id="regenBtn">↻ Régénérer les valeurs par défaut</button>
       </div>
 
-      <h3 style="color:var(--essence);font-size:14px;margin-top:20px;">Thermique</h3>
+      <h3 id="headingTableA" style="color:var(--essence);font-size:14px;margin-top:20px;">Thermique</h3>
       <div class="table-scroll">
-        <table class="detail" id="tableEssence"></table>
+        <table class="detail" id="tableA"></table>
       </div>
 
-      <h3 style="color:var(--elec);font-size:14px;margin-top:24px;">Électrique</h3>
+      <h3 id="headingTableB" style="color:var(--elec);font-size:14px;margin-top:24px;">Électrique</h3>
       <div class="table-scroll">
-        <table class="detail" id="tableElec"></table>
+        <table class="detail" id="tableB"></table>
       </div>
     </details>
   </div>
@@ -289,189 +328,186 @@ const $ = id => document.getElementById(id);
 
 let chart;
 let chartCo2;
-let detailEssence = null; // array of {km, prixLitre, conso, entretien}
-let detailElec = null;    // array of {km, prixKwh, kmPerKwh, entretien}
+let detailA = null; // array of {km, prixUnite, conso, entretien}
+let detailB = null;
+
+function readSide(side){
+  return {
+    nom: ($('nom'+side).value || '').trim() || (side === 'A' ? 'Énergie A' : 'Énergie B'),
+    type: $('type'+side).value, // 'liquide' | 'electrique'
+    achat: parseFloat($('achat'+side).value) || 0,
+    prixLitre: parseFloat($('prixLitre'+side).value) || 0,
+    consoL100: parseFloat($('consoL100'+side).value) || 0,
+    prixKwh: parseFloat($('prixKwh'+side).value) || 0,
+    kwhRef: parseFloat($('kwhRef'+side).value) || 1,
+    kmRef: parseFloat($('kmRef'+side).value) || 0,
+    inflation: (parseFloat($('inflation'+side).value) || 0) / 100,
+    entretien: parseFloat($('entretien'+side).value) || 0,
+    co2Km: parseFloat($('co2Km'+side).value) || 0,
+    co2Prod: parseFloat($('co2Prod'+side).value) || 0,
+  };
+}
 
 function getInputs(){
   return {
     kmParAn: parseFloat($('kmParAn').value) || 0,
     nbAnnees: Math.max(1, parseInt($('nbAnnees').value) || 1),
-    achatEssence: parseFloat($('achatEssence').value) || 0,
-    prixLitre: parseFloat($('prixLitre').value) || 0,
-    consoL100: parseFloat($('consoL100').value) || 0,
-    entretienEssence: parseFloat($('entretienEssence').value) || 0,
-    inflationEssence: (parseFloat($('inflationEssence').value) || 0) / 100,
-    achatElec: parseFloat($('achatElec').value) || 0,
-    prixKwh: parseFloat($('prixKwh').value) || 0,
-    kwhRef: parseFloat($('kwhRef').value) || 1,
-    kmRef: parseFloat($('kmRef').value) || 0,
-    entretienElec: parseFloat($('entretienElec').value) || 0,
-    inflationElec: (parseFloat($('inflationElec').value) || 0) / 100,
-    co2KmEssence: parseFloat($('co2KmEssence').value) || 0,
-    co2ProdEssence: parseFloat($('co2ProdEssence').value) || 0,
-    co2KmElec: parseFloat($('co2KmElec').value) || 0,
-    co2ProdElec: parseFloat($('co2ProdElec').value) || 0,
+    A: readSide('A'),
+    B: readSide('B'),
   };
+}
+
+function updateTypeVisibility(){
+  ['A', 'B'].forEach(side => {
+    const type = $('type'+side).value;
+    document.querySelectorAll(`.field.type-liquide[data-side="${side}"]`).forEach(el => {
+      el.style.display = type === 'liquide' ? '' : 'none';
+    });
+    document.querySelectorAll(`.field.type-electrique[data-side="${side}"]`).forEach(el => {
+      el.style.display = type === 'electrique' ? '' : 'none';
+    });
+  });
+}
+
+// ---- Coût annuel d'énergie selon le type (carburant liquide ou électrique) ----
+function annualEnergyCost(side, kmParAn){
+  if(side.type === 'liquide'){
+    return (side.consoL100 / 100) * side.prixLitre * kmParAn;
+  }
+  const kmPerKwh = side.kmRef / side.kwhRef;
+  return (side.prixKwh / kmPerKwh) * kmParAn;
+}
+
+function simulateCostSide(side, kmParAn, nbAnnees){
+  const annuel = annualEnergyCost(side, kmParAn);
+  const arr = [];
+  let cum = side.achat;
+  for(let year = 1; year <= nbAnnees; year++){
+    cum += annuel + (year >= 5 ? side.entretien : 0);
+    arr.push(cum);
+  }
+  return arr;
 }
 
 // ---- Projection simple (reproduit le bloc du haut du fichier Excel) ----
 function computeSimple(inputs){
-  const consoKmEssence = inputs.consoL100 / 100;          // L/km
-  const prixKmEssence = consoKmEssence * inputs.prixLitre; // €/km
-  const coutAnnuelEssence = prixKmEssence * inputs.kmParAn;
-
-  const kmPerKwh = inputs.kmRef / inputs.kwhRef;           // km/kWh
-  const prixKmElec = inputs.prixKwh / kmPerKwh;             // €/km
-  const coutAnnuelElec = prixKmElec * inputs.kmParAn;
-
-  const essence = [];
-  const elec = [];
-  let cumEssence = inputs.achatEssence;
-  let cumElec = inputs.achatElec;
-
-  for(let year = 1; year <= inputs.nbAnnees; year++){
-    cumEssence += coutAnnuelEssence + (year >= 5 ? inputs.entretienEssence : 0);
-    cumElec += coutAnnuelElec + (year >= 5 ? inputs.entretienElec : 0);
-    essence.push(cumEssence);
-    elec.push(cumElec);
-  }
-  return { essence, elec };
+  return {
+    A: simulateCostSide(inputs.A, inputs.kmParAn, inputs.nbAnnees),
+    B: simulateCostSide(inputs.B, inputs.kmParAn, inputs.nbAnnees),
+  };
 }
 
 // ---- CO2 : production du véhicule + émissions à l'usage (g/km -> kg), projection simple uniquement ----
-function computeCO2(inputs){
-  const co2AnnuelEssence = (inputs.co2KmEssence / 1000) * inputs.kmParAn; // kg/an
-  const co2AnnuelElec = (inputs.co2KmElec / 1000) * inputs.kmParAn;       // kg/an
-
-  const essence = [];
-  const elec = [];
-  let cumEssence = inputs.co2ProdEssence;
-  let cumElec = inputs.co2ProdElec;
-
-  for(let year = 1; year <= inputs.nbAnnees; year++){
-    cumEssence += co2AnnuelEssence;
-    cumElec += co2AnnuelElec;
-    essence.push(cumEssence);
-    elec.push(cumElec);
+function simulateCO2Side(side, kmParAn, nbAnnees){
+  const annuel = (side.co2Km / 1000) * kmParAn; // kg/an
+  const arr = [];
+  let cum = side.co2Prod;
+  for(let year = 1; year <= nbAnnees; year++){
+    cum += annuel;
+    arr.push(cum);
   }
-  return { essence, elec };
+  return arr;
 }
 
-// ---- Génération des valeurs par défaut du tableau détaillé ----
-function buildDefaultDetail(inputs){
-  const kmPerKwhBase = inputs.kmRef / inputs.kwhRef;
-  const essRows = [];
-  const elecRows = [];
-  let prixLitre = inputs.prixLitre;
-  let prixKwh = inputs.prixKwh;
+function computeCO2(inputs){
+  return {
+    A: simulateCO2Side(inputs.A, inputs.kmParAn, inputs.nbAnnees),
+    B: simulateCO2Side(inputs.B, inputs.kmParAn, inputs.nbAnnees),
+  };
+}
 
-  for(let year = 1; year <= inputs.nbAnnees; year++){
+// ---- Génération des valeurs par défaut du tableau détaillé, selon le type de chaque côté ----
+function buildDefaultDetailForSide(side){
+  const rows = [];
+  let priceUnit = side.type === 'liquide' ? side.prixLitre : side.prixKwh;
+  const kmPerKwhBase = side.kmRef / side.kwhRef;
+  const decimals = side.type === 'liquide' ? 10000 : 100000;
+
+  for(let year = 1; year <= side.nbAnnees; year++){
     if(year > 1){
-      prixLitre = prixLitre * (1 + inputs.inflationEssence);
-      prixKwh = prixKwh * (1 + inputs.inflationElec);
+      priceUnit = priceUnit * (1 + side.inflation);
     }
-    essRows.push({
-      km: inputs.kmParAn,
-      prixLitre: Math.round(prixLitre * 10000) / 10000,
-      conso: inputs.consoL100,
-      entretien: year === 1 ? inputs.achatEssence : (year >= 5 ? inputs.entretienEssence : 0)
-    });
-    elecRows.push({
-      km: inputs.kmParAn,
-      prixKwh: Math.round(prixKwh * 100000) / 100000,
-      kmPerKwh: Math.round(kmPerKwhBase * 100) / 100,
-      entretien: year === 1 ? inputs.achatElec : (year >= 5 ? inputs.entretienElec : 0)
+    rows.push({
+      km: side.kmParAn,
+      prixUnite: Math.round(priceUnit * decimals) / decimals,
+      conso: side.type === 'liquide' ? side.consoL100 : Math.round(kmPerKwhBase * 100) / 100,
+      entretien: year === 1 ? side.achat : (year >= 5 ? side.entretien : 0)
     });
   }
-  return { essRows, elecRows };
+  return rows;
+}
+
+function rowCost(type, row){
+  if(type === 'liquide') return (row.conso / 100) * row.prixUnite * row.km + row.entretien;
+  return (row.prixUnite / row.conso) * row.km + row.entretien; // conso = km/kWh ici
+}
+
+function renderDetailTableForSide(sideLetter, side, tableEl, detailData){
+  const priceLabel = side.type === 'liquide' ? 'Prix du L (€)' : 'Prix du kWh (€)';
+  const consoLabel = side.type === 'liquide' ? 'Conso (L/100km)' : 'km/kWh';
+  const priceStep = side.type === 'liquide' ? '0.001' : '0.0001';
+
+  let h = `<tr><th>Année</th><th>km/an</th><th>${priceLabel}</th><th>${consoLabel}</th><th>Entretien (€)</th><th>Coût année (€)</th><th>Cumul (€)</th></tr>`;
+  let cum = 0;
+  const costs = [];
+  detailData.forEach((row, i) => {
+    const cost = rowCost(side.type, row);
+    cum += cost;
+    costs.push(cum);
+    h += `<tr>
+      <td class="readonly">${i+1}</td>
+      <td><input type="number" data-side="${sideLetter}" data-row="${i}" data-field="km" value="${row.km}"></td>
+      <td><input type="number" step="${priceStep}" data-side="${sideLetter}" data-row="${i}" data-field="prixUnite" value="${row.prixUnite}"></td>
+      <td><input type="number" step="0.1" data-side="${sideLetter}" data-row="${i}" data-field="conso" value="${row.conso}"></td>
+      <td><input type="number" data-side="${sideLetter}" data-row="${i}" data-field="entretien" value="${row.entretien}"></td>
+      <td class="readonly">${cost.toFixed(2)}</td>
+      <td class="readonly">${cum.toFixed(2)}</td>
+    </tr>`;
+  });
+  tableEl.innerHTML = h;
+  return costs;
 }
 
 function renderDetailTables(){
   const inputs = getInputs();
-  if(!detailEssence || detailEssence.length !== inputs.nbAnnees){
-    const built = buildDefaultDetail(inputs);
-    detailEssence = built.essRows;
-    detailElec = built.elecRows;
+
+  if(!detailA || detailA.length !== inputs.nbAnnees){
+    detailA = buildDefaultDetailForSide({ ...inputs.A, kmParAn: inputs.kmParAn, nbAnnees: inputs.nbAnnees });
+  }
+  if(!detailB || detailB.length !== inputs.nbAnnees){
+    detailB = buildDefaultDetailForSide({ ...inputs.B, kmParAn: inputs.kmParAn, nbAnnees: inputs.nbAnnees });
   }
 
-  // Table Essence
-  let h = '<tr><th>Année</th><th>km/an</th><th>Prix du L (€)</th><th>Conso (L/100km)</th><th>Entretien (€)</th><th>Coût année (€)</th><th>Cumul (€)</th></tr>';
-  let cum = 0;
-  const essCosts = [];
-  detailEssence.forEach((row, i) => {
-    const cost = (row.conso/100) * row.prixLitre * row.km + row.entretien;
-    cum += cost;
-    essCosts.push(cum);
-    h += `<tr>
-      <td class="readonly">${i+1}</td>
-      <td><input type="number" data-table="ess" data-row="${i}" data-field="km" value="${row.km}"></td>
-      <td><input type="number" step="0.001" data-table="ess" data-row="${i}" data-field="prixLitre" value="${row.prixLitre}"></td>
-      <td><input type="number" step="0.1" data-table="ess" data-row="${i}" data-field="conso" value="${row.conso}"></td>
-      <td><input type="number" data-table="ess" data-row="${i}" data-field="entretien" value="${row.entretien}"></td>
-      <td class="readonly">${cost.toFixed(2)}</td>
-      <td class="readonly">${cum.toFixed(2)}</td>
-    </tr>`;
-  });
-  $('tableEssence').innerHTML = h;
-
-  // Table Electrique
-  h = '<tr><th>Année</th><th>km/an</th><th>Prix du kWh (€)</th><th>km/kWh</th><th>Entretien (€)</th><th>Coût année (€)</th><th>Cumul (€)</th></tr>';
-  cum = 0;
-  const elecCosts = [];
-  detailElec.forEach((row, i) => {
-    const prixKm = row.prixKwh / row.kmPerKwh;
-    const cost = prixKm * row.km + row.entretien;
-    cum += cost;
-    elecCosts.push(cum);
-    h += `<tr>
-      <td class="readonly">${i+1}</td>
-      <td><input type="number" data-table="elec" data-row="${i}" data-field="km" value="${row.km}"></td>
-      <td><input type="number" step="0.0001" data-table="elec" data-row="${i}" data-field="prixKwh" value="${row.prixKwh}"></td>
-      <td><input type="number" step="0.1" data-table="elec" data-row="${i}" data-field="kmPerKwh" value="${row.kmPerKwh}"></td>
-      <td><input type="number" data-table="elec" data-row="${i}" data-field="entretien" value="${row.entretien}"></td>
-      <td class="readonly">${cost.toFixed(2)}</td>
-      <td class="readonly">${cum.toFixed(2)}</td>
-    </tr>`;
-  });
-  $('tableElec').innerHTML = h;
+  renderDetailTableForSide('A', inputs.A, $('tableA'), detailA);
+  renderDetailTableForSide('B', inputs.B, $('tableB'), detailB);
 
   attachTableListeners();
-  return { essCosts, elecCosts };
 }
 
 function attachTableListeners(){
   document.querySelectorAll('table.detail input').forEach(inp => {
     inp.addEventListener('change', e => {
       const t = e.target;
-      const table = t.dataset.table === 'ess' ? detailEssence : detailElec;
+      const data = t.dataset.side === 'A' ? detailA : detailB;
       const row = parseInt(t.dataset.row);
       const field = t.dataset.field;
-      table[row][field] = parseFloat(t.value) || 0;
+      data[row][field] = parseFloat(t.value) || 0;
       refresh(false); // recompute without rebuilding table inputs (preserve edits)
     });
   });
 }
 
-function computeFromDetail(){
+function computeFromDetail(inputs){
   let cum = 0;
-  const essence = detailEssence.map(row => {
-    const cost = (row.conso/100) * row.prixLitre * row.km + row.entretien;
-    cum += cost;
-    return cum;
-  });
+  const A = detailA.map(row => { cum += rowCost(inputs.A.type, row); return cum; });
   cum = 0;
-  const elec = detailElec.map(row => {
-    const prixKm = row.prixKwh / row.kmPerKwh;
-    const cost = prixKm * row.km + row.entretien;
-    cum += cost;
-    return cum;
-  });
-  return { essence, elec };
+  const B = detailB.map(row => { cum += rowCost(inputs.B.type, row); return cum; });
+  return { A, B };
 }
 
-function findBreakeven(essence, elec){
-  for(let i=0; i<essence.length; i++){
-    if(elec[i] <= essence[i]) return i+1;
+function findBreakeven(arrA, arrB){
+  for(let i=0; i<arrA.length; i++){
+    if(arrB[i] <= arrA[i]) return i+1;
   }
   return null;
 }
@@ -481,38 +517,49 @@ function refresh(rebuildTables){
   const useDetail = $('useDetailToggle').checked;
 
   if(rebuildTables !== false){
-    detailEssence = null;
-    detailElec = null;
+    detailA = null;
+    detailB = null;
   }
 
   renderDetailTables();
 
-  const data = useDetail ? computeFromDetail() : computeSimple(inputs);
+  const data = useDetail ? computeFromDetail(inputs) : computeSimple(inputs);
 
   const years = Array.from({length: inputs.nbAnnees}, (_, i) => i+1);
-  const breakYear = findBreakeven(data.essence, data.elec);
+  const breakYear = findBreakeven(data.A, data.B);
   $('breakevenText').textContent = breakYear ? `${breakYear} an${breakYear>1?'s':''}` : 'Non atteint';
+  $('breakevenLbl').textContent = `Année à partir de laquelle ${inputs.B.nom} devient plus rentable que ${inputs.A.nom}`;
 
-  const finalDelta = data.essence[data.essence.length-1] - data.elec[data.elec.length-1];
+  const finalDelta = data.A[data.A.length-1] - data.B[data.B.length-1];
   $('deltaFinal').textContent = (finalDelta >= 0 ? '+' : '') + finalDelta.toFixed(0) + ' €';
   $('deltaFinal').style.color = finalDelta >= 0 ? '#0f9d58' : '#d93025';
-  $('deltaFinalLbl').textContent = `Économie cumulée à l'année ${inputs.nbAnnees} (fin de la projection)`;
+  $('deltaFinalLbl').textContent = `Économie cumulée de ${inputs.B.nom} vs ${inputs.A.nom} à l'année ${inputs.nbAnnees} (fin de la projection)`;
 
-  drawChart(years, data.essence, data.elec, breakYear);
+  $('legendCostA').textContent = `${inputs.A.nom} — coût cumulé`;
+  $('legendCostB').textContent = `${inputs.B.nom} — coût cumulé`;
+
+  drawChart(years, data.A, data.B, inputs);
 
   const co2Data = computeCO2(inputs);
-  const breakYearCo2 = findBreakeven(co2Data.essence, co2Data.elec);
+  const breakYearCo2 = findBreakeven(co2Data.A, co2Data.B);
   $('breakevenCo2Text').textContent = breakYearCo2 ? `${breakYearCo2} an${breakYearCo2>1?'s':''}` : 'Non atteint';
+  $('breakevenCo2Lbl').textContent = `Année à partir de laquelle ${inputs.B.nom} devient plus vertueux (CO2) que ${inputs.A.nom}`;
 
-  const finalCo2Delta = co2Data.essence[co2Data.essence.length-1] - co2Data.elec[co2Data.elec.length-1];
+  const finalCo2Delta = co2Data.A[co2Data.A.length-1] - co2Data.B[co2Data.B.length-1];
   $('deltaCo2Final').textContent = (finalCo2Delta >= 0 ? '+' : '') + finalCo2Delta.toFixed(0) + ' kg';
   $('deltaCo2Final').style.color = finalCo2Delta >= 0 ? '#0f9d58' : '#d93025';
-  $('deltaCo2FinalLbl').textContent = `CO2 économisé à l'année ${inputs.nbAnnees} (fin de la projection)`;
+  $('deltaCo2FinalLbl').textContent = `CO2 économisé (${inputs.B.nom} vs ${inputs.A.nom}) à l'année ${inputs.nbAnnees} (fin de la projection)`;
 
-  drawChartCo2(years, co2Data.essence, co2Data.elec);
+  $('legendCo2A').textContent = `${inputs.A.nom} — CO2 cumulé`;
+  $('legendCo2B').textContent = `${inputs.B.nom} — CO2 cumulé`;
+
+  drawChartCo2(years, co2Data.A, co2Data.B, inputs);
+
+  $('headingTableA').textContent = inputs.A.nom;
+  $('headingTableB').textContent = inputs.B.nom;
 }
 
-function drawChart(years, essence, elec, breakYear){
+function drawChart(years, arrA, arrB, inputs){
   const ctx = document.getElementById('chart').getContext('2d');
   if(chart) chart.destroy();
   chart = new Chart(ctx, {
@@ -521,8 +568,8 @@ function drawChart(years, essence, elec, breakYear){
       labels: years,
       datasets: [
         {
-          label: 'Thermique — coût cumulé (€)',
-          data: essence,
+          label: `${inputs.A.nom} — coût cumulé (€)`,
+          data: arrA,
           borderColor: '#d97706',
           backgroundColor: 'rgba(217,119,6,0.08)',
           fill: false,
@@ -530,8 +577,8 @@ function drawChart(years, essence, elec, breakYear){
           pointRadius: 2
         },
         {
-          label: 'Électrique — coût cumulé (€)',
-          data: elec,
+          label: `${inputs.B.nom} — coût cumulé (€)`,
+          data: arrB,
           borderColor: '#0ea5e9',
           backgroundColor: 'rgba(14,165,233,0.08)',
           fill: false,
@@ -559,7 +606,7 @@ function drawChart(years, essence, elec, breakYear){
   });
 }
 
-function drawChartCo2(years, essence, elec){
+function drawChartCo2(years, arrA, arrB, inputs){
   const ctx = document.getElementById('chartCo2').getContext('2d');
   if(chartCo2) chartCo2.destroy();
   chartCo2 = new Chart(ctx, {
@@ -568,8 +615,8 @@ function drawChartCo2(years, essence, elec){
       labels: years,
       datasets: [
         {
-          label: 'Thermique — CO2 cumulé (kg)',
-          data: essence,
+          label: `${inputs.A.nom} — CO2 cumulé (kg)`,
+          data: arrA,
           borderColor: '#d97706',
           backgroundColor: 'rgba(217,119,6,0.08)',
           fill: false,
@@ -577,8 +624,8 @@ function drawChartCo2(years, essence, elec){
           pointRadius: 2
         },
         {
-          label: 'Électrique — CO2 cumulé (kg)',
-          data: elec,
+          label: `${inputs.B.nom} — CO2 cumulé (kg)`,
+          data: arrB,
           borderColor: '#0ea5e9',
           backgroundColor: 'rgba(14,165,233,0.08)',
           fill: false,
@@ -610,9 +657,14 @@ document.querySelectorAll('.card input[type="number"]').forEach(inp => {
   if(inp.closest('table')) return;
   inp.addEventListener('change', () => refresh(true));
 });
+$('nomA').addEventListener('input', () => refresh(false));
+$('nomB').addEventListener('input', () => refresh(false));
+$('typeA').addEventListener('change', () => { updateTypeVisibility(); refresh(true); });
+$('typeB').addEventListener('change', () => { updateTypeVisibility(); refresh(true); });
 $('useDetailToggle').addEventListener('change', () => refresh(false));
 $('regenBtn').addEventListener('click', () => refresh(true));
 
+updateTypeVisibility();
 refresh(true);
 </script>
 </body>
