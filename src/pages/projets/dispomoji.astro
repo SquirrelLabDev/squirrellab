@@ -1,0 +1,259 @@
+---
+// Adresse de la Web App Azure (tenant perso) — à mettre à jour après le premier déploiement.
+const dispomojiUrl = 'https://dispomoji-squirrellab.azurewebsites.net';
+const steps = [
+  { emoji: '🎬', title: "Créez l'événement", desc: 'Un nom (« Sortie ciné »), votre prénom et votre avatar emoji.' },
+  { emoji: '⏳', title: 'Fixez la date de décision', desc: 'La date de fin de saisie, et la période de jours proposés.' },
+  { emoji: '📅', title: 'Cochez vos dispos', desc: 'Cliquez sur les jours où vous êtes libre : votre avatar apparaît dans les cases.' },
+  { emoji: '🔗', title: 'Partagez le lien', desc: 'Les autres ajoutent leur tête à côté des vôtres, sans créer de compte.' },
+  { emoji: '✉️', title: 'Recevez le résultat', desc: 'À la date de décision, un e-mail avec le calendrier : le nombre de personnes par jour, et les jours qui ont le plus de monde en doré.' },
+];
+const features = [
+  {
+    title: 'Un vrai calendrier en cases',
+    desc: "Pas de tableau à rallonge avec une colonne par date : un calendrier mensuel où chaque case montre qui est dispo, avec des emojis.",
+  },
+  {
+    title: 'Aucun agenda à partager',
+    desc: "On ne connecte rien : chacun·e coche seulement les jours qui l'arrangent, et ne partage rien d'autre.",
+  },
+  {
+    title: 'Lisible même à 20',
+    desc: "Quand une case est pleine, on affiche les premier·es par ordre alphabétique et un « +N ». Le total reste visible, et le survol d'un avatar affiche le prénom.",
+  },
+  {
+    title: 'Gratuit jusqu\'à 40 personnes',
+    desc: 'Pour un séminaire, une AG ou un gros événement d\'entreprise, le mode événement (2 €, paiement unique) lève la limite. Écrivez à contact@squirrellab.fr.',
+  },
+  {
+    title: "L'organisateur·rice garde la main",
+    desc: "Modifier l'événement, les jours ou le profil de n'importe qui, retirer quelqu'un, clôturer en avance, tout supprimer.",
+  },
+];
+// Mini-calendrier de démonstration (octobre 2026 commence un jeudi).
+const demo: Record<number, string[]> = {
+  3: ['🦊'],
+  10: ['🐨', '🐼', '🐯', '🦁', '🐿️'],
+  11: ['🦄', '🐿️'],
+  17: ['🐨', '🐼', '🦊'],
+  24: ['🐯'],
+};
+const demoMax = Math.max(...Object.values(demo).map((d) => d.length));
+const demoCells = [null, null, null, ...Array.from({ length: 31 }, (_, i) => i + 1)];
+while (demoCells.length % 7) demoCells.push(null);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Dispo'moji — indiquez vos dispos directement sur un calendrier et trouvez une date ensemble, sans partager vos agendas." />
+    <title>Dispo'moji — SquirrelLab</title>
+  </head>
+  <body>
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <div class="badge">Bientôt en ligne</div>
+        <h1>📅 Dispo'moji</h1>
+        <p class="tagline">Indiquez vos dispos directement sur un calendrier.</p>
+        <p><a class="btn-tool" href={dispomojiUrl} target="_blank" rel="noopener">Créer un événement ↗</a></p>
+      </header>
+
+      <section class="demo" aria-label="Exemple de calendrier">
+        <div class="demo-title">Octobre 2026 · Sortie ciné 🍿</div>
+        <div class="demo-grid">
+          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => <div class="demo-wd">{d}</div>)}
+          {demoCells.map((day) => {
+            if (!day) return <div class="demo-cell demo-empty" />;
+            const people = demo[day] || [];
+            return (
+              <div class:list={['demo-cell', { 'demo-best': people.length === demoMax }]}>
+                <div class="demo-head">
+                  <span>{day}</span>
+                  {people.length > 0 && <span class="demo-count">{people.length}</span>}
+                </div>
+                <div class="demo-avatars">{people.join('')}</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section class="about">
+        <p>
+          Trouver une date pour un ciné, un resto ou un week-end, c'est souvent une longue discussion
+          de groupe, ou un tableau de sondage peu lisible. On a tous des agendas différents (perso, pro,
+          papier…) et on n'a pas forcément envie de les ouvrir aux autres.
+        </p>
+        <p>
+          <strong>Dispo'moji</strong> garde l'essentiel : un calendrier en cases, où chacun·e pose son
+          avatar sur les jours où il/elle est libre. En un coup d'œil, on voit où il y a le plus de monde.
+        </p>
+      </section>
+
+      <section class="features">
+        <h2>Comment ça marche</h2>
+        <ol class="steps">
+          {steps.map((s) => (
+            <li>
+              <span class="step-emoji">{s.emoji}</span>
+              <div>
+                <strong>{s.title}</strong>
+                <p>{s.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section class="features">
+        <h2>Fonctionnalités</h2>
+        <div class="features-grid">
+          {features.map((f) => (
+            <article class="feature">
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="status">
+        <h2>État du projet</h2>
+        <ul>
+          <li>Application web (création, calendrier partagé, e-mail de résultat, administration) <strong>terminée</strong>.</li>
+          <li>Mise en ligne sur Azure <strong>en cours</strong>.</li>
+          <li>Code source : dépôt privé (usage commercial prévu).</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Retour aux outils</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+        --best: #f2b632;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+
+      .hero { margin-bottom: 1.5rem; }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0 0 1rem; }
+      .btn-tool {
+        display: inline-block; background: var(--accent); color: #1a1a1a;
+        font-weight: 600; padding: 0.55rem 1.25rem; border-radius: 8px;
+        text-decoration: none; font-size: 0.9rem;
+      }
+      .btn-tool:hover { opacity: 0.9; }
+
+      .demo {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+      .demo-title { font-weight: 700; text-align: center; margin-bottom: 0.6rem; }
+      .demo-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+      .demo-wd { text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); }
+      .demo-cell {
+        min-height: 3.6rem;
+        background: #33211b;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.2rem 0.25rem;
+      }
+      .demo-empty { background: transparent; border: none; }
+      .demo-best { box-shadow: 0 0 0 2px var(--best) inset; border-color: var(--best); }
+      .demo-head { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+      .demo-count { font-weight: 700; color: var(--fg); background: rgba(224, 120, 64, 0.25); border-radius: 999px; padding: 0 0.35rem; }
+      .demo-best .demo-count { background: var(--best); color: #2a1b14; }
+      .demo-avatars { font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
+
+      .about p { line-height: 1.7; color: var(--fg); margin: 0 0 1.25rem; }
+
+      .features h2 { font-size: 1.25rem; margin: 2rem 0 1rem; }
+      .steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+      .steps li { display: flex; gap: 0.9rem; align-items: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; }
+      .step-emoji { font-size: 1.6rem; line-height: 1; }
+      .steps p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .feature h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .feature p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+      section h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+      ul { line-height: 1.8; padding-left: 1.2rem; }
+      code { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.9em; }
+      a { color: var(--accent); }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      footer a:hover { border-bottom-style: solid; }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+
+      @media (max-width: 600px) {
+        main { padding: 1.25rem 1rem; }
+        .demo { padding: 0.6rem; }
+        .demo-grid { gap: 2px; }
+        .demo-avatars { font-size: 0.8rem; }
+      }
+    </style>
+  </body>
+</html>
