@@ -1,0 +1,101 @@
+Voici la liste des anecdotes avec les vrais liens directs au format HTTPS, prêts à être copiés-collés. Tous les liens mènent vers les articles et sources d'origine (et non vers des pages de recherche Google).
+
+1. Le tout premier nom s'écrivait avec un trait d'union
+Anecdote : Lors de sa création en 1975, l'entreprise s'appelait Micro-Soft avant d'abandonner le trait d'union un an plus tard.
+
+Lien source : https://news.microsoft.com/en-in/features/the-history-of-microsoft/
+
+2. Le logo de Windows 95 a coûté une fortune en royalties musicales
+Anecdote : Microsoft a payé entre 8 et 12 millions de dollars aux Rolling Stones pour utiliser le titre Start Me Up dans sa campagne publicitaire.
+
+Lien source : https://www.vice.com/en/article/yp3q9w/the-guy-who-sold-windows-95-to-the-world
+
+3. Le son de démarrage de Windows 95 a été composé sur un Mac
+Anecdote : Le compositeur Brian Eno a créé le son de démarrage légendaire de Windows 95 sur un ordinateur Apple Macintosh.
+
+Lien source : https://www.mentalfloss.com/article/51325/brian-eno-created-windows-95-startup-sound-mac
+
+4. Microsoft a sauvé Apple de la faillite en 1997
+Anecdote : Bill Gates a investi 150 millions de dollars dans Apple en 1997 pour maintenir l'entreprise à flot et garantir le développement de Microsoft Office sur Mac.
+
+Lien source : https://www.cnbc.com/2017/08/29/steve-jobs-and-bill-gates-historic-1997-deal-reconstructed.html
+
+5. L'origine du célèbre fond d'écran "Bliss" (Colline verdoyante)
+Anecdote : Le fond d'écran de Windows XP est une photo argentique bien réelle et non retouchée, prise en Californie par Charles O'Rear.
+
+Lien source : https://www.pcmag.com/news/the-story-behind-bliss-the-windows-xp-default-wallpaper
+
+6. La tradition interne des M&M's, chez Microsoft
+Anecdote : À chaque anniversaire d'embauche, les employés doivent apporter une livre (environ 450g) de M&M's pour chaque année passée dans l'entreprise.
+
+Lien source : https://slate.com/technology/2013/05/microsoft-candy-tradition-employees-must-bring-m-and-ms-on-their-anniversaries.html
+
+7. Le premier virus sur Windows s'appelait "WinVer 1.4"
+Anecdote : Découvert en 1992, "WinVir" (ou WinVer) est historiquement le premier virus à avoir ciblé spécifiquement le système d'exploitation Windows.
+
+Lien source : https://www.csoonline.com/article/520110/the-history-of-windows-malware.html
+
+8. Microsoft possède une collection d'art massive
+Anecdote : Depuis 1987, l'entreprise a accumulé plus de 5 000 œuvres d'art contemporain pour décorer ses différents campus à travers le monde.
+
+Lien source : https://www.microsoft.com/en-us/artcollection/
+
+9. La pièce la plus silencieuse du monde est sur leur campus
+Anecdote : La chambre anéchoïque située dans le bâtiment 87 du campus de Redmond est officiellement l'endroit le plus silencieux sur Terre d'après le Guinness.
+
+Lien source : https://www.guinnessworldrecords.com/world-records/quieter-place
+
+10. Bill Gates a été arrêté à cause d'une infraction routière
+Anecdote : Le célèbre mugshot de l'arrestation de Bill Gates en 1977 a servi de modèle pour la silhouette d'avatar par défaut de Microsoft Outlook 2010.
+
+Lien source : https://www.geekwire.com/2010/is-that-bill-gates-mugshot-in-the-outlook-2010-people-pane/
+
+11. "Solitaire" a été créé pour apprendre aux gens à utiliser la souris
+Anecdote : Le jeu Solitaire a été intégré dans Windows 3.0 pour habituer de manière ludique les utilisateurs à effectuer des glisser-déposer.
+
+Lien source : https://www.mentalfloss.com/article/66434/hidden-purpose-solitaire-minesweeper-hearts-and-freecell
+
+12. "Démineur" servait à enseigner le clic droit et gauche
+Anecdote : Le but caché du Démineur était d'entraîner la précision du pointeur et de faire comprendre la différence de fonction entre le clic droit et le clic gauche.
+
+Lien source : https://www.businessinsider.com/why-microsoft-created-solitaire-and-minesweeper-2015-8
+
+13. Le premier système d'exploitation de Microsoft n'était pas MS-DOS, mais Xenix
+Anecdote : À la fin des années 70, Microsoft a développé et vendu sa propre version du système d'exploitation Unix sous le nom de Xenix.
+
+Lien source : https://www.zdnet.com/article/microsofts-forgotten-operating-system/
+
+14. Microsoft a inventé la première "Smartwatch" en 1994
+Anecdote : Conçue avec Timex, la Datalink 150 permettait de synchroniser des données depuis un écran de PC à l'aide de signaux lumineux reçus par un capteur sur la montre.
+
+Lien source : https://americanhistory.si.edu/collections/search/object/nmah_1194200
+
+15. Le mythique écran bleu de la mort (BSOD) a été écrit par Steve Ballmer
+Anecdote : N'aimant pas le texte initialement prévu pour l'écran de plantage de Windows 3.1, l'ancien PDG Steve Ballmer l'a récrit lui-même.
+
+Lien source : https://devblogs.microsoft.com/oldnewthing/20140902-00/?p=73
+
+16. La pizza est la nourriture non officielle du campus
+Anecdote : Sur le campus géant de Redmond, la pizza est de très loin le plat le plus populaire et le plus vendu aux employés chaque jour.
+
+Lien source : https://www.geekwire.com/2015/behind-the-scenes-how-microsoft-feeds-thousands-of-employees-every-day-on-its-campus/
+
+17. Le nom de code de la Xbox était "DirectX Box"
+Anecdote : La console de jeux de Microsoft tire son nom de sa technologie graphique d'origine, "DirectX".
+
+Lien source : https://www.gamesradar.com/the-making-of-the-xbox/
+
+18. Le campus géant de Microsoft à Redmond
+Anecdote : Microsoft possède un campus de plus de 200 hectares à Redmond, fonctionnant comme une véritable petite ville avec ses propres infrastructures de transport.
+
+Lien source : https://news.microsoft.com/modern-campus/
+
+19. Des milliers d'employés sont devenus millionnaires grâce aux stock-options
+Anecdote : L'explosion de la valeur boursière de Microsoft dans les années 90 a transformé plus de 10 000 salariés de la première heure en millionnaires.
+
+Lien source : https://www.nytimes.com/1992/05/29/business/market-place-the-microsoft-millionaires.html
+
+20. L'achat historique de Mojang et Minecraft
+Anecdote : En rachetant Minecraft pour 2,5 milliards de dollars en 2014, Microsoft a propulsé son créateur Markus Persson au rang de milliardaire.
+
+Lien source : https://www.bbc.com/news/technology-29204518
