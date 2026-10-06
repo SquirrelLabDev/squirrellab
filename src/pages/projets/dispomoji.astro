@@ -59,7 +59,7 @@ while (demoCells.length % 7) demoCells.push(null);
       </nav>
 
       <header class="hero">
-        <div class="badge">Bientôt en ligne</div>
+        <div class="badge badge-live">En ligne</div>
         <h1>📅 Dispo'moji</h1>
         <p class="tagline">Indiquez vos dispos directement sur un calendrier.</p>
         <p><a class="btn-tool" href={dispomojiUrl} target="_blank" rel="noopener">Créer un événement ↗</a></p>
@@ -128,7 +128,7 @@ while (demoCells.length % 7) demoCells.push(null);
         <h2>État du projet</h2>
         <ul>
           <li>Application web (création, calendrier partagé, e-mail de résultat, administration) <strong>terminée</strong>.</li>
-          <li>Mise en ligne sur Azure <strong>en cours</strong>.</li>
+          <li>Application <strong>en ligne</strong> sur Azure.</li>
           <li>Code source : dépôt privé (usage commercial prévu).</li>
         </ul>
       </section>
@@ -175,6 +175,7 @@ while (demoCells.length % 7) demoCells.push(null);
         padding: 0.2rem 0.6rem;
         margin-bottom: 0.6rem;
       }
+      .badge-live { color: #7ec88a; border-color: #7ec88a; }
       h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.4rem; letter-spacing: -0.02em; }
       .tagline { color: var(--muted); font-size: 1.1rem; margin: 0 0 1rem; }
       .btn-tool {
