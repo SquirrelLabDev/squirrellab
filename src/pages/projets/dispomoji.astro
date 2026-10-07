@@ -62,7 +62,11 @@ while (demoCells.length % 7) demoCells.push(null);
         <div class="badge badge-live">En ligne</div>
         <h1>📅 Dispo'moji</h1>
         <p class="tagline">Indiquez vos dispos directement sur un calendrier.</p>
-        <p><a class="btn-tool" href={dispomojiUrl} target="_blank" rel="noopener">Créer un événement ↗</a></p>
+        <p class="hero-actions">
+          <a class="btn-tool" href={dispomojiUrl} target="_blank" rel="noopener">Créer un événement ↗</a>
+          <a class="btn-tool-secondary" href={`${dispomojiUrl}/mes-evenements`} target="_blank" rel="noopener">Mes événements ↗</a>
+        </p>
+        <p class="hero-hint">Vous avez déjà créé un événement ? Retrouvez-le dans « Mes événements » pour le gérer, ou recevez vos liens organisateur·rice par e-mail.</p>
       </header>
 
       <section class="demo" aria-label="Exemple de calendrier">
@@ -134,7 +138,7 @@ while (demoCells.length % 7) demoCells.push(null);
       </section>
 
       <footer>
-        <p><a href="/outils">← Retour aux outils</a></p>
+        <p><a href="/outils">← Retour aux outils</a> · <a href={`${dispomojiUrl}/admin`} target="_blank" rel="noopener">Administration</a></p>
         <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
       </footer>
     </main>
@@ -184,6 +188,13 @@ while (demoCells.length % 7) demoCells.push(null);
         text-decoration: none; font-size: 0.9rem;
       }
       .btn-tool:hover { opacity: 0.9; }
+      .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+      .btn-tool-secondary {
+        color: var(--muted); font-size: 0.9rem;
+        text-decoration: none; border-bottom: 1px dashed var(--border);
+      }
+      .btn-tool-secondary:hover { color: var(--fg); }
+      .hero-hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
 
       .demo {
         background: var(--bg-card);
