@@ -1,4 +1,5 @@
 ---
+import HomeLogo from '../../components/HomeLogo.astro';
 import anecdotes from '../../data/anecdotes.json';
 
 export function getStaticPaths() {
@@ -20,6 +21,7 @@ const sourceUrl = anecdote.source && (/^https?:\/\//i.test(anecdote.source) ? an
     <title>Anecdote #{anecdote.num}</title>
   </head>
   <body>
+    <HomeLogo />
     <main>
       <div class="badge">Anecdote n°{anecdote.num} / 20</div>
       <h1>{anecdote.title}</h1>

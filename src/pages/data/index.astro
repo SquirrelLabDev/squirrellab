@@ -1,4 +1,5 @@
 ---
+import HomeLogo from '../../components/HomeLogo.astro';
 const sections = [
   { href: '/data/dashboards', label: 'Rapports Power BI', desc: 'CV interactif et escape game Power BI.', live: true },
   { href: '/data/scripts', label: 'Scripts', desc: 'Automatisations, notebooks et repos.', live: false },
@@ -17,6 +18,7 @@ const sections = [
     <title>Réalisations Data — Matthieu Rancinan</title>
   </head>
   <body>
+    <HomeLogo />
     <main>
       <nav class="topnav">
         <a href="/">← Accueil</a>

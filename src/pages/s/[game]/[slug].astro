@@ -1,4 +1,5 @@
 ---
+import HomeLogo from '../../../components/HomeLogo.astro';
 export function getStaticPaths() {
   const gameFiles = import.meta.glob('../../../data/games/*.json', { eager: true });
   const paths = [];
@@ -27,6 +28,7 @@ const sourceUrl = anecdote.source && (/^https?:\/\//i.test(anecdote.source) ? an
     <title>Anecdote #{anecdote.num}</title>
   </head>
   <body>
+    <HomeLogo />
     <main>
       <div class="badge">Anecdote n°{anecdote.num} / {total}</div>
       <h1>{anecdote.title}</h1>

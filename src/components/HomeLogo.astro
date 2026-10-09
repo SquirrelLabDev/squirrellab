@@ -1,0 +1,57 @@
+---
+---
+<a href="/" class="home-logo" aria-label="Retour à l'accueil">
+  <span class="home-logo-label">Accueil</span>
+  <img src="/logo.png" alt="SquirrelLab" width="44" height="44" />
+</a>
+
+<style>
+  .home-logo {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 200;
+    display: block;
+    text-decoration: none;
+  }
+  .home-logo-label {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 0.6rem);
+    transform: translate(6px, -50%);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--fg, #f5e6d5);
+    background: var(--bg-card, #3a2620);
+    border: 1px solid var(--border, #4a332a);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+  }
+  .home-logo img {
+    display: block;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+    transition: transform 0.15s ease;
+  }
+  .home-logo:hover .home-logo-label,
+  .home-logo:focus-visible .home-logo-label {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+  .home-logo:hover img,
+  .home-logo:focus-visible img {
+    transform: scale(1.08);
+  }
+  @media (max-width: 640px) {
+    .home-logo { top: 0.65rem; right: 0.65rem; }
+    .home-logo img { width: 34px; height: 34px; }
+    .home-logo-label { display: none; }
+  }
+</style>

@@ -1,4 +1,5 @@
 ---
+import HomeLogo from '../../components/HomeLogo.astro';
 // Adresse de la Web App Azure (tenant perso, plan F1 partagé avec le Gestionnaire de tokens).
 const dispomojiUrl = 'https://dispomoji-squirrellab-axfcg5ahc8gjhxed.francecentral-01.azurewebsites.net';
 const steps = [
@@ -53,6 +54,7 @@ while (demoCells.length % 7) demoCells.push(null);
     <title>Dispo'moji — SquirrelLab</title>
   </head>
   <body>
+    <HomeLogo />
     <main>
       <nav class="topnav">
         <a href="/outils">← Outils</a>
