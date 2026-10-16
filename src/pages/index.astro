@@ -35,12 +35,11 @@ const sections = [
       { href: '/data/videos', label: 'Vidéos' },
     ],
   },
-  {
-    href: '/services',
-    label: 'Prestations & services',
-    desc: 'Jeux de QR codes sur mesure pour vos événements, formations Power BI.',
-    links: [],
-  },
+];
+const services = [
+  { icon: '🌐', title: 'Développement web & sites', desc: 'Sites vitrines, applications et intégrations conçus sur mesure.' },
+  { icon: '🤖', title: 'Automatisation & IA', desc: 'Scripts, workflows et assistants pour gagner du temps au quotidien.' },
+  { icon: '🧭', title: 'Conseil & accompagnement', desc: 'Audit, formation (Power BI…) et accompagnement technique.' },
 ];
 ---
 
@@ -66,7 +65,25 @@ const sections = [
           </div>
         </div>
         <p class="tagline">Partage de tâtonnements, créations et découvertes numériques.</p>
+        <p class="tagline-services">Et aussi : <strong>des services sur mesure</strong> pour vos projets web, data et IA.</p>
       </header>
+
+      <section class="services-band" aria-labelledby="services-title">
+        <div class="services-head">
+          <h2 id="services-title">Travaillons ensemble</h2>
+          <p>Ce que je peux faire pour vous, du site web à l'automatisation en passant par l'accompagnement.</p>
+        </div>
+        <div class="services-list">
+          {services.map((sv) => (
+            <div class="service-item">
+              <span class="service-icon" aria-hidden="true">{sv.icon}</span>
+              <h3>{sv.title}</h3>
+              <p>{sv.desc}</p>
+            </div>
+          ))}
+        </div>
+        <a class="cta" href="/services">Découvrir tous les services →</a>
+      </section>
 
 
       <section class="nav-grid">
@@ -164,6 +181,40 @@ const sections = [
         letter-spacing: -0.02em;
       }
       .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; }
+      .tagline-services { color: var(--fg); font-size: 1.05rem; margin: 0.5rem 0 0; }
+      .tagline-services strong { color: var(--accent); }
+      .services-band {
+        background: var(--bg-card);
+        border: 1px solid var(--accent);
+        border-radius: 14px;
+        padding: 2rem 1.5rem;
+        margin-bottom: 3rem;
+        text-align: center;
+      }
+      .services-head h2 { margin: 0 0 0.4rem; font-size: 1.6rem; }
+      .services-head p { margin: 0 0 1.5rem; color: var(--muted); }
+      .services-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+      .service-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+      .service-icon { font-size: 1.5rem; }
+      .service-item h3 { margin: 0.4rem 0; font-size: 1.05rem; }
+      .service-item p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      .cta {
+        display: inline-block;
+        background: var(--accent);
+        color: var(--bg);
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.7rem 1.4rem;
+        border-radius: 8px;
+        transition: filter 0.15s;
+      }
+      .cta:hover { filter: brightness(1.1); }
       @media (max-width: 640px) {
         .hero-top { flex-direction: column; }
         .squiggy-wrap { flex-direction: column; }
