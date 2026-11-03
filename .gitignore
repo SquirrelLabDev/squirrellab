@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Rapports Power BI (.pbix lourds + registre local)
+asset/Power BI Report/
