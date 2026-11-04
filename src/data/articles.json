@@ -3,18 +3,35 @@
     "slug": "publish-to-web-my-workspace",
     "title": "Mon trial Fabric a expiré… et c'est une bonne nouvelle 😄",
     "date": "2026-11-03",
+    "tags": [
+      "powerbi",
+      "fabric",
+      "publish-to-web",
+      "powershell",
+      "claude"
+    ],
     "html": "<p>Salut tout le monde, 👋</p>\n<p>Mon trial Fabric a expiré, et c’est finalement une bonne nouvelle. 😄</p>\n<img src=\"/articles/publish-to-web-my-workspace/my-workspace.png\" alt=\"My workspace dans Fabric avec le bandeau « Your Microsoft Fabric trial has ended » et les rapports ECE rangés dans un dossier\" loading=\"lazy\" />\n<figure>\n  <img src=\"/articles/publish-to-web-my-workspace/avant-contenu-indisponible.png\" alt=\"Rapport Inazuma Eleven dans le carrousel du site, avec le message « This content isn't available »\" loading=\"lazy\" />\n  <figcaption>Avant : mes rapports embeddés affichaient « This content isn't available ».</figcaption>\n</figure>\n<p>Je cherchais comment continuer à exposer mes rapports sur le web, comme mon CV Power BI. J’ai découvert qu’en publiant sur “My Workspace”, on peut faire un Publish to Web sans trial Fabric. 🎉</p>\n<img src=\"/articles/publish-to-web-my-workspace/publish-to-web-menu.png\" alt=\"Menu Fichier > Intégrer le rapport > Publish to web (public) dans Fabric\" loading=\"lazy\" />\n<p>Restait un détail : j’avais plein de rapports à republier.</p>\n<p>Ma solution avec Claude :</p>\n<ul>\n  <li>📁 Un dossier avec tous mes .pbix</li>\n  <li>⚙️ Un script PowerShell généré par Claude, basé sur l’API REST Power BI, pour tout publier en masse</li>\n  <li>🗂️ Des dossiers pour organiser le workspace</li>\n  <li>🔗 Un fichier interne mis à jour avec les liens Publish to Web (à générer à la main, c’est le seul passage manuel)</li>\n  <li>🌐 Mon site <a href=\"https://squirrellab.fr/\">https://squirrellab.fr/</a> mis à jour par Claude</li>\n</ul>\n<p>Et tadaaaa, mes réalisations sont de nouveau en ligne. ✨</p>\n<img src=\"/articles/publish-to-web-my-workspace/resultat-pokemon.png\" alt=\"Le rapport Pokémon affiché dans le carrousel du site squirrellab.fr\" loading=\"lazy\" />\n<img src=\"/articles/publish-to-web-my-workspace/resultat-inazuma.png\" alt=\"Le rapport Inazuma Eleven affiché dans le carrousel du site squirrellab.fr\" loading=\"lazy\" />\n<p>Merci Claude ! 🙏</p>"
   },
   {
     "slug": "police-personnalisee-zone-de-texte-power-bi",
     "title": "Une police personnalisée dans une zone de texte Power BI ?",
     "date": "2026-11-02",
+    "tags": [
+      "powerbi",
+      "police",
+      "astuce"
+    ],
     "html": "<p>Salut salut !</p>\n<p>Je viens de tomber sur une petite perle. Vous savez, on dit qu’on ne peut pas importer une police personnalisée dans Power BI, dans la zone de texte.</p>\n<p>Eh bien, aujourd’hui je viens de découvrir par hasard, en faisant un simple copier-coller d’un titre dans une police particulière PowerPoint vers une zone de texte Power BI, qu’il a conservé ma police !</p>\n<img src=\"/articles/police-personnalisee-power-bi/zone-de-texte-police-collee.jpeg\" alt=\"Zone de texte Power BI avec un titre « CALCULATE » collé depuis PowerPoint, dans une police absente de la liste des polices\" loading=\"lazy\" />\n<img src=\"/articles/police-personnalisee-power-bi/liste-des-polices.jpeg\" alt=\"La liste des polices de la zone de texte Power BI, où apparaît « Avenir Next LT Pro »\" loading=\"lazy\" />\n<p>On va peut-être bientôt pouvoir importer nos propres polices !</p>"
   },
   {
     "slug": "variables-colonnes-power-query",
     "title": "Des variables dans vos colonnes personnalisées Power Query",
     "date": "2025-01-01",
+    "tags": [
+      "powerquery",
+      "m",
+      "astuce"
+    ],
     "html": "<p>Vous saviez qu'on peut intégrer des variables dans nos colonnes calculées en Power Query ? Intéressant non ? 😎</p>\n<pre><code>let\n  var1 = 1,\n  var2 = 2,\n  final = var1 + var2\nin\n  final</code></pre>\n<p>À insérer directement dans la formule de la colonne personnalisée — pratique pour découper des calculs complexes en étapes claires et lisibles.</p>"
   }
 ]

@@ -64,6 +64,7 @@ import HomeLogo from '../../components/HomeLogo.astro';
           path: 'src/data/articles.json',
           fields: [
             { key: 'title', label: 'Titre', kind: 'text' },
+            { key: 'tags', label: 'Tags (séparés par des virgules, sans #)', kind: 'tags' },
             { key: 'html', label: 'Contenu (HTML)', kind: 'textarea' },
           ],
           extra: () => ({ date: new Date().toISOString().slice(0, 10) }),
@@ -306,7 +307,8 @@ import HomeLogo from '../../components/HomeLogo.astro';
       function enterEditMode(type, item) {
         editingSlug = item.slug;
         for (const f of TYPES[type].fields) {
-          document.getElementById('f-' + f.key).value = item[f.key] || '';
+          const v = item[f.key];
+          document.getElementById('f-' + f.key).value = Array.isArray(v) ? v.join(', ') : v || '';
         }
         document.getElementById('submit-btn').textContent = 'Enregistrer les modifications';
         document.getElementById('cancel-edit-btn').hidden = false;
@@ -325,7 +327,11 @@ import HomeLogo from '../../components/HomeLogo.astro';
         const cfg = TYPES[activeType];
         const values = {};
         for (const f of cfg.fields) {
-          values[f.key] = document.getElementById('f-' + f.key).value.trim();
+          const raw = document.getElementById('f-' + f.key).value.trim();
+          values[f.key] =
+            f.kind === 'tags'
+              ? [...new Set(raw.split(/[,\s]+/).map((t) => t.replace(/^#+/, '').trim()).filter(Boolean))]
+              : raw;
         }
         if (editingSlug) {
           const slugToEdit = editingSlug;
