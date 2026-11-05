@@ -1,6 +1,7 @@
 ---
 import HomeLogo from '../../components/HomeLogo.astro';
 import videos from '../../data/videos.json';
+import { formatDate } from '../../lib/feed';
 ---
 <html lang="fr">
   <head>
@@ -21,8 +22,9 @@ import videos from '../../data/videos.json';
       </header>
 
       {videos.map((v) => (
-        <section class="video-card">
+        <section class="video-card" id={v.slug}>
           <h2>{v.title}</h2>
+          {(v as any).date && <time datetime={(v as any).date} style="display:block;color:var(--muted);font-size:0.85rem;margin:0 0 0.75rem">Publié le {formatDate((v as any).date)}</time>}
           <p class="desc">{v.desc}</p>
           <video controls playsinline preload="metadata">
             <source src={v.src} type="video/mp4" />

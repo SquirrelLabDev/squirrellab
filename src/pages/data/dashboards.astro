@@ -1,6 +1,7 @@
 ---
 import HomeLogo from '../../components/HomeLogo.astro';
 import dashboards from '../../data/dashboards.json';
+import { formatDate } from '../../lib/feed';
 
 const worldChallengeReports = [
   {
@@ -116,8 +117,9 @@ const eceReports = [
       </header>
 
       {dashboards.map((d) => (
-        <section class="dashboard">
+        <section class="dashboard" id={d.slug}>
           <h2>{d.title}</h2>
+          {(d as any).date && <time datetime={(d as any).date} style="display:block;color:var(--muted);font-size:0.85rem;margin:0 0 0.75rem">Publié le {formatDate((d as any).date)}</time>}
           <Fragment set:html={d.html} />
         </section>
       ))}

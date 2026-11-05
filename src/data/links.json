@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "dax-guide",
+    "title": "DAX Guide",
+    "url": "https://dax.guide/",
+    "note": "Référence de toutes les fonctions DAX, avec exemples et compatibilité par produit.",
+    "date": "2026-11-05",
+    "tags": ["powerbi", "dax", "documentation"]
+  },
+  {
+    "slug": "power-query-m-reference",
+    "title": "Référence du langage M (Power Query)",
+    "url": "https://learn.microsoft.com/fr-fr/powerquery-m/",
+    "note": "Documentation officielle des fonctions et de la syntaxe du langage M.",
+    "date": "2026-11-05",
+    "tags": ["powerquery", "m", "documentation"]
+  },
+  {
+    "slug": "aqueria",
+    "title": "Aqueria",
+    "url": "https://aqueria.be/#haut",
+    "note": "L'inclusion au fil des mots : repère les biais de genre dans les textes RH et propose des reformulations. Thésaurus ouvert, ASBL belge.",
+    "date": "2026-11-05",
+    "tags": ["inclusion", "rh"]
+  }
+]

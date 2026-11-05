@@ -1,0 +1,198 @@
+---
+import HomeLogo from '../components/HomeLogo.astro';
+import { getFeed, SECTION_LABELS, formatDate, type FeedItem } from '../lib/feed';
+
+const items = getFeed();
+const monthKey = (d: string) => d.slice(0, 7);
+const monthLabel = (k: string) => {
+  const s = new Date(k + '-15T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+const groups: { key: string; items: FeedItem[] }[] = [];
+for (const it of items) {
+  const k = monthKey(it.date);
+  const last = groups[groups.length - 1];
+  if (last && last.key === k) last.items.push(it);
+  else groups.push({ key: k, items: [it] });
+}
+const filters = [
+  { value: 'all', label: 'Tout' },
+  { value: 'creations', label: SECTION_LABELS.creations },
+  { value: 'outils', label: SECTION_LABELS.outils },
+  { value: 'data', label: SECTION_LABELS.data },
+];
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Frise chronologique de SquirrelLab : créations, outils, articles et réalisations data dans l'ordre où ils sont apparus." />
+    <title>Frise chronologique — SquirrelLab</title>
+  </head>
+  <body>
+    <HomeLogo />
+    <main>
+      <nav class="topnav"><a href="/">← Accueil</a></nav>
+      <header>
+        <div class="badge">Chronologie</div>
+        <h1>Frise chronologique</h1>
+        <p class="tagline">Tout ce qui est né sur SquirrelLab, du plus récent au plus ancien.</p>
+      </header>
+
+      <div class="controls">
+        <input type="search" id="search" placeholder="Rechercher dans le site (titre, texte, #tag)…" aria-label="Rechercher" />
+        <div class="filters" role="group" aria-label="Filtrer par section">
+          {filters.map((f) => (
+            <button type="button" class="chip" data-filter={f.value} aria-pressed={f.value === 'all' ? 'true' : 'false'}>{f.label}</button>
+          ))}
+        </div>
+        <p class="count" id="count" aria-live="polite"></p>
+      </div>
+
+      <p id="no-result" hidden>Rien ne correspond à cette recherche.</p>
+
+      <ol class="timeline">
+        {groups.map((g) => (
+          <li class="month" data-month>
+            <h2 class="month-title">{monthLabel(g.key)}</h2>
+            <ul class="events">
+              {g.items.map((it) => (
+                <li
+                  class={`event s-${it.section}`}
+                  data-section={it.section}
+                  data-search={`${it.title} ${it.summary} ${it.kind} ${it.tags.join(' ')} ${SECTION_LABELS[it.section]}`.toLowerCase()}
+                  data-tags={it.tags.join(' ').toLowerCase()}
+                >
+                  <a href={it.url}>
+                    <div class="meta">
+                      <span class="kind">{it.kind}</span>
+                      <span class="sec">{SECTION_LABELS[it.section]}</span>
+                      <time datetime={it.date}>{formatDate(it.date)}</time>
+                    </div>
+                    <h3>{it.title}</h3>
+                    {it.summary && <p>{it.summary}</p>}
+                    {it.updated && it.updated !== it.date && <p class="upd">Mis à jour le {formatDate(it.updated)}</p>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+
+      <footer>
+        <p><a href="/">← Accueil</a></p>
+        <p class="copy">© {new Date().getFullYear()} SquirrelLab</p>
+      </footer>
+    </main>
+
+    <script>
+      const input = document.getElementById('search') as HTMLInputElement;
+      const noResult = document.getElementById('no-result')!;
+      const count = document.getElementById('count')!;
+      const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+      const events = Array.from(document.querySelectorAll<HTMLElement>('.event'));
+      const months = Array.from(document.querySelectorAll<HTMLElement>('[data-month]'));
+      let section = 'all';
+
+      function apply() {
+        const raw = input.value.trim().toLowerCase();
+        const hash = raw.startsWith('#');
+        const q = raw.replace(/^#/, '');
+        let visible = 0;
+        for (const e of events) {
+          const okSection = section === 'all' || e.dataset.section === section;
+          const okText = !q || (hash ? (e.dataset.tags ?? '').split(' ').some((t) => t.includes(q)) : (e.dataset.search ?? '').includes(q));
+          e.hidden = !(okSection && okText);
+          if (!e.hidden) visible++;
+        }
+        for (const m of months) m.hidden = !m.querySelector('.event:not([hidden])');
+        noResult.hidden = visible > 0;
+        count.textContent = `${visible} élément${visible > 1 ? 's' : ''}`;
+        const url = new URL(location.href);
+        raw ? url.searchParams.set('q', input.value.trim()) : url.searchParams.delete('q');
+        section !== 'all' ? url.searchParams.set('s', section) : url.searchParams.delete('s');
+        history.replaceState(null, '', url);
+      }
+
+      function setSection(v: string) {
+        section = v;
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.filter === v)));
+      }
+
+      input.addEventListener('input', apply);
+      chips.forEach((c) => c.addEventListener('click', () => { setSection(c.dataset.filter!); apply(); }));
+
+      const params = new URLSearchParams(location.search);
+      if (params.get('q')) input.value = params.get('q')!;
+      const s = params.get('s');
+      if (s && chips.some((c) => c.dataset.filter === s)) setSection(s);
+      apply();
+    </script>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+        --c-creations: #e07840;
+        --c-outils: #6bb5a6;
+        --c-data: #7aa2e0;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 2rem; }
+      .topnav { margin-bottom: 2rem; }
+      .topnav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+      .topnav a:hover { color: var(--accent); }
+      .badge { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.2rem 0.6rem; margin-bottom: 1rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.05rem; margin: 0 0 2rem; }
+
+      .controls { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 2.5rem; }
+      #search { width: 100%; background: var(--bg-card); color: var(--fg); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 1rem; font-size: 1rem; }
+      #search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .chip { background: var(--bg-card); color: var(--fg); border: 1px solid var(--border); border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.9rem; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+      .chip:hover { border-color: var(--accent); }
+      .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #2a1b14; font-weight: 600; }
+      .count { margin: 0; color: var(--muted); font-size: 0.85rem; }
+      #no-result { color: var(--muted); text-align: center; padding: 2rem 0; }
+
+      .timeline { list-style: none; margin: 0; padding: 0 0 0 1.75rem; border-left: 2px solid var(--border); }
+      .month { position: relative; margin-bottom: 2.5rem; }
+      .month[hidden], .event[hidden], #no-result[hidden] { display: none; }
+      .month-title { position: relative; margin: 0 0 1rem; font-size: 1.15rem; color: var(--accent); }
+      .month-title::before { content: ''; position: absolute; left: calc(-1.75rem - 7px); top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+      .events { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+      .event { position: relative; }
+      .event::before { content: ''; position: absolute; left: calc(-1.75rem - 4px); top: 1.35rem; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--muted)); }
+      .event::after { content: ''; position: absolute; left: -1.75rem; top: calc(1.35rem + 3px); width: 1.75rem; height: 2px; background: var(--border); z-index: -1; }
+      .s-creations { --dot: var(--c-creations); }
+      .s-outils { --dot: var(--c-outils); }
+      .s-data { --dot: var(--c-data); }
+      .event a { display: block; background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--dot); border-radius: 10px; padding: 0.9rem 1.1rem; color: inherit; text-decoration: none; transition: transform 150ms ease, border-color 150ms ease; }
+      .event a:hover, .event a:focus-visible { transform: translateX(3px); border-color: var(--dot); }
+      .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.35rem; }
+      .kind { color: var(--dot); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+      .event h3 { margin: 0; font-size: 1.05rem; }
+      .event p { margin: 0.4rem 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+      .event .upd { color: var(--accent); font-size: 0.8rem; }
+
+      footer { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>

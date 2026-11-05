@@ -1,5 +1,8 @@
 ---
 import HomeLogo from '../components/HomeLogo.astro';
+import catalog from '../data/catalog.json';
+import { formatDate } from '../lib/feed';
+const dateOf = (href: string) => catalog.find((c) => c.url === href)?.date;
 const projets = [
   {
     href: '/projets/mapinblue',
@@ -48,6 +51,7 @@ const projets = [
             <div class="badge">{p.badge}</div>
             <h2>{p.label}</h2>
             <p>{p.desc}</p>
+            {dateOf(p.href) && <time datetime={dateOf(p.href)} style="display:block;color:var(--muted);font-size:0.8rem;margin-bottom:0.5rem">Mis en ligne le {formatDate(dateOf(p.href)!)}</time>}
             <span class="arrow">→</span>
           </a>
         ))}

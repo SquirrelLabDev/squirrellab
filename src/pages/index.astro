@@ -1,5 +1,14 @@
 ---
 import HomeLogo from '../components/HomeLogo.astro';
+import { getFeed, lastActivity, formatDate, SECTION_LABELS } from '../lib/feed';
+
+const latest = getFeed()
+  .map((it) => {
+    const isUpdate = !!it.updated && it.updated > it.date;
+    return { ...it, when: lastActivity(it), isUpdate };
+  })
+  .sort((a, b) => b.when.localeCompare(a.when))
+  .slice(0, 5);
 const sections = [
   {
     href: '/creations',
@@ -32,6 +41,7 @@ const sections = [
       { href: '/data/dashboards', label: 'Rapports Power BI' },
       { href: '/data/scripts', label: 'Scripts' },
       { href: '/data/articles', label: 'Articles' },
+      { href: '/data/liens', label: 'Liens' },
       { href: '/data/videos', label: 'Vidéos' },
     ],
   },
@@ -85,6 +95,25 @@ const sections = [
             )}
           </div>
         ))}
+      </section>
+
+      <section class="latest" aria-labelledby="latest-title">
+        <div class="latest-head">
+          <h2 id="latest-title">Dernières nouveautés</h2>
+          <a href="/frise" class="frise-link">Voir la frise chronologique →</a>
+        </div>
+        <ul class="latest-list">
+          {latest.map((it) => (
+            <li>
+              <a href={it.url}>
+                <span class={`latest-kind s-${it.section}`}>{it.isUpdate ? 'Mise à jour' : 'Nouveau'} · {it.kind}</span>
+                <span class="latest-title">{it.title}</span>
+                {it.summary && <span class="latest-sum">{it.summary}</span>}
+                <time datetime={it.when}>{SECTION_LABELS[it.section]} · {formatDate(it.when)}</time>
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <footer>
@@ -202,6 +231,18 @@ const sections = [
       .sublinks { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--border); padding-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
       .sublinks a { color: var(--accent); font-size: 0.85rem; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 0.15rem 0.5rem; transition: background 0.15s; }
       .sublinks a:hover { background: var(--border); }
+      .latest { margin-bottom: 4rem; }
+      .latest-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 1rem; }
+      .latest-head h2 { margin: 0; font-size: 1.35rem; }
+      .frise-link { color: var(--accent); text-decoration: none; font-size: 0.95rem; border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.9rem; transition: background 0.15s; }
+      .frise-link:hover { background: var(--border); }
+      .latest-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+      .latest-list a { display: flex; flex-direction: column; gap: 0.3rem; height: 100%; background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 0.9rem 1.1rem; color: inherit; text-decoration: none; transition: transform 150ms ease, border-color 150ms ease; }
+      .latest-list a:hover { transform: translateY(-2px); border-color: var(--accent); }
+      .latest-kind { color: var(--accent); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+      .latest-title { font-size: 1.02rem; font-weight: 600; }
+      .latest-sum { color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+      .latest-list time { color: var(--muted); font-size: 0.78rem; margin-top: auto; padding-top: 0.3rem; }
       footer {
         border-top: 1px solid var(--border);
         padding-top: 2rem;

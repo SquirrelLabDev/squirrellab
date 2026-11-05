@@ -1,6 +1,7 @@
 ---
 import HomeLogo from '../../components/HomeLogo.astro';
 import articles from '../../data/articles.json';
+import { formatDate } from '../../lib/feed';
 ---
 <html lang="fr">
   <head>
@@ -36,6 +37,7 @@ import articles from '../../data/articles.json';
             {a.title}
             <a class="permalink" href={`#${a.slug}`} data-slug={a.slug} title="Copier le lien de cet article" aria-label="Copier le lien de cet article">🔗</a>
           </h2>
+          <time datetime={a.date} style="display:block;color:var(--muted);font-size:0.85rem;margin:0 0 0.75rem">Publié le {formatDate(a.date)}</time>
           {((a as any).tags ?? []).length > 0 && (
             <div class="tags">
               {((a as any).tags as string[]).map((t) => (

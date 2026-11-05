@@ -1,0 +1,170 @@
+---
+import HomeLogo from '../../components/HomeLogo.astro';
+import rawLinks from '../../data/links.json';
+import { formatDate } from '../../lib/feed';
+
+type LinkItem = { slug: string; title: string; url: string; note?: string; tags?: string[] };
+const links = [...(rawLinks as LinkItem[])].sort((a, b) => a.title.localeCompare(b.title, 'fr'));
+const host = (u: string) => {
+  try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; }
+};
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Liens utiles de Matthieu Rancinan — sites d'outils, documentation et ressources Data." />
+    <title>Liens — Matthieu Rancinan</title>
+  </head>
+  <body>
+    <HomeLogo />
+    <main>
+      <nav class="topnav"><a href="/data">← Réalisations Data</a></nav>
+      <header>
+        <div class="badge">Ressources</div>
+        <h1>Liens</h1>
+        <p class="tagline">Sites d'outils, documentation et ressources que je garde sous la main.</p>
+      </header>
+
+      <div class="search">
+        <input type="search" id="search" placeholder="Rechercher un lien ou un #tag…" aria-label="Rechercher" />
+        <p id="no-result" hidden>Aucun lien ne correspond.</p>
+      </div>
+
+      <ul class="links">
+        {links.map((l) => (
+          <li
+            class="link-card"
+            id={l.slug}
+            data-tags={(l.tags ?? []).join(' ').toLowerCase()}
+            data-text={`${l.title} ${l.note ?? ''} ${host(l.url)}`.toLowerCase()}
+          >
+            <div class="head">
+              <a class="title" href={l.url} target="_blank" rel="noopener noreferrer">{l.title}</a>
+              <a class="permalink" href={`#${l.slug}`} data-slug={l.slug} title="Copier le lien vers cette entrée" aria-label="Copier le lien vers cette entrée">🔗</a>
+            </div>
+            <div class="host">{host(l.url)}{(l as any).date && <> · ajouté le {formatDate((l as any).date)}</>}</div>
+            {l.note && <p class="note">{l.note}</p>}
+            {(l.tags ?? []).length > 0 && (
+              <div class="tags">
+                {(l.tags ?? []).map((t) => (
+                  <button type="button" class="tag" data-tag={t.toLowerCase()}>#{t}</button>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <footer>
+        <p><a href="/data">← Réalisations Data</a></p>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
+      </footer>
+    </main>
+    <script>
+      const input = document.getElementById('search') as HTMLInputElement;
+      const noResult = document.getElementById('no-result')!;
+      const cards = Array.from(document.querySelectorAll<HTMLElement>('.link-card'));
+
+      function applyFilter() {
+        const raw = input.value.trim().toLowerCase();
+        const hashSearch = raw.startsWith('#');
+        const q = raw.replace(/^#/, '');
+        let visible = 0;
+        for (const c of cards) {
+          const tags = c.dataset.tags ?? '';
+          const match =
+            !q ||
+            (hashSearch
+              ? tags.split(' ').some((t) => t.includes(q))
+              : (c.dataset.text ?? '').includes(q) || tags.includes(q));
+          c.hidden = !match;
+          if (match) visible++;
+        }
+        noResult.hidden = visible > 0;
+        const url = new URL(location.href);
+        if (raw) url.searchParams.set('q', input.value.trim());
+        else url.searchParams.delete('q');
+        history.replaceState(null, '', url);
+      }
+
+      input.addEventListener('input', applyFilter);
+
+      document.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        const tag = target.closest<HTMLElement>('.tag');
+        if (tag) {
+          input.value = '#' + tag.dataset.tag;
+          applyFilter();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        const link = target.closest<HTMLAnchorElement>('.permalink');
+        if (link) {
+          e.preventDefault();
+          const url = new URL(location.href);
+          url.search = '';
+          url.hash = link.dataset.slug!;
+          history.replaceState(null, '', url);
+          try {
+            await navigator.clipboard.writeText(url.toString());
+            link.textContent = '✅';
+            setTimeout(() => (link.textContent = '🔗'), 1500);
+          } catch {}
+        }
+      });
+
+      const initial = new URLSearchParams(location.search).get('q');
+      if (initial) {
+        input.value = initial;
+        applyFilter();
+      }
+      if (location.hash) {
+        const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (el) {
+          if (el.hidden) {
+            input.value = '';
+            applyFilter();
+          }
+          el.scrollIntoView();
+          el.classList.add('targeted');
+        }
+      }
+    </script>
+    <style is:global>
+      :root { color-scheme: dark; --bg: #2a1b14; --bg-card: #3a2620; --fg: #f5e6d5; --muted: #b8a491; --border: #4a332a; --accent: #8b9d7e; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+      main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .badge { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.2rem 0.6rem; margin-bottom: 1rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0 0 2.5rem; }
+      .search { margin-bottom: 2rem; }
+      .search input { width: 100%; background: var(--bg-card); color: var(--fg); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 1rem; font: inherit; }
+      .search input:focus { outline: none; border-color: var(--accent); }
+      #no-result { color: var(--muted); margin: 1rem 0 0; }
+      .links { list-style: none; padding: 0; margin: 0; }
+      .link-card { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; scroll-margin-top: 1rem; }
+      .link-card[hidden] { display: none; }
+      .link-card.targeted, .link-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+      .head { display: flex; align-items: baseline; gap: 0.5rem; }
+      .title { color: var(--fg); font-size: 1.1rem; font-weight: 600; text-decoration: none; }
+      .title:hover { color: var(--accent); text-decoration: underline; }
+      .permalink { font-size: 0.8rem; text-decoration: none; opacity: 0.4; }
+      .link-card:hover .permalink, .permalink:focus { opacity: 1; }
+      .host { color: var(--muted); font-size: 0.85rem; margin-top: 0.15rem; }
+      .note { margin: 0.6rem 0 0; line-height: 1.5; }
+      .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+      .tag { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 999px; padding: 0.1rem 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer; }
+      .tag:hover { border-color: var(--accent); }
+      footer { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+    </style>
+  </body>
+</html>
