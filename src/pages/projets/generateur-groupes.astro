@@ -1,0 +1,260 @@
+---
+import HomeLogo from '../../components/HomeLogo.astro';
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Générateur de groupes : collez une liste de noms et obtenez des équipes aléatoires de 4 personnes (ou la taille de votre choix), équilibrées." />
+    <title>Générateur de groupes — SquirrelLab</title>
+  </head>
+  <body>
+    <HomeLogo />
+    <main>
+      <nav class="topnav">
+        <a href="/outils">← Outils</a>
+      </nav>
+
+      <header class="hero">
+        <h1>Générateur de groupes</h1>
+        <p class="tagline">Collez une liste de noms, obtenez des équipes tirées au hasard. Rien n'est envoyé : tout reste dans votre navigateur.</p>
+      </header>
+
+      <section class="panel">
+        <label for="names">Noms (un par ligne, ou séparés par des virgules / points-virgules)</label>
+        <textarea id="names" rows="10" placeholder="Alice Martin&#10;Bob Durand&#10;Chloé Bernard&#10;…" spellcheck="false"></textarea>
+
+        <div class="controls">
+          <label class="inline">
+            Taille des groupes
+            <input id="size" type="number" min="2" max="50" value="4" />
+          </label>
+          <button id="generate" class="btn" type="button">Générer les groupes</button>
+          <span id="count" class="muted" aria-live="polite"></span>
+        </div>
+        <p id="msg" class="msg" role="status" hidden></p>
+      </section>
+
+      <section id="result" class="result" hidden>
+        <div class="result-bar">
+          <h2 id="summary"></h2>
+          <div class="actions">
+            <button id="reshuffle" class="btn-secondary" type="button">🔀 Re-mélanger</button>
+            <button id="copy" class="btn-secondary" type="button">📋 Copier</button>
+            <button id="print" class="btn-secondary" type="button">🖨️ Imprimer</button>
+          </div>
+        </div>
+        <div id="groups" class="groups"></div>
+      </section>
+
+      <footer>
+        <p><a href="/outils">← Outils</a></p>
+        <p class="copy">© {new Date().getFullYear()} Matthieu Rancinan</p>
+      </footer>
+    </main>
+
+    <script is:inline>
+      (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        var namesEl = $('names'), sizeEl = $('size'), msgEl = $('msg');
+        var groups = [];
+
+        function parseNames() {
+          return namesEl.value
+            .split(/[\n\r,;]+/)
+            .map(function (s) { return s.trim(); })
+            .filter(Boolean);
+        }
+
+        function randInt(n) {
+          var buf = new Uint32Array(1);
+          var limit = Math.floor(0x100000000 / n) * n;
+          do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+          return buf[0] % n;
+        }
+
+        function shuffle(arr) {
+          var a = arr.slice();
+          for (var i = a.length - 1; i > 0; i--) {
+            var j = randInt(i + 1);
+            var t = a[i]; a[i] = a[j]; a[j] = t;
+          }
+          return a;
+        }
+
+        // Nombre de groupes = ceil(n / taille), puis répartition équilibrée :
+        // 10 personnes en taille 4 → 4/3/3 plutôt que 4/4/2.
+        function split(names, size) {
+          var k = Math.ceil(names.length / size);
+          var base = Math.floor(names.length / k);
+          var extra = names.length % k;
+          var out = [], pos = 0;
+          for (var g = 0; g < k; g++) {
+            var len = base + (g < extra ? 1 : 0);
+            out.push(names.slice(pos, pos + len));
+            pos += len;
+          }
+          return out;
+        }
+
+        function showMsg(text) {
+          msgEl.textContent = text;
+          msgEl.hidden = !text;
+        }
+
+        function render() {
+          var box = $('groups');
+          box.textContent = '';
+          groups.forEach(function (members, i) {
+            var card = document.createElement('article');
+            card.className = 'group';
+            var h = document.createElement('h3');
+            h.textContent = 'Groupe ' + (i + 1);
+            var small = document.createElement('span');
+            small.className = 'muted';
+            small.textContent = members.length + ' pers.';
+            h.appendChild(small);
+            var ul = document.createElement('ul');
+            members.forEach(function (m) {
+              var li = document.createElement('li');
+              li.textContent = m;
+              ul.appendChild(li);
+            });
+            card.appendChild(h);
+            card.appendChild(ul);
+            box.appendChild(card);
+          });
+          var total = groups.reduce(function (s, g) { return s + g.length; }, 0);
+          $('summary').textContent = groups.length + ' groupe' + (groups.length > 1 ? 's' : '') + ' · ' + total + ' personnes';
+          $('result').hidden = false;
+        }
+
+        function generate() {
+          var names = parseNames();
+          var size = parseInt(sizeEl.value, 10);
+          if (!size || size < 2) { showMsg('La taille des groupes doit être d\'au moins 2.'); return; }
+          if (names.length < 2) { showMsg('Ajoutez au moins deux noms.'); return; }
+
+          var seen = {}, dups = [];
+          names.forEach(function (n) {
+            var key = n.toLowerCase();
+            if (seen[key] && dups.indexOf(n) === -1) dups.push(n);
+            seen[key] = true;
+          });
+          showMsg(dups.length ? 'Attention, noms en double : ' + dups.join(', ') + '.' : '');
+
+          groups = split(shuffle(names), size);
+          render();
+        }
+
+        function asText() {
+          return groups.map(function (g, i) {
+            return 'Groupe ' + (i + 1) + '\n' + g.map(function (m) { return '- ' + m; }).join('\n');
+          }).join('\n\n');
+        }
+
+        function updateCount() {
+          var n = parseNames().length;
+          $('count').textContent = n ? n + ' nom' + (n > 1 ? 's' : '') + ' détecté' + (n > 1 ? 's' : '') : '';
+        }
+
+        namesEl.addEventListener('input', updateCount);
+        $('generate').addEventListener('click', generate);
+        $('reshuffle').addEventListener('click', generate);
+        $('print').addEventListener('click', function () { window.print(); });
+        $('copy').addEventListener('click', function () {
+          var btn = $('copy');
+          var done = function (label) {
+            btn.textContent = label;
+            setTimeout(function () { btn.textContent = '📋 Copier'; }, 1500);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(asText()).then(function () { done('✅ Copié'); }, function () { done('Échec'); });
+          } else {
+            done('Non supporté');
+          }
+        });
+      })();
+    </script>
+
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #2a1b14;
+        --bg-card: #3a2620;
+        --fg: #f5e6d5;
+        --muted: #b8a491;
+        --border: #4a332a;
+        --accent: #e07840;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: radial-gradient(circle at 20% 0%, #4a2a1d 0%, var(--bg) 60%);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .topnav { margin-bottom: 2rem; font-size: 0.9rem; }
+      .topnav a { color: var(--muted); text-decoration: none; }
+      .topnav a:hover { color: var(--fg); }
+      .hero { margin-bottom: 2rem; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+      .tagline { color: var(--muted); font-size: 1.1rem; margin: 0; line-height: 1.5; }
+      .muted { color: var(--muted); font-size: 0.85rem; }
+
+      .panel {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem;
+      }
+      .panel > label { display: block; color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
+      textarea, input[type=number] {
+        background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+        border-radius: 8px; font: inherit;
+      }
+      textarea { width: 100%; padding: 0.75rem; resize: vertical; line-height: 1.5; }
+      input[type=number] { width: 5rem; padding: 0.4rem 0.5rem; margin-left: 0.5rem; }
+      textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1rem; }
+      .inline { color: var(--fg); font-size: 0.95rem; }
+      .msg { color: var(--accent); font-size: 0.9rem; margin: 0.75rem 0 0; }
+
+      .btn {
+        background: var(--accent); color: #1a1a1a; font-weight: 600; font: inherit;
+        font-weight: 600; border: 0; border-radius: 8px; padding: 0.55rem 1.25rem; cursor: pointer;
+      }
+      .btn:hover { opacity: 0.9; }
+      .btn-secondary {
+        background: transparent; color: var(--fg); font: inherit; font-size: 0.9rem;
+        border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.8rem; cursor: pointer;
+      }
+      .btn-secondary:hover { border-color: var(--accent); }
+
+      .result-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+      .result-bar h2 { margin: 0; font-size: 1.3rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+      .group { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; break-inside: avoid; }
+      .group h3 { margin: 0 0 0.6rem; font-size: 1rem; color: var(--accent); display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+      .group ul { margin: 0; padding-left: 1.1rem; line-height: 1.7; }
+
+      footer { border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--fg); text-decoration: none; border-bottom: 1px dashed var(--muted); }
+      .copy { margin-top: 0.5rem; font-size: 0.8rem; }
+
+      @media print {
+        :root { color-scheme: light; }
+        body { background: #fff; color: #000; }
+        .topnav, .hero, .panel, .actions, footer, .logo, [class*="home-logo"] { display: none !important; }
+        .group { background: #fff; border-color: #999; }
+        .group h3 { color: #000; }
+        .muted { color: #444; }
+      }
+    </style>
+  </body>
+</html>
