@@ -74,26 +74,49 @@ import HomeLogo from '../../components/HomeLogo.astro';
 
       <div id="progress" class="progress" hidden></div>
 
+      <div id="scan-bar" class="scan-bar" hidden>
+        <button id="scan-btn" class="btn" type="button">📷 Scanner le QR code suivant</button>
+      </div>
+
       <footer id="team-bar" class="team-bar" hidden>
         <span>Équipe <strong id="bar-name"></strong> · code <strong id="bar-code"></strong></span>
         <button id="switch-btn" class="link-btn" type="button">Changer d'équipe</button>
       </footer>
     </main>
 
+    <div id="scanner" class="scanner" role="dialog" aria-modal="true" aria-label="Scanner un QR code" hidden>
+      <video id="scan-video" class="scan-video" playsinline muted></video>
+      <div class="scan-frame" aria-hidden="true"></div>
+      <div class="scan-panel">
+        <p id="scan-status" class="scan-status">Vise un QR code du jeu.</p>
+        <div class="scan-actions">
+          <label id="photo-label" class="btn btn-secondary" hidden>
+            Prendre une photo
+            <input id="photo-input" type="file" accept="image/*" capture="environment" hidden />
+          </label>
+          <button id="scan-close" class="btn btn-secondary" type="button">Fermer</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       import { apiPost } from '../../lib/qr-api.js';
       import { el, clear } from '../../lib/dom.js';
+      import { cameraSupported, startCameraScan, decodePhoto, parseGameTarget } from '../../lib/qr-scanner.js';
 
       const params = new URLSearchParams(location.search);
       const game = (params.get('g') || '').trim();
-      const slug = (params.get('s') || '').trim();
+      // Modifiable : le scanner intégré passe d'un QR code à l'autre sans recharger la page.
+      let slug = (params.get('s') || '').trim();
       const STORE_KEY = `sl_qr_team_${game}`;
       const VIEWS = ['loading', 'error', 'onboard', 'teamcode', 'step', 'wrong'];
       const $ = (id) => document.getElementById(id);
 
       function show(name) {
         for (const v of VIEWS) $('v-' + v).hidden = v !== name;
-        if (name === 'loading' || name === 'error' || name === 'onboard' || name === 'teamcode') {
+        const playing = name === 'step' || name === 'wrong';
+        $('scan-bar').hidden = !playing;
+        if (!playing) {
           $('progress').hidden = true;
           $('team-bar').hidden = true;
         }
@@ -225,6 +248,92 @@ import HomeLogo from '../../components/HomeLogo.astro';
         }
       }
 
+      // ── Scanner intégré ───────────────────────────────────────────────────────
+      let scan = null;
+      let lastScanMessage = '';
+
+      function setScanStatus(message) {
+        if (message === lastScanMessage) return;
+        lastScanMessage = message;
+        $('scan-status').textContent = message;
+      }
+
+      function closeScanner() {
+        if (scan) scan.stop();
+        scan = null;
+        $('scanner').hidden = true;
+        document.body.classList.remove('scanning');
+      }
+
+      // Renvoie true quand le QR code lu est valide (le scan s'arrête alors).
+      function handleScanned(text) {
+        const target = parseGameTarget(text);
+        if (!target) {
+          setScanStatus("Ce n'est pas un QR code du jeu. Cherche-en un autre.");
+          return false;
+        }
+        if (target.g !== game) {
+          setScanStatus('Ce QR code appartient à une autre partie.');
+          return false;
+        }
+        if (target.s === slug) {
+          setScanStatus("Tu es déjà sur ce QR code. Scanne-en un autre.");
+          return false;
+        }
+        slug = target.s;
+        history.pushState(null, '', `?g=${encodeURIComponent(game)}&s=${encodeURIComponent(slug)}`);
+        if (navigator.vibrate) navigator.vibrate(80);
+        closeScanner();
+        window.scrollTo(0, 0);
+        run();
+        return true;
+      }
+
+      async function openScanner() {
+        lastScanMessage = '';
+        setScanStatus('Démarrage de la caméra…');
+        $('photo-label').hidden = true;
+        $('scanner').hidden = false;
+        document.body.classList.add('scanning');
+        if (!cameraSupported()) {
+          setScanStatus("La caméra n'est pas disponible ici. Prends le QR code en photo.");
+          $('photo-label').hidden = false;
+          return;
+        }
+        try {
+          scan = await startCameraScan($('scan-video'), handleScanned);
+          setScanStatus('Vise un QR code du jeu.');
+        } catch {
+          setScanStatus("Impossible d'utiliser la caméra (autorisation refusée ?). Prends le QR code en photo.");
+          $('photo-label').hidden = false;
+        }
+      }
+
+      $('scan-btn').addEventListener('click', openScanner);
+      $('scan-close').addEventListener('click', closeScanner);
+      $('photo-input').addEventListener('change', async (event) => {
+        const file = event.target.files && event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+        setScanStatus('Analyse de la photo…');
+        try {
+          const text = await decodePhoto(file);
+          if (text) handleScanned(text);
+          else setScanStatus('Aucun QR code détecté. Rapproche-toi et réessaie.');
+        } catch {
+          setScanStatus('Photo illisible. Réessaie.');
+        }
+      });
+
+      // Bouton « précédent » : revient sur l'étape précédemment affichée.
+      window.addEventListener('popstate', () => {
+        const p = new URLSearchParams(location.search);
+        if ((p.get('g') || '').trim() !== game) return location.reload();
+        slug = (p.get('s') || '').trim();
+        closeScanner();
+        run();
+      });
+
       $('retry-btn').addEventListener('click', () => run());
 
       $('create-form').addEventListener('submit', async (event) => {
@@ -351,6 +460,19 @@ import HomeLogo from '../../components/HomeLogo.astro';
       }
       .team-bar strong { color: var(--fg); }
       .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem; text-decoration: underline; }
+      .scan-bar { margin-top: 1.5rem; }
+      .scan-bar .btn { width: 100%; max-width: 360px; padding: 0.95rem 1.2rem; }
+      .scanner { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; flex-direction: column; }
+      .scan-video { flex: 1; width: 100%; min-height: 0; object-fit: cover; background: #000; }
+      .scan-frame {
+        position: absolute; top: 38%; left: 50%; width: min(70vw, 300px); aspect-ratio: 1; transform: translate(-50%, -50%);
+        border: 3px solid var(--accent); border-radius: 18px; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45); pointer-events: none;
+      }
+      .scan-panel { background: var(--bg-card); border-top: 1px solid var(--border); padding: 1rem 1rem 1.4rem; text-align: center; }
+      .scan-status { margin: 0 0 0.8rem; min-height: 2.6em; line-height: 1.4; }
+      .scan-actions { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+      .scan-actions .btn { cursor: pointer; }
+      body.scanning { overflow: hidden; }
     </style>
   </body>
 </html>
