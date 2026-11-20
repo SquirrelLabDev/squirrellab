@@ -1,0 +1,350 @@
+---
+import HomeLogo from '../../components/HomeLogo.astro';
+import '../../styles/admin-qr.css';
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Jeux QR ordonnés — Admin</title>
+  </head>
+  <body>
+    <HomeLogo />
+    <main>
+      <nav class="topnav">
+        <a href="/admin">← Admin</a>
+        <a href="/admin/qr-games">Générateur de jeux QR (anecdotes libres)</a>
+      </nav>
+      <header>
+        <h1>Jeux QR ordonnés</h1>
+        <p class="tagline">
+          Les équipes doivent trouver les QR codes dans l'ordre (1, puis 2, puis 3…). Chaque jeu est une
+          <strong>partie indépendante</strong> : ses équipes, sa progression et ses QR codes lui sont propres,
+          donc plusieurs parties peuvent tourner en même temps.
+        </p>
+      </header>
+
+      <section id="login-panel" class="panel">
+        <h2>Connexion</h2>
+        <p class="help">Mot de passe d'administration du jeu (variable <code>QR_ADMIN_PASSWORD</code> de l'API). Il n'est envoyé qu'à l'API du jeu.</p>
+        <div class="row">
+          <input id="pw-input" type="password" placeholder="Mot de passe" autocomplete="current-password" />
+          <button id="login-btn" class="btn" type="button">Connecter</button>
+        </div>
+        <label class="checkbox"><input id="pw-remember" type="checkbox" /> Se souvenir sur cet appareil</label>
+        <p id="login-status" class="status"></p>
+      </section>
+
+      <section id="games-panel" class="panel" hidden>
+        <h2>Mes parties</h2>
+        <div id="games-list" class="list"></div>
+        <p id="games-status" class="status"></p>
+        <button id="new-btn" class="btn btn-secondary" type="button">+ Nouvelle partie</button>
+      </section>
+
+      <section id="editor-panel" class="panel" hidden>
+        <h2 id="editor-title">Nouvelle partie</h2>
+        <div class="field">
+          <label for="game-name">Nom de la partie</label>
+          <input id="game-name" type="text" maxlength="120" placeholder="Ex : Fabric Days 2026 — salle A" />
+        </div>
+        <div class="field">
+          <label for="game-id">Identifiant (dans l'URL des QR codes)</label>
+          <input id="game-id" type="text" maxlength="60" placeholder="fabric-days-2026-salle-a" />
+          <p class="help" id="game-id-help">Lettres minuscules, chiffres et tirets, 3 à 60 caractères. Ne peut plus être changé après la création.</p>
+        </div>
+
+        <div id="paste-block">
+          <div class="field">
+            <label for="raw-text">Étapes (dans l'ordre, séparées par une ligne vide)</label>
+            <p class="help">
+              Par bloc : <strong>titre</strong> sur la première ligne, <strong>texte</strong> sur les lignes suivantes,
+              une ligne <code>Indice : …</code> (optionnelle, affichée sous le contenu pour aider à trouver le QR code suivant)
+              et un <strong>lien source</strong> (optionnel, commençant par http) en dernière ligne.
+            </p>
+            <textarea id="raw-text" rows="9" placeholder={`Le tout premier nom s'écrivait avec un trait d'union
+Lors de sa création en 1975, l'entreprise s'appelait Micro-Soft.
+Indice : cherche près de la machine à café
+https://news.microsoft.com/...
+
+Étape suivante
+Texte de l'étape...`}></textarea>
+          </div>
+          <button id="parse-btn" class="btn btn-secondary" type="button">Analyser le texte</button>
+          <p id="parse-status" class="status"></p>
+        </div>
+
+        <div id="entries" class="entries"></div>
+
+        <div id="save-block" hidden>
+          <p class="help">
+            Enregistrer publie la partie sur l'API. Modifier une partie en cours est possible, mais ne supprime pas d'étapes
+            pendant que des équipes jouent. Les QR codes déjà imprimés restent valides.
+          </p>
+          <div class="actions-row">
+            <button id="save-btn" class="btn" type="button">Enregistrer la partie</button>
+            <button id="cancel-btn" class="btn btn-secondary" type="button">Fermer l'éditeur</button>
+          </div>
+          <p id="save-status" class="status"></p>
+        </div>
+
+        <div id="print-block" hidden>
+          <h2 style="margin-top:1.5rem">Livrables</h2>
+          <p class="help">Les QR codes pointent vers <span id="url-sample" class="mono"></span></p>
+          <div class="actions-row">
+            <button id="qr-btn" class="btn btn-secondary" type="button">Feuille de QR codes à imprimer</button>
+            <button id="cheat-btn" class="btn btn-secondary" type="button">Cheat sheet organisateur</button>
+            <a id="track-link" class="btn" href="/admin/qr-suivi">Suivre la partie →</a>
+          </div>
+        </div>
+      </section>
+
+      <footer><p><a href="/admin">← Admin</a></p></footer>
+    </main>
+
+    <script>
+      import QRCode from 'qrcode';
+      import { adminPost, savedPassword, rememberPassword, forgetPassword } from '../../lib/qr-api.js';
+      import { el, clear, slugify, openHtml } from '../../lib/dom.js';
+      import { qrSheetHtml, cheatSheetHtml } from '../../lib/qr-print.js';
+
+      const $ = (id) => document.getElementById(id);
+      let password = savedPassword();
+      let games = [];
+      let editing = null; // { id, isNew }
+      let entries = []; // { title, text, source, hint }
+      let saved = null; // jeu renvoyé par l'API après enregistrement (avec slugs et URLs)
+      let idTouched = false;
+
+      function setStatus(node, text, kind) {
+        node.textContent = text;
+        node.className = 'status' + (kind ? ' status-' + kind : '');
+      }
+
+      // ── Connexion et liste ──────────────────────────────────────────────────
+      async function loadGames() {
+        setStatus($('games-status'), 'Chargement…', 'loading');
+        const res = await adminPost(password, '/games');
+        if (res.status === 401 || res.status === 429) {
+          forgetPassword();
+          password = '';
+          $('login-panel').hidden = false;
+          $('games-panel').hidden = true;
+          setStatus($('login-status'), (res.data && res.data.message) || 'Accès refusé.', 'error');
+          return false;
+        }
+        if (!res.ok || !res.data) {
+          setStatus($('games-status'), (res.data && res.data.message) || 'Erreur de chargement.', 'error');
+          return false;
+        }
+        games = res.data.games;
+        $('login-panel').hidden = true;
+        $('games-panel').hidden = false;
+        setStatus($('games-status'), '', '');
+        renderGames();
+        return true;
+      }
+
+      function renderGames() {
+        const list = clear($('games-list'));
+        if (games.length === 0) {
+          list.appendChild(el('p', { class: 'help' }, 'Aucune partie pour le moment.'));
+          return;
+        }
+        for (const g of games) {
+          list.appendChild(el('div', { class: 'item' },
+            el('div', {},
+              el('strong', {}, g.name), ' ',
+              el('span', { class: 'mono' }, g.id), ' ',
+              !g.active && el('span', { class: 'pill pill-off' }, 'désactivée'),
+              el('div', { class: 'meta' }, `${g.steps.length} étapes · ${g.teamCount} équipe${g.teamCount > 1 ? 's' : ''}`)),
+            el('div', { class: 'item-actions' },
+              el('a', { class: 'btn btn-small', href: `/admin/qr-suivi?g=${encodeURIComponent(g.id)}` }, 'Suivi'),
+              el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => openEditor(g, false) }, 'Éditer'),
+              el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => openEditor(g, true) }, 'Dupliquer'),
+              el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => toggleActive(g) }, g.active ? 'Désactiver' : 'Réactiver'),
+              el('button', { class: 'btn btn-danger btn-small', type: 'button', onclick: () => removeGame(g) }, 'Supprimer'))));
+        }
+      }
+
+      async function toggleActive(g) {
+        const res = await adminPost(password, `/games/${g.id}/save`, {
+          name: g.name, active: !g.active, steps: g.steps.map(({ title, text, source, hint }) => ({ title, text, source, hint })),
+        });
+        if (!res.ok) return setStatus($('games-status'), (res.data && res.data.message) || 'Erreur.', 'error');
+        await loadGames();
+      }
+
+      async function removeGame(g) {
+        const ok = confirm(
+          `Supprimer définitivement la partie « ${g.name} » ?\n\n${g.teamCount} équipe(s) et toute leur progression seront effacées. ` +
+          `Pense à exporter le CSV avant. Les QR codes déjà imprimés ne fonctionneront plus.`);
+        if (!ok) return;
+        const res = await adminPost(password, `/games/${g.id}/delete`);
+        if (!res.ok) return setStatus($('games-status'), (res.data && res.data.message) || 'Erreur.', 'error');
+        if (editing && editing.id === g.id) closeEditor();
+        await loadGames();
+      }
+
+      // ── Éditeur ─────────────────────────────────────────────────────────────
+      function parseSteps(raw) {
+        const isUrl = (s) => /^https?:\/\//i.test(s);
+        return raw.trim().split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean).map((block, i) => {
+          const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+          let source = '';
+          let hint = '';
+          if (lines.length > 1 && isUrl(lines[lines.length - 1])) source = lines.pop();
+          const hi = lines.findIndex((l, idx) => idx > 0 && /^indice\s*:/i.test(l));
+          if (hi > 0) hint = lines.splice(hi, 1)[0].replace(/^indice\s*:\s*/i, '');
+          const title = lines.shift() || `Étape ${i + 1}`;
+          return { title, text: lines.join(' '), source, hint };
+        });
+      }
+
+      function markDirty() {
+        saved = null;
+        $('print-block').hidden = true;
+      }
+
+      function renderEntries() {
+        const box = clear($('entries'));
+        entries.forEach((entry, idx) => {
+          const title = el('input', { value: entry.title, placeholder: 'Titre', oninput: (e) => { entry.title = e.target.value; markDirty(); } });
+          const text = el('textarea', { rows: '3', placeholder: 'Texte', oninput: (e) => { entry.text = e.target.value; markDirty(); } });
+          text.value = entry.text;
+          const hint = el('input', { value: entry.hint, placeholder: 'Indice pour trouver le QR code suivant (optionnel)', oninput: (e) => { entry.hint = e.target.value; markDirty(); } });
+          const source = el('input', { value: entry.source, placeholder: 'https://source (optionnel)', oninput: (e) => { entry.source = e.target.value; markDirty(); } });
+          box.appendChild(el('div', { class: 'entry-row' },
+            el('div', { class: 'entry-num' }, `N° ${idx + 1}`),
+            el('div', { class: 'entry-fields' }, title, text,
+              el('label', { class: 'mini' }, 'Indice pour trouver le QR code suivant'), hint,
+              el('label', { class: 'mini' }, 'Source (lien)'), source,
+              saved && saved.steps[idx] && el('div', { class: 'entry-slug' }, saved.steps[idx].url)),
+            el('div', { class: 'item-actions' },
+              idx > 0 && el('button', { class: 'btn btn-secondary btn-small', type: 'button', title: 'Monter', onclick: () => moveEntry(idx, -1) }, '↑'),
+              idx < entries.length - 1 && el('button', { class: 'btn btn-secondary btn-small', type: 'button', title: 'Descendre', onclick: () => moveEntry(idx, 1) }, '↓'),
+              el('button', { class: 'btn btn-danger btn-small', type: 'button', onclick: () => { entries.splice(idx, 1); markDirty(); renderEntries(); } }, 'Supprimer'))));
+        });
+        $('save-block').hidden = entries.length === 0;
+      }
+
+      function moveEntry(idx, delta) {
+        const target = idx + delta;
+        [entries[idx], entries[target]] = [entries[target], entries[idx]];
+        markDirty();
+        renderEntries();
+      }
+
+      function openEditor(game, asCopy) {
+        const isNew = !game || asCopy;
+        editing = { id: game && !asCopy ? game.id : '', isNew };
+        saved = game && !asCopy ? game : null;
+        entries = game ? game.steps.map(({ title, text, source, hint }) => ({ title, text, source, hint })) : [];
+        $('editor-title').textContent = !game ? 'Nouvelle partie' : asCopy ? `Dupliquer « ${game.name} »` : `Éditer « ${game.name} »`;
+        $('game-name').value = game ? (asCopy ? `${game.name} (copie)` : game.name) : '';
+        $('game-id').value = game && !asCopy ? game.id : '';
+        $('game-id').disabled = !isNew;
+        $('game-id-help').textContent = isNew
+          ? "Lettres minuscules, chiffres et tirets, 3 à 60 caractères. Ne peut plus être changé après la création."
+          : 'Identifiant figé : il est dans les QR codes déjà imprimés.';
+        idTouched = false;
+        $('paste-block').hidden = !!game;
+        $('raw-text').value = '';
+        setStatus($('parse-status'), '', '');
+        setStatus($('save-status'), asCopy ? 'Copie : de nouveaux QR codes (nouvelles URLs) seront créés à l’enregistrement.' : '', asCopy ? 'loading' : '');
+        $('editor-panel').hidden = false;
+        $('print-block').hidden = !(saved && saved.steps.length);
+        if (saved) refreshPrintBlock();
+        renderEntries();
+        $('editor-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function closeEditor() {
+        editing = null;
+        entries = [];
+        saved = null;
+        $('editor-panel').hidden = true;
+      }
+
+      function refreshPrintBlock() {
+        if (!saved) return;
+        $('url-sample').textContent = saved.steps[0] ? saved.steps[0].url : '';
+        $('track-link').href = `/admin/qr-suivi?g=${encodeURIComponent(saved.id)}`;
+        $('print-block').hidden = false;
+      }
+
+      $('game-name').addEventListener('input', () => {
+        if (editing && editing.isNew && !idTouched) $('game-id').value = slugify($('game-name').value);
+      });
+      $('game-id').addEventListener('input', () => {
+        idTouched = true;
+        $('game-id').value = slugify($('game-id').value);
+      });
+
+      $('parse-btn').addEventListener('click', () => {
+        const raw = $('raw-text').value;
+        if (!raw.trim()) return setStatus($('parse-status'), 'Colle du texte à analyser.', 'error');
+        entries = parseSteps(raw);
+        markDirty();
+        setStatus($('parse-status'), `${entries.length} étape(s) trouvée(s). Vérifie l'ordre, c'est celui des numéros de QR codes.`, 'success');
+        renderEntries();
+      });
+
+      $('save-btn').addEventListener('click', async () => {
+        const id = editing.isNew ? $('game-id').value.trim() : editing.id;
+        const name = $('game-name').value.trim();
+        if (!name) return setStatus($('save-status'), 'Donne un nom à la partie.', 'error');
+        if (editing.isNew && games.some((g) => g.id === id)) {
+          return setStatus($('save-status'), 'Cet identifiant existe déjà : choisis-en un autre (ou édite la partie existante).', 'error');
+        }
+        const existing = games.find((g) => g.id === id);
+        $('save-btn').disabled = true;
+        setStatus($('save-status'), 'Enregistrement…', 'loading');
+        const res = await adminPost(password, `/games/${id}/save`, {
+          name, active: existing ? existing.active : true,
+          steps: entries.map(({ title, text, source, hint }) => ({ title, text, source, hint })),
+        });
+        $('save-btn').disabled = false;
+        if (!res.ok || !res.data || !res.data.game) {
+          return setStatus($('save-status'), (res.data && res.data.message) || 'Erreur pendant l’enregistrement.', 'error');
+        }
+        saved = res.data.game;
+        editing = { id: saved.id, isNew: false };
+        $('game-id').value = saved.id;
+        $('game-id').disabled = true;
+        setStatus($('save-status'), 'Partie enregistrée. Tu peux imprimer les QR codes.', 'success');
+        refreshPrintBlock();
+        renderEntries();
+        loadGames();
+      });
+
+      $('cancel-btn').addEventListener('click', closeEditor);
+      $('new-btn').addEventListener('click', () => openEditor(null, false));
+
+      // ── Livrables ───────────────────────────────────────────────────────────
+      $('qr-btn').addEventListener('click', async () => {
+        const cards = await Promise.all(saved.steps.map(async (s) => ({
+          n: s.n, title: s.title,
+          qr: await QRCode.toDataURL(s.url, { width: 220, margin: 2, color: { dark: '#000000', light: '#ffffff' } }),
+        })));
+        openHtml(qrSheetHtml(saved.name, cards));
+      });
+      $('cheat-btn').addEventListener('click', () => openHtml(cheatSheetHtml(saved.name, saved.steps)));
+
+      // ── Connexion ───────────────────────────────────────────────────────────
+      async function login() {
+        const value = $('pw-input').value;
+        if (!value) return;
+        password = value;
+        setStatus($('login-status'), 'Vérification…', 'loading');
+        if (await loadGames()) rememberPassword(value, $('pw-remember').checked);
+      }
+      $('login-btn').addEventListener('click', login);
+      $('pw-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+      if (password) loadGames();
+    </script>
+  </body>
+</html>

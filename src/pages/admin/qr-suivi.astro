@@ -1,0 +1,271 @@
+---
+import HomeLogo from '../../components/HomeLogo.astro';
+import '../../styles/admin-qr.css';
+---
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Suivi d'une partie QR — Admin</title>
+  </head>
+  <body>
+    <HomeLogo />
+    <main>
+      <nav class="topnav">
+        <a href="/admin">← Admin</a>
+        <a href="/admin/qr-ordonne">← Mes parties</a>
+      </nav>
+      <header>
+        <h1 id="page-title">Suivi de la partie</h1>
+        <p id="page-sub" class="tagline"></p>
+      </header>
+
+      <section id="login-panel" class="panel" hidden>
+        <h2>Connexion</h2>
+        <div class="row">
+          <input id="pw-input" type="password" placeholder="Mot de passe d'administration" autocomplete="current-password" />
+          <button id="login-btn" class="btn" type="button">Connecter</button>
+        </div>
+        <label class="checkbox"><input id="pw-remember" type="checkbox" /> Se souvenir sur cet appareil</label>
+        <p id="login-status" class="status"></p>
+      </section>
+
+      <section id="live-panel" class="panel" hidden>
+        <div class="toolbar">
+          <button id="refresh-btn" class="btn btn-secondary btn-small" type="button">Actualiser</button>
+          <label class="checkbox" style="margin:0"><input id="auto-check" type="checkbox" checked /> Actualisation auto (10 s)</label>
+          <span id="updated" class="help" style="margin:0"></span>
+          <span class="spacer"></span>
+          <button id="csv-btn" class="btn btn-secondary btn-small" type="button">Exporter CSV</button>
+          <button id="report-btn" class="btn btn-secondary btn-small" type="button">Rapport organisateur</button>
+          <button id="diplomas-btn" class="btn btn-small" type="button">Tous les diplômes</button>
+        </div>
+        <p class="help">
+          Classement à la durée (du scan de l'étape 1 à celui de la dernière). Une équipe dont tu as rétabli une étape à la main
+          passe derrière celles qui ont réellement tout scanné. Documents à imprimer : Ctrl+P puis « Enregistrer au format PDF ».
+        </p>
+        <div class="table-wrap">
+          <table class="teams">
+            <thead>
+              <tr>
+                <th class="c">Rang</th><th>Équipe</th><th>Progression</th><th class="c">Durée</th><th>Dernière activité</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="teams-body"></tbody>
+          </table>
+        </div>
+        <p id="empty" class="help" hidden>Aucune équipe pour le moment.</p>
+        <p id="live-status" class="status"></p>
+      </section>
+
+      <footer><p><a href="/admin/qr-ordonne">← Mes parties</a></p></footer>
+    </main>
+
+    <script>
+      import { adminPost, savedPassword, rememberPassword, forgetPassword } from '../../lib/qr-api.js';
+      import { el, clear, downloadText, openHtml } from '../../lib/dom.js';
+      import { reportHtml, diplomasHtml, fmtDuration, fmtDateTime } from '../../lib/qr-print.js';
+
+      const $ = (id) => document.getElementById(id);
+      const gameId = (new URLSearchParams(location.search).get('g') || '').trim();
+      let password = savedPassword();
+      let data = null; // { game, name, total, teams }
+      let steps = []; // contenu des étapes (titres) pour les rapports
+      let timer = null;
+      const open = new Set();
+
+      function setStatus(node, text, kind) {
+        node.textContent = text;
+        node.className = 'status' + (kind ? ' status-' + kind : '');
+      }
+
+      function ago(iso) {
+        if (!iso) return '—';
+        const sec = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000));
+        if (sec < 60) return `il y a ${sec} s`;
+        if (sec < 3600) return `il y a ${Math.floor(sec / 60)} min`;
+        return fmtDateTime(iso);
+      }
+
+      function showLogin(message) {
+        $('login-panel').hidden = false;
+        $('live-panel').hidden = true;
+        stopTimer();
+        if (message) setStatus($('login-status'), message, 'error');
+      }
+
+      async function load() {
+        if (!gameId) {
+          $('page-sub').textContent = 'Aucune partie sélectionnée : ouvre cette page depuis « Mes parties ».';
+          return;
+        }
+        const res = await adminPost(password, `/games/${gameId}/teams`);
+        if (res.status === 401 || res.status === 429) {
+          forgetPassword();
+          password = '';
+          return showLogin((res.data && res.data.message) || 'Accès refusé.');
+        }
+        if (!res.ok || !res.data) {
+          setStatus($('live-status'), (res.data && res.data.message) || 'Erreur de chargement.', 'error');
+          $('live-panel').hidden = false;
+          return;
+        }
+        data = res.data;
+        $('login-panel').hidden = true;
+        $('live-panel').hidden = false;
+        $('page-title').textContent = data.name;
+        $('page-sub').textContent = `Partie ${data.game} · ${data.total} étapes · ${data.teams.length} équipe${data.teams.length > 1 ? 's' : ''}`;
+        $('updated').textContent = `Mis à jour à ${new Date().toLocaleTimeString('fr-FR')}`;
+        setStatus($('live-status'), '', '');
+        render();
+        startTimer();
+      }
+
+      async function loadSteps() {
+        const res = await adminPost(password, '/games');
+        if (!res.ok || !res.data) return;
+        const game = res.data.games.find((g) => g.id === gameId);
+        if (game) steps = game.steps;
+      }
+
+      function stopTimer() {
+        if (timer) clearInterval(timer);
+        timer = null;
+      }
+      function startTimer() {
+        stopTimer();
+        if (!$('auto-check').checked) return;
+        timer = setInterval(() => {
+          if (document.hidden) return;
+          // Ne pas écraser une saisie en cours (renommage, progression).
+          const active = document.activeElement;
+          if (active && active.closest && active.closest('#teams-body') && /^(INPUT|SELECT)$/.test(active.tagName)) return;
+          load();
+        }, 10000);
+      }
+
+      // ── Tableau ─────────────────────────────────────────────────────────────
+      function render() {
+        const body = clear($('teams-body'));
+        $('empty').hidden = data.teams.length > 0;
+        for (const team of data.teams) {
+          body.appendChild(el('tr', {},
+            el('td', { class: 'c rank' }, team.finished || team.progress > 0 ? team.rank : '—'),
+            el('td', {}, el('strong', {}, team.name), ' ', el('span', { class: 'mono' }, team.code), ' ',
+              team.restored && el('span', { class: 'pill pill-off', title: 'Une étape a été rétablie à la main' }, 'rétablie')),
+            el('td', {},
+              el('div', { class: 'bar' + (team.finished ? ' done' : '') }, el('span', { style: `width:${data.total ? (team.progress / data.total) * 100 : 0}%` })),
+              el('div', { class: 'meta' }, `${team.progress} / ${data.total}`)),
+            el('td', { class: 'c' }, team.finished ? fmtDuration(team.durationSec) : 'en cours'),
+            el('td', {}, ago(team.lastAt)),
+            el('td', {}, el('div', { class: 'item-actions' },
+              el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => toggleDetail(team.code) }, open.has(team.code) ? 'Masquer' : 'Détail')))));
+          if (open.has(team.code)) body.appendChild(detailRow(team));
+        }
+      }
+
+      function toggleDetail(code) {
+        if (open.has(code)) open.delete(code);
+        else open.add(code);
+        render();
+      }
+
+      function detailRow(team) {
+        const byStep = new Map(team.steps.map((s) => [s.n, s]));
+        const grid = el('div', { class: 'steps-detail' });
+        for (let n = 1; n <= data.total; n++) {
+          const s = byStep.get(n);
+          const title = (steps.find((x) => x.n === n) || {}).title;
+          grid.appendChild(el('div', { class: s && s.restored ? 'restored' : '' },
+            el('strong', {}, `Étape ${n}`), title ? ` · ${title}` : '', ' — ',
+            s ? `${fmtDateTime(s.at)}${s.durSec !== null && s.durSec !== undefined ? ` (+${fmtDuration(s.durSec)})` : ''}${s.restored ? ' · rétablie' : ''}` : 'pas encore'));
+        }
+
+        const select = el('select', {}, Array.from({ length: data.total + 1 }, (_, i) =>
+          el('option', { value: String(i), selected: i === team.progress }, i === 0 ? '0 (repartir de zéro)' : `Étape ${i}${i === data.total ? ' (terminé)' : ''}`)));
+        const nameInput = el('input', { value: team.name, maxlength: '60', 'aria-label': "Nom de l'équipe" });
+
+        return el('tr', { class: 'detail' }, el('td', { colspan: '6' },
+          grid,
+          el('div', { class: 'edit-row' },
+            el('span', { class: 'help', style: 'margin:0' }, 'Rétablir la progression à :'), select,
+            el('button', { class: 'btn btn-small', type: 'button', onclick: () => restore(team, Number(select.value)) }, 'Appliquer')),
+          el('div', { class: 'edit-row' },
+            el('span', { class: 'help', style: 'margin:0' }, 'Renommer :'), nameInput,
+            el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => rename(team, nameInput.value) }, 'Renommer')),
+          el('div', { class: 'edit-row' },
+            el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => openHtml(reportHtml({ gameName: data.name, total: data.total, teams: data.teams, steps, focusCode: team.code })) }, "Rapport de l'équipe"),
+            el('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => openHtml(diplomasHtml({ gameName: data.name, items: [{ team, total: data.total }], dateIso: team.finishedAt || team.lastAt })) }, "Diplôme de l'équipe"),
+            el('button', { class: 'btn btn-danger btn-small', type: 'button', onclick: () => removeTeam(team) }, "Supprimer l'équipe"))));
+      }
+
+      async function restore(team, target) {
+        if (target === team.progress) return;
+        const verb = target > team.progress
+          ? `Avancer « ${team.name} » à l'étape ${target} ? Les étapes manquantes seront marquées « rétablies » et sa durée ne sera plus classée comme fiable.`
+          : `Faire reculer « ${team.name} » à l'étape ${target} ? Les étapes suivantes seront effacées.`;
+        if (!confirm(verb)) return;
+        const res = await adminPost(password, `/games/${gameId}/teams/${team.code}/update`, { progress: target });
+        if (!res.ok) return setStatus($('live-status'), (res.data && res.data.message) || 'Erreur.', 'error');
+        await load();
+      }
+
+      async function rename(team, name) {
+        const res = await adminPost(password, `/games/${gameId}/teams/${team.code}/update`, { name });
+        if (!res.ok) return setStatus($('live-status'), (res.data && res.data.message) || 'Erreur.', 'error');
+        await load();
+      }
+
+      async function removeTeam(team) {
+        if (!confirm(`Supprimer l'équipe « ${team.name} » et sa progression ? Ses téléphones devront en créer une nouvelle.`)) return;
+        const res = await adminPost(password, `/games/${gameId}/teams/${team.code}/delete`);
+        if (!res.ok) return setStatus($('live-status'), (res.data && res.data.message) || 'Erreur.', 'error');
+        open.delete(team.code);
+        await load();
+      }
+
+      // ── Exports et documents ────────────────────────────────────────────────
+      $('csv-btn').addEventListener('click', async () => {
+        const res = await adminPost(password, `/games/${gameId}/export`);
+        if (!res.ok) return setStatus($('live-status'), (res.data && res.data.message) || "Export impossible.", 'error');
+        // Response.text() retire le BOM UTF-8 ; sans lui Excel lit le fichier en ANSI (accents cassés).
+        downloadText(`qr-${gameId}.csv`, '﻿' + res.text.replace(/^﻿/, ''), 'text/csv;charset=utf-8');
+      });
+      $('report-btn').addEventListener('click', () => {
+        openHtml(reportHtml({ gameName: data.name, total: data.total, teams: data.teams, steps }));
+      });
+      $('diplomas-btn').addEventListener('click', () => {
+        const items = data.teams.filter((t) => t.progress >= 1).map((team) => ({ team, total: data.total }));
+        if (items.length === 0) return setStatus($('live-status'), 'Aucune équipe n’a encore scanné de QR code.', 'error');
+        const last = data.teams.map((t) => t.finishedAt || t.lastAt).filter(Boolean).sort().pop();
+        openHtml(diplomasHtml({ gameName: data.name, items, dateIso: last }));
+      });
+
+      $('refresh-btn').addEventListener('click', load);
+      $('auto-check').addEventListener('change', () => ($('auto-check').checked ? startTimer() : stopTimer()));
+
+      async function login() {
+        const value = $('pw-input').value;
+        if (!value) return;
+        password = value;
+        setStatus($('login-status'), 'Vérification…', 'loading');
+        await load();
+        if (password) {
+          rememberPassword(value, $('pw-remember').checked);
+          loadSteps().then(() => data && render());
+        }
+      }
+      $('login-btn').addEventListener('click', login);
+      $('pw-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+      if (password) {
+        load();
+        loadSteps().then(() => data && render());
+      } else {
+        showLogin();
+      }
+    </script>
+  </body>
+</html>
